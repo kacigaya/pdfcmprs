@@ -1,0 +1,167 @@
+#!/bin/bash
+
+# pdfcmprs - PDF compression script
+# Uses Ghostscript to compress PDF files while maintaining reasonable quality
+
+set -e
+
+# Default settings
+COMPRESSION_LEVEL="medium"
+VERBOSE=false
+
+# Function to display help message
+show_help() {
+    cat << EOF
+Usage: pdfcmprs [OPTIONS] <input.pdf>
+
+Compress PDF files while maintaining reasonable quality.
+
+Options:
+  -h, --help             Show this help message
+  -l, --level <level>    Set compression level (low|medium|high) [default: medium]
+  -v, --verbose          Enable verbose output
+
+Examples:
+  pdfcmprs document.pdf
+  pdfcmprs --level high document.pdf
+  pdfcmprs -v -l low input.pdf
+
+Note: Requires Ghostscript to be installed.
+EOF
+    exit 0
+}
+
+# Function to check if Ghostscript is installed
+check_ghostscript() {
+    if ! command -v gs &> /dev/null; then
+        echo "Error: Ghostscript is not installed."
+        case "$(uname -s)" in
+            Darwin*)
+                echo "To install on macOS using Homebrew: brew install ghostscript"
+                ;;
+            Linux*)
+                echo "To install on Linux: sudo apt-get install ghostscript (Debian/Ubuntu)"
+                echo "                     sudo yum install ghostscript (RHEL/CentOS)"
+                ;;
+            MINGW*|CYGWIN*)
+                echo "To install on Windows: https://ghostscript.com/releases/gsdnld.html"
+                ;;
+        esac
+        exit 1
+    fi
+}
+
+# Function to validate PDF file
+validate_pdf() {
+    local file="$1"
+    if [ ! -f "$file" ]; then
+        echo "Error: File '$file' does not exist."
+        exit 1
+    fi
+
+    # Check if file is a valid PDF
+    if ! gs -q -dNODISPLAY -dBATCH -dNOPAUSE "$file" 2>/dev/null; then
+        echo "Error: '$file' is not a valid PDF file."
+        exit 1
+    fi
+}
+
+# Function to compress PDF
+compress_pdf() {
+    local input_file="$1"
+    local output_file="${input_file%.*}_compressed.pdf"
+    local settings
+
+    case "$COMPRESSION_LEVEL" in
+        "low")
+            settings="-dPDFSETTINGS=/screen"
+            ;;
+        "medium")
+            settings="-dPDFSETTINGS=/ebook"
+            ;;
+        "high")
+            settings="-dPDFSETTINGS=/printer"
+            ;;
+        *)
+            echo "Error: Invalid compression level."
+            exit 1
+            ;;
+    esac
+
+    local input_size=$(stat -f%z "$input_file" 2>/dev/null || stat -c%s "$input_file")
+
+    if [ "$VERBOSE" = true ]; then
+        echo "Compressing '$input_file'..."
+        echo "Compression level: $COMPRESSION_LEVEL"
+        echo "Input file size: $(numfmt --to=iec-i --suffix=B $input_size 2>/dev/null || echo "$input_size bytes")"
+    fi
+
+    # Compress PDF using Ghostscript
+    if ! gs -sDEVICE=pdfwrite -dCompatibilityLevel=1.4 -dPDFSETTINGS=/default \
+        -dNOPAUSE -dQUIET -dBATCH $settings \
+        -sOutputFile="$output_file" "$input_file"; then
+        echo "Error: Failed to compress PDF."
+        exit 1
+    fi
+
+    local output_size=$(stat -f%z "$output_file" 2>/dev/null || stat -c%s "$output_file")
+    local reduction=$(( (input_size - output_size) * 100 / input_size ))
+
+    echo "Successfully compressed PDF:"
+    echo "Output file: $output_file"
+    echo "Original size: $(numfmt --to=iec-i --suffix=B $input_size 2>/dev/null || echo "$input_size bytes")"
+    echo "New size: $(numfmt --to=iec-i --suffix=B $output_size 2>/dev/null || echo "$output_size bytes")"
+    echo "Size reduction: $reduction%"
+}
+
+# Parse command line arguments
+while [[ $# -gt 0 ]]; do
+    case $1 in
+        -h|--help)
+            show_help
+            ;;
+        -l|--level)
+            shift
+            if [[ $# -gt 0 ]]; then
+                if [[ "$1" =~ ^(low|medium|high)$ ]]; then
+                    COMPRESSION_LEVEL="$1"
+                else
+                    echo "Error: Invalid compression level. Use 'low', 'medium', or 'high'."
+                    exit 1
+                fi
+            else
+                echo "Error: Compression level not specified."
+                exit 1
+            fi
+            ;;
+        -v|--verbose)
+            VERBOSE=true
+            ;;
+        -*)
+            echo "Error: Unknown option $1"
+            echo "Use -h or --help for usage information."
+            exit 1
+            ;;
+        *)
+            if [ -z "$INPUT_FILE" ]; then
+                INPUT_FILE="$1"
+            else
+                echo "Error: Multiple input files not supported."
+                exit 1
+            fi
+            ;;
+    esac
+    shift
+done
+
+# Check if input file is provided
+if [ -z "$INPUT_FILE" ]; then
+    echo "Error: No input file specified."
+    echo "Use -h or --help for usage information."
+    exit 1
+fi
+
+# Main execution
+check_ghostscript
+validate_pdf "$INPUT_FILE"
+compress_pdf "$INPUT_FILE"
