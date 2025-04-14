@@ -1,17 +1,17 @@
-# pdfcmprs-web
+# 📄💨 **pdfcmprs** – Application Web de Compression PDF
 
-Une application web pour la compression de fichiers PDF en ligne. Cette application permet aux utilisateurs de compresser leurs fichiers PDF facilement avec différents niveaux de compression tout en conservant la qualité.
+**pdfcmprs** est une application web qui permet de compresser facilement vos fichiers PDF en ligne 📉, tout en conservant une bonne qualité ✨.
 
-## Fonctionnalités
+## 🚀 Fonctionnalités
 
-- Interface utilisateur intuitive
-- Glisser-déposer de fichiers PDF
-- Plusieurs niveaux de compression disponibles
-- Mode sombre/clair
-- Compression instantanée côté client
+- 🖱️ Interface utilisateur intuitive et facile à utiliser  
+- 📂 Glisser-déposer de fichiers PDF  
+- ⚙️ Plusieurs niveaux de compression disponibles (faible, moyen, élevé)  
+- 🌗 Mode sombre / mode clair  
+- ⚡ Compression instantanée directement côté client (aucune donnée envoyée au serveur)
 
-## Technologies utilisées
+## 🛠️ Technologies utilisées
 
-- HTML5
-- TailwindCSS
-- JavaScript
+- 🌐 **HTML5**  
+- 🎨 **TailwindCSS**  
+- 🧠 **JavaScript**
