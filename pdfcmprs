@@ -3,15 +3,16 @@
 # pdfcmprs - PDF compression script
 # Uses Ghostscript to compress PDF files while maintaining reasonable quality
 
-set -e
+set -euo pipefail
 
 # Default settings
-COMPRESSION_LEVEL="medium"
+readonly DEFAULT_COMPRESSION_LEVEL="medium"
+COMPRESSION_LEVEL="$DEFAULT_COMPRESSION_LEVEL"
 VERBOSE=false
+INPUT_FILE=""
 
-# Function to display help message
-show_help() {
-    cat << EOF
+ShowHelp() {
+    cat << 'EOF'
 Usage: pdfcmprs [OPTIONS] <input.pdf>
 
 Compress PDF files while maintaining reasonable quality.
@@ -31,137 +32,149 @@ EOF
     exit 0
 }
 
-# Function to check if Ghostscript is installed
-check_ghostscript() {
-    if ! command -v gs &> /dev/null; then
-        echo "Error: Ghostscript is not installed."
+CheckGhostscript() {
+    if ! command -v gs > /dev/null 2>&1; then
+        echo "Error: Ghostscript is not installed." >&2
         case "$(uname -s)" in
             Darwin*)
-                echo "To install on macOS using Homebrew: brew install ghostscript"
+                echo "To install on macOS using Homebrew: brew install ghostscript" >&2
                 ;;
             Linux*)
-                echo "To install on Linux: sudo apt-get install ghostscript (Debian/Ubuntu)"
-                echo "                     sudo yum install ghostscript (RHEL/CentOS)"
+                echo "To install on Linux: sudo apt-get install ghostscript (Debian/Ubuntu)" >&2
+                echo "                     sudo yum install ghostscript (RHEL/CentOS)" >&2
                 ;;
             MINGW*|CYGWIN*)
-                echo "To install on Windows: https://ghostscript.com/releases/gsdnld.html"
+                echo "To install on Windows: https://ghostscript.com/releases/gsdnld.html" >&2
                 ;;
         esac
         exit 1
     fi
 }
 
-# Function to validate PDF file
-validate_pdf() {
+ValidatePdf() {
     local file="$1"
-    if [ ! -f "$file" ]; then
-        echo "Error: File '$file' does not exist."
+
+    if [[ ! -f "$file" ]]; then
+        echo "Error: File '$file' does not exist." >&2
         exit 1
     fi
 
-    # Check if file is a valid PDF
     if ! gs -q -dNODISPLAY -dBATCH -dNOPAUSE "$file" 2>/dev/null; then
-        echo "Error: '$file' is not a valid PDF file."
+        echo "Error: '$file' is not a valid PDF file." >&2
         exit 1
     fi
 }
 
-# Function to compress PDF
-compress_pdf() {
+FormatSize() {
+    local size="$1"
+    if command -v numfmt > /dev/null 2>&1; then
+        numfmt --to=iec-i --suffix=B "$size"
+    else
+        echo "$size bytes"
+    fi
+}
+
+CompressPdf() {
     local input_file="$1"
     local output_file="${input_file%.*}_compressed.pdf"
     local settings
 
     case "$COMPRESSION_LEVEL" in
-        "low")
-            settings="-dPDFSETTINGS=/screen"
-            ;;
-        "medium")
-            settings="-dPDFSETTINGS=/ebook"
-            ;;
-        "high")
-            settings="-dPDFSETTINGS=/printer"
-            ;;
+        low)    settings="-dPDFSETTINGS=/screen"  ;;
+        medium) settings="-dPDFSETTINGS=/ebook"   ;;
+        high)   settings="-dPDFSETTINGS=/printer"  ;;
         *)
-            echo "Error: Invalid compression level."
+            echo "Error: Invalid compression level." >&2
             exit 1
             ;;
     esac
 
-    local input_size=$(stat -f%z "$input_file" 2>/dev/null || stat -c%s "$input_file")
+    local input_size
+    input_size=$(stat -f%z "$input_file" 2>/dev/null || stat -c%s "$input_file")
 
-    if [ "$VERBOSE" = true ]; then
+    if [[ "$VERBOSE" == true ]]; then
         echo "Compressing '$input_file'..."
         echo "Compression level: $COMPRESSION_LEVEL"
-        echo "Input file size: $(numfmt --to=iec-i --suffix=B $input_size 2>/dev/null || echo "$input_size bytes")"
+        echo "Input file size: $(FormatSize "$input_size")"
     fi
 
-    # Compress PDF using Ghostscript
-    if ! gs -sDEVICE=pdfwrite -dCompatibilityLevel=1.4 -dPDFSETTINGS=/default \
-        -dNOPAUSE -dQUIET -dBATCH $settings \
-        -sOutputFile="$output_file" "$input_file"; then
-        echo "Error: Failed to compress PDF."
+    if ! gs -sDEVICE=pdfwrite \
+            -dCompatibilityLevel=1.5 \
+            -dNOPAUSE -dQUIET -dBATCH \
+            "$settings" \
+            -sOutputFile="$output_file" \
+            "$input_file"; then
+        echo "Error: Failed to compress PDF." >&2
         exit 1
     fi
 
-    local output_size=$(stat -f%z "$output_file" 2>/dev/null || stat -c%s "$output_file")
+    local output_size
+    output_size=$(stat -f%z "$output_file" 2>/dev/null || stat -c%s "$output_file")
     local reduction=$(( (input_size - output_size) * 100 / input_size ))
 
+    if (( output_size >= input_size )); then
+        echo "Warning: Compressed file is not smaller than the original." >&2
+        echo "The PDF may already be optimized or compression level is too high."
+    fi
+
     echo "Successfully compressed PDF:"
-    echo "Output file: $output_file"
-    echo "Original size: $(numfmt --to=iec-i --suffix=B $input_size 2>/dev/null || echo "$input_size bytes")"
-    echo "New size: $(numfmt --to=iec-i --suffix=B $output_size 2>/dev/null || echo "$output_size bytes")"
-    echo "Size reduction: $reduction%"
+    echo "  Output file:    $output_file"
+    echo "  Original size:  $(FormatSize "$input_size")"
+    echo "  New size:       $(FormatSize "$output_size")"
+    echo "  Size reduction: ${reduction}%"
 }
 
-# Parse command line arguments
-while [[ $# -gt 0 ]]; do
-    case $1 in
-        -h|--help)
-            show_help
-            ;;
-        -l|--level)
-            shift
-            if [[ $# -gt 0 ]]; then
+ParseArguments() {
+    while [[ $# -gt 0 ]]; do
+        case "$1" in
+            -h|--help)
+                ShowHelp
+                ;;
+            -l|--level)
+                shift
+                if [[ $# -eq 0 ]]; then
+                    echo "Error: Compression level not specified." >&2
+                    exit 1
+                fi
                 if [[ "$1" =~ ^(low|medium|high)$ ]]; then
                     COMPRESSION_LEVEL="$1"
                 else
-                    echo "Error: Invalid compression level. Use 'low', 'medium', or 'high'."
+                    echo "Error: Invalid compression level '$1'. Use 'low', 'medium', or 'high'." >&2
                     exit 1
                 fi
-            else
-                echo "Error: Compression level not specified."
+                ;;
+            -v|--verbose)
+                VERBOSE=true
+                ;;
+            -*)
+                echo "Error: Unknown option '$1'" >&2
+                echo "Use -h or --help for usage information." >&2
                 exit 1
-            fi
-            ;;
-        -v|--verbose)
-            VERBOSE=true
-            ;;
-        -*)
-            echo "Error: Unknown option $1"
-            echo "Use -h or --help for usage information."
-            exit 1
-            ;;
-        *)
-            if [ -z "$INPUT_FILE" ]; then
-                INPUT_FILE="$1"
-            else
-                echo "Error: Multiple input files not supported."
-                exit 1
-            fi
-            ;;
-    esac
-    shift
-done
+                ;;
+            *)
+                if [[ -z "$INPUT_FILE" ]]; then
+                    INPUT_FILE="$1"
+                else
+                    echo "Error: Multiple input files not supported." >&2
+                    exit 1
+                fi
+                ;;
+        esac
+        shift
+    done
 
-# Check if input file is provided
-if [ -z "$INPUT_FILE" ]; then
-    echo "Error: No input file specified."
-    echo "Use -h or --help for usage information."
-    exit 1
-fi
+    if [[ -z "$INPUT_FILE" ]]; then
+        echo "Error: No input file specified." >&2
+        echo "Use -h or --help for usage information." >&2
+        exit 1
+    fi
+}
 
-# Main execution
-check_ghostscript
-validate_pdf "$INPUT_FILE"
-compress_pdf "$INPUT_FILE"
+Main() {
+    ParseArguments "$@"
+    CheckGhostscript
+    ValidatePdf "$INPUT_FILE"
+    CompressPdf "$INPUT_FILE"
+}
+
+Main "$@"
