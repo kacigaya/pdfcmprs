@@ -93,6 +93,14 @@ export function PdfWorkspace() {
       <footer className="colophon">
         <span>Processed client-side · No server upload</span>
         <span>
+          <a
+            href="https://github.com/kacigaya/pdfcmprs"
+            target="_blank"
+            rel="noreferrer"
+          >
+            GitHub
+          </a>
+          {" · "}
           <em>pdfcmprs</em> · {new Date().getFullYear()}
         </span>
       </footer>
