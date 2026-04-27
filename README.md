@@ -2,8 +2,6 @@
   <img src="public/icon.svg" alt="Logo" width="200">
 </p>
 
-<h1 align="center">pdfcmprs</h1>
-
 <p align="center">
    <strong>A press for your PDFs built with Next.js.</strong><br>
    <em>Compress, merge, and split your PDFs directly in the browser. No server upload, fully offline.</em>
