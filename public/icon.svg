@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <style>
+    .text {
+      font-family: Georgia, serif;
+      font-weight: 400;
+      font-size: 130px;
+      letter-spacing: -0.03em;
+      fill: #181410;
+    }
+    .accent {
+      font-style: italic;
+      fill: #c83c1d;
+    }
+    @media (prefers-color-scheme: dark) {
+      .text { fill: #ece2cd; }
+      .accent { fill: #e26544; }
+    }
+  </style>
+  <text
+        x="256"
+        y="256"
+        dominant-baseline="middle"
+        text-anchor="middle"
+        class="text"
+    >
+    pdf<tspan class="accent" dx="-0.04em">cmprs</tspan>
+  </text>
+</svg>
