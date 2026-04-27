@@ -1,0 +1,2 @@
+# Exclude generated PDF.js worker from GitHub language statistics.
+public/pdf.worker.min.mjs linguist-generated=true
