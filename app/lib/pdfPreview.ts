@@ -42,5 +42,3 @@ export async function renderPageToDataUrl(
   page.cleanup();
   return canvas.toDataURL("image/png");
 }
-
-export type { PDFDocumentProxy };
