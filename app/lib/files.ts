@@ -1,6 +1,6 @@
 export const PDF_MIME = "application/pdf";
 
-export function isPdfFile(file: File): boolean {
+function isPdfFile(file: File): boolean {
   if (file.type === PDF_MIME) return true;
   return file.name.toLowerCase().endsWith(".pdf");
 }

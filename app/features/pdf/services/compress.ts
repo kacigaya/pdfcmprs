@@ -2,15 +2,7 @@ import { PDFDocument } from "pdf-lib";
 import { bytesToPdfBlob } from "../../../lib/blob";
 import { readFileAsArrayBuffer, withPdfExtension } from "../../../lib/files";
 
-export interface CompressResult {
-  blob: Blob;
-  filename: string;
-  originalSize: number;
-  compressedSize: number;
-  ratio: number;
-}
-
-export async function compressPdf(file: File): Promise<CompressResult> {
+export async function compressPdf(file: File) {
   const buffer = await readFileAsArrayBuffer(file);
   const doc = await PDFDocument.load(buffer, { updateMetadata: false });
   const bytes = await doc.save({

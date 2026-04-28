@@ -2,13 +2,7 @@ import { PDFDocument } from "pdf-lib";
 import { bytesToPdfBlob } from "../../../lib/blob";
 import { readFileAsArrayBuffer } from "../../../lib/files";
 
-export interface MergeResult {
-  blob: Blob;
-  filename: string;
-  pageCount: number;
-}
-
-export async function mergePdfs(files: File[]): Promise<MergeResult> {
+export async function mergePdfs(files: File[]) {
   if (files.length < 2) {
     throw new Error("At least two PDF files are required to merge.");
   }
