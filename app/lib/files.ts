@@ -9,6 +9,13 @@ export function filterPdfFiles(files: Iterable<File>): File[] {
   return Array.from(files).filter(isPdfFile);
 }
 
+export function filterImageFiles(files: Iterable<File>): File[] {
+  return Array.from(files).filter((file) => {
+    if (file.type.startsWith("image/")) return true;
+    return /\.(jpe?g|png|webp)$/i.test(file.name);
+  });
+}
+
 export function formatFileSize(bytes: number): string {
   if (!Number.isFinite(bytes) || bytes < 0) return "0 B";
   const units = ["B", "KB", "MB", "GB"];

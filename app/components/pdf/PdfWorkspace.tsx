@@ -5,7 +5,11 @@ import {
   usePdfWorkspace,
 } from "../../features/pdf/hooks/usePdfWorkspace";
 import { CompressPanel } from "./panels/CompressPanel";
+import { ExtractTextPanel } from "./panels/ExtractTextPanel";
+import { ImagesToPdfPanel } from "./panels/ImagesToPdfPanel";
+import { InspectPanel } from "./panels/InspectPanel";
 import { MergePanel } from "./panels/MergePanel";
+import { PdfToImagesPanel } from "./panels/PdfToImagesPanel";
 import { SplitPanel } from "./panels/SplitPanel";
 import { ResultCard } from "./ResultCard";
 
@@ -30,6 +34,30 @@ const tools: ReadonlyArray<ToolDefinition> = [
     subtitle: "Combine multiple PDFs",
   },
   { id: "split", numeral: "III", label: "Split", subtitle: "Extract pages" },
+  {
+    id: "inspect",
+    numeral: "IV",
+    label: "Inspect",
+    subtitle: "Read metadata",
+  },
+  {
+    id: "extract",
+    numeral: "V",
+    label: "Text",
+    subtitle: "Extract content",
+  },
+  {
+    id: "images-to-pdf",
+    numeral: "VI",
+    label: "Images",
+    subtitle: "Create PDF",
+  },
+  {
+    id: "pdf-to-images",
+    numeral: "VII",
+    label: "Render",
+    subtitle: "PDF to images",
+  },
 ];
 
 export function PdfWorkspace() {
@@ -45,8 +73,9 @@ export function PdfWorkspace() {
         </h1>
         <div className="masthead-bottom">
           <p className="masthead-tagline">
-            A typeset press to <em>compress</em>, <em>merge</em>, and{" "}
-            <em>split</em> your PDFs no server, fully in the browser.
+            A typeset press to <em>compress</em>, <em>merge</em>,{" "}
+            <em>split</em>, inspect, extract text, and convert your PDFs no
+            server, fully in the browser.
           </p>
         </div>
       </header>
@@ -80,6 +109,18 @@ export function PdfWorkspace() {
           ) : null}
           {workspace.tool === "split" ? (
             <SplitPanel workspace={workspace} />
+          ) : null}
+          {workspace.tool === "inspect" ? (
+            <InspectPanel workspace={workspace} />
+          ) : null}
+          {workspace.tool === "extract" ? (
+            <ExtractTextPanel workspace={workspace} />
+          ) : null}
+          {workspace.tool === "images-to-pdf" ? (
+            <ImagesToPdfPanel workspace={workspace} />
+          ) : null}
+          {workspace.tool === "pdf-to-images" ? (
+            <PdfToImagesPanel workspace={workspace} />
           ) : null}
         </div>
         <ResultCard
