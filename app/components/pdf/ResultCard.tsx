@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { triggerDownload } from "../../lib/download";
 import type {
   StatusTone,
@@ -46,6 +47,13 @@ export function ResultCard({
   const showProgress = isRunning || progress > 0;
   const pct = Math.min(100, Math.max(0, Math.round(progress)));
   const tone = stampTone(isRunning, status.tone, Boolean(result));
+  const [copyLabel, setCopyLabel] = useState("Copy Text");
+
+  async function copyText(text: string) {
+    await navigator.clipboard.writeText(text);
+    setCopyLabel("Copied");
+    window.setTimeout(() => setCopyLabel("Copy Text"), 1400);
+  }
 
   return (
     <aside className="output" data-testid="result-card">
@@ -66,6 +74,21 @@ export function ResultCard({
             <p className="output-message" data-testid="status-message">
               {result.description}
             </p>
+          ) : null}
+          {result.details ? (
+            <dl className="output-details">
+              {result.details.map((item) => (
+                <div key={item.label} className="output-detail-row">
+                  <dt>{item.label}</dt>
+                  <dd>{item.value}</dd>
+                </div>
+              ))}
+            </dl>
+          ) : null}
+          {result.text ? (
+            <pre className="output-text" data-testid="extracted-text">
+              {result.text}
+            </pre>
           ) : null}
         </>
       ) : status.message ? (
@@ -96,14 +119,28 @@ export function ResultCard({
 
       {result ? (
         <div className="output-cta">
-          <button
-            type="button"
-            className="button button-primary"
-            onClick={() => triggerDownload(result.blob, result.filename)}
-            data-testid="download-button"
-          >
-            Download / {result.filename}
-          </button>
+          {result.text ? (
+            <button
+              type="button"
+              className="button button-secondary"
+              onClick={() => copyText(result.text ?? "")}
+              data-testid="copy-text-button"
+            >
+              {copyLabel}
+            </button>
+          ) : null}
+          {result.blob ? (
+            <button
+              type="button"
+              className="button button-primary"
+              onClick={() => {
+                if (result.blob) triggerDownload(result.blob, result.filename);
+              }}
+              data-testid="download-button"
+            >
+              Download / {result.filename}
+            </button>
+          ) : null}
         </div>
       ) : null}
     </aside>
