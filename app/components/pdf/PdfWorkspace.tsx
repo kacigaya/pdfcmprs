@@ -63,7 +63,7 @@ const tools: ReadonlyArray<ToolDefinition> = [
 export function PdfWorkspace() {
   const workspace = usePdfWorkspace();
   const activeTool = tools.find((tool) => tool.id === workspace.tool);
-  const sectionRoman = activeTool?.numeral ?? "—";
+  const sectionRoman = activeTool?.numeral ?? "N/A";
 
   return (
     <>
@@ -73,9 +73,8 @@ export function PdfWorkspace() {
         </h1>
         <div className="masthead-bottom">
           <p className="masthead-tagline">
-            A typeset press to <em>compress</em>, <em>merge</em>,{" "}
-            <em>split</em>, inspect, extract text, and convert your PDFs no
-            server, fully in the browser.
+            Compress, merge, split, inspect, extract text from, and convert
+            PDFs in your browser. Files stay on your device.
           </p>
         </div>
       </header>

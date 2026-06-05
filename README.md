@@ -3,8 +3,8 @@
 </p>
 
 <p align="center">
-   <strong>A press for your PDFs built with Next.js.</strong><br>
-   <em>Compress, merge, and split your PDFs directly in the browser. No server upload, fully offline.</em>
+   <strong>Browser PDF tools built with Next.js.</strong><br>
+   <em>Compress, merge, split, inspect, extract text from, and convert PDFs without uploading files.</em>
 </p>
 
 ## Features
@@ -12,18 +12,18 @@
 - Compress PDF files to reduce file size
 - Merge multiple PDFs into a single document
 - Split PDFs and extract specific pages
-- Fully client-side processing (no server upload)
-- Fast, secure, and offline operations
+- Process files in the browser without uploading them
+- Work offline after the app loads
 
-## Tech Stack
+## Tech stack
 
-- **Framework:** Next.js 16 (App Router)
-- **UI:** React 19
-- **Core Libraries:** `pdf-lib`, `pdfjs-dist`
-- **Language:** TypeScript
-- **Package Manager:** Bun
+- Framework: Next.js 16 (App Router)
+- UI: React 19
+- Core libraries: `pdf-lib`, `pdfjs-dist`
+- Language: TypeScript
+- Package manager: Bun
 
-## Getting Started
+## Getting started
 
 ### Prerequisites
 
@@ -43,7 +43,7 @@ bun run dev
 
 Open [http://localhost:3000](http://localhost:3000) to view the app.
 
-### Project Structure
+### Project structure
 
 ```
 app/               # Next.js App Router pages, styles, and layouts

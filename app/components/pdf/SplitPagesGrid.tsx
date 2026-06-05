@@ -172,8 +172,8 @@ export function SplitPagesGrid({ file, selection, onChange }: Props) {
       </div>
       {truncated ? (
         <p className="split-grid-note">
-          Preview limited to the first {MAX_PREVIEW_PAGES} pages — the text
-          selection field still works beyond that.
+          Preview is limited to the first {MAX_PREVIEW_PAGES} pages. The text
+          selection field still works for later pages.
         </p>
       ) : null}
     </div>

@@ -242,7 +242,7 @@ export function usePdfWorkspace(): PdfWorkspaceState {
       setProgress(100);
       const saved =
         out.originalSize > out.compressedSize
-          ? `Saved ${formatPercent(out.ratio)} — ${out.compressedSize} bytes vs ${out.originalSize} bytes.`
+          ? `Saved ${formatPercent(out.ratio)}. ${out.compressedSize} bytes vs ${out.originalSize} bytes.`
           : `No size reduction. Output is ${out.compressedSize} bytes.`;
       setStatus({ tone: "success", message: `Compression complete. ${saved}` });
       setResult({ blob: out.blob, filename: out.filename, description: saved });
@@ -266,7 +266,7 @@ export function usePdfWorkspace(): PdfWorkspaceState {
       setProgress(100);
       setStatus({
         tone: "success",
-        message: `Merge complete — ${out.pageCount} pages combined.`,
+        message: `Merge complete. ${out.pageCount} pages combined.`,
       });
       setResult({
         blob: out.blob,
@@ -289,7 +289,7 @@ export function usePdfWorkspace(): PdfWorkspaceState {
     if (!splitSelection.trim()) {
       setStatus({
         tone: "error",
-        message: "Provide a page selection (e.g. 1, 3, 5–7).",
+        message: "Provide a page selection (e.g. 1, 3, 5-7).",
       });
       return;
     }
@@ -300,7 +300,7 @@ export function usePdfWorkspace(): PdfWorkspaceState {
       setProgress(100);
       setStatus({
         tone: "success",
-        message: `Extraction complete — ${out.extractedPages.length} pages extracted.`,
+        message: `Extraction complete. ${out.extractedPages.length} pages extracted.`,
       });
       setResult({
         blob: out.blob,
@@ -376,7 +376,7 @@ export function usePdfWorkspace(): PdfWorkspaceState {
       setProgress(100);
       setStatus({
         tone: "success",
-        message: `Conversion complete — ${out.pageCount} pages created.`,
+        message: `Conversion complete. ${out.pageCount} pages created.`,
       });
       setResult({
         blob: out.blob,

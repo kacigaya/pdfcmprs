@@ -21,8 +21,8 @@ export function CompressPanel({ workspace }: Props) {
         </div>
       </header>
       <p className="panel-lede">
-        Re-presses the document with <em>object streams</em> to reduce file size
-        without resampling images or altering the original layout.
+        Reduces file size with PDF object streams. Images and page layout stay
+        unchanged.
       </p>
 
       <Dropzone

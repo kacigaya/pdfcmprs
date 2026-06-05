@@ -25,16 +25,16 @@ const jetbrainsMono = JetBrains_Mono({
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://pdfcmprs.vercel.app"),
-  title: "pdfcmprs — A press for your PDFs",
+  title: "pdfcmprs: Browser PDF tools",
   description:
-    "Compress, merge, and split your PDFs directly in the browser. No server upload, fully offline.",
+    "Compress, merge, split, inspect, extract text from, and convert PDFs in your browser.",
   openGraph: {
     type: "website",
     locale: "en_US",
     url: "/",
-    title: "pdfcmprs — A press for your PDFs",
+    title: "pdfcmprs: Browser PDF tools",
     description:
-      "Compress, merge, and split your PDFs directly in the browser. No server upload, fully offline.",
+      "Compress, merge, split, inspect, extract text from, and convert PDFs in your browser.",
     siteName: "pdfcmprs",
     images: [
       {
@@ -47,9 +47,9 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "pdfcmprs — A press for your PDFs",
+    title: "pdfcmprs: Browser PDF tools",
     description:
-      "Compress, merge, and split your PDFs directly in the browser. No server upload, fully offline.",
+      "Compress, merge, split, inspect, extract text from, and convert PDFs in your browser.",
     images: [
       {
         url: "/pdfcmprs-banner.png",

@@ -8,7 +8,7 @@ export function parsePageSelection(
 ): number[] {
   const cleaned = input.trim();
   if (!cleaned) {
-    throw new Error("Selection is empty. Example: 1, 3, 5–7");
+    throw new Error("Selection is empty. Example: 1, 3, 5-7");
   }
   const pages = new Set<number>();
   const normalized = cleaned.replace(/[–—]/g, "-");

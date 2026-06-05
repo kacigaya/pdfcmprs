@@ -13,7 +13,7 @@ interface FileRowProps {
 }
 
 function formatIndex(index: number | undefined): string {
-  if (typeof index !== "number") return "—";
+  if (typeof index !== "number") return "N/A";
   return `№${String(index + 1).padStart(2, "0")}`;
 }
 

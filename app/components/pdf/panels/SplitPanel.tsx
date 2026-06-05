@@ -24,7 +24,7 @@ export function SplitPanel({ workspace }: Props) {
       </header>
       <p className="panel-lede">
         Click pages below to select them, or type a range like{" "}
-        <em>1, 3, 5–7</em> to extract only the pages you need.
+        <em>1, 3, 5-7</em> to extract only the pages you need.
       </p>
 
       <Dropzone
@@ -59,7 +59,7 @@ export function SplitPanel({ workspace }: Props) {
         type="text"
         className="field-input"
         value={workspace.splitSelection}
-        placeholder="1, 3, 5–7"
+        placeholder="1, 3, 5-7"
         onChange={(event) => workspace.setSplitSelection(event.target.value)}
         data-testid="split-selection-input"
       />
