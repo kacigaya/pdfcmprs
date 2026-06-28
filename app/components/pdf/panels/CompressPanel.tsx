@@ -36,7 +36,7 @@ export function CompressPanel({ workspace }: Props) {
           <FileRow
             file={file}
             index={0}
-            onRemove={() => workspace.removeCompressFile(0)}
+            onRemove={workspace.clearCompressFiles}
           />
         </div>
       ) : null}

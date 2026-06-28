@@ -29,10 +29,6 @@ export function formatFileSize(bytes: number): string {
   return `${formatted} ${units[unit]}`;
 }
 
-export function readFileAsArrayBuffer(file: File): Promise<ArrayBuffer> {
-  return file.arrayBuffer();
-}
-
 export function withPdfExtension(name: string, suffix: string): string {
   const base = name.replace(/\.pdf$/i, "");
   return `${base}${suffix}.pdf`;

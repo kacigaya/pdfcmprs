@@ -1,6 +1,6 @@
 import { PDFDocument } from "pdf-lib";
 import { bytesToPdfBlob } from "../../../lib/blob";
-import { readFileAsArrayBuffer, withPdfExtension } from "../../../lib/files";
+import { withPdfExtension } from "../../../lib/files";
 
 export function parsePageSelection(
   input: string,
@@ -51,7 +51,7 @@ export function parsePageSelection(
 }
 
 export async function splitPdf(file: File, selection: string) {
-  const buffer = await readFileAsArrayBuffer(file);
+  const buffer = await file.arrayBuffer();
   const src = await PDFDocument.load(buffer, { updateMetadata: false });
   const total = src.getPageCount();
   const pages = parsePageSelection(selection, total);

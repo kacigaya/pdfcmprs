@@ -1,6 +1,5 @@
 import { PDFDocument } from "pdf-lib";
 import { bytesToPdfBlob } from "../../../lib/blob";
-import { readFileAsArrayBuffer } from "../../../lib/files";
 
 async function imageFileToPngBytes(file: File): Promise<ArrayBuffer> {
   const bitmap = await createImageBitmap(file);
@@ -26,16 +25,13 @@ export async function imagesToPdf(files: File[]) {
   }
   const doc = await PDFDocument.create();
   for (const file of files) {
+    const isJpg = file.type === "image/jpeg" || /\.jpe?g$/i.test(file.name);
+    const isPng = file.type === "image/png" || /\.png$/i.test(file.name);
     const buffer =
-      file.type === "image/png" || /\.png$/i.test(file.name)
-        ? await readFileAsArrayBuffer(file)
-        : file.type === "image/jpeg" || /\.jpe?g$/i.test(file.name)
-          ? await readFileAsArrayBuffer(file)
-          : await imageFileToPngBytes(file);
-    const image =
-      file.type === "image/jpeg" || /\.jpe?g$/i.test(file.name)
-        ? await doc.embedJpg(buffer)
-        : await doc.embedPng(buffer);
+      isPng || isJpg ? await file.arrayBuffer() : await imageFileToPngBytes(file);
+    const image = isJpg
+      ? await doc.embedJpg(buffer)
+      : await doc.embedPng(buffer);
     const page = doc.addPage([image.width, image.height]);
     page.drawImage(image, {
       x: 0,

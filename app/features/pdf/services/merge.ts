@@ -1,6 +1,5 @@
 import { PDFDocument } from "pdf-lib";
 import { bytesToPdfBlob } from "../../../lib/blob";
-import { readFileAsArrayBuffer } from "../../../lib/files";
 
 export async function mergePdfs(files: File[]) {
   if (files.length < 2) {
@@ -8,7 +7,7 @@ export async function mergePdfs(files: File[]) {
   }
   const out = await PDFDocument.create();
   for (const file of files) {
-    const buffer = await readFileAsArrayBuffer(file);
+    const buffer = await file.arrayBuffer();
     const src = await PDFDocument.load(buffer, { updateMetadata: false });
     const indices = src.getPageIndices();
     const pages = await out.copyPages(src, indices);

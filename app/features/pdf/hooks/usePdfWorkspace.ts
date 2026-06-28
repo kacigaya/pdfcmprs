@@ -55,7 +55,6 @@ export interface PdfWorkspaceState {
   setPdfImageFormat: (value: PdfImageFormat) => void;
   setPdfImageQuality: (value: PdfImageQuality) => void;
   addCompressFiles: (files: File[]) => void;
-  removeCompressFile: (index: number) => void;
   clearCompressFiles: () => void;
   addMergeFiles: (files: File[]) => void;
   removeMergeFile: (index: number) => void;
@@ -114,10 +113,6 @@ export function usePdfWorkspace(): PdfWorkspaceState {
     setResult(null);
     setStatus(idleStatus);
     setProgress(0);
-  }, []);
-
-  const removeCompressFile = useCallback((index: number) => {
-    setCompressFiles((prev) => prev.filter((_, i) => i !== index));
   }, []);
 
   const clearCompressFiles = useCallback(() => {
@@ -453,7 +448,6 @@ export function usePdfWorkspace(): PdfWorkspaceState {
     setPdfImageFormat,
     setPdfImageQuality,
     addCompressFiles,
-    removeCompressFile,
     clearCompressFiles,
     addMergeFiles,
     removeMergeFile,

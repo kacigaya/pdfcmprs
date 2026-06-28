@@ -62,8 +62,6 @@ const tools: ReadonlyArray<ToolDefinition> = [
 
 export function PdfWorkspace() {
   const workspace = usePdfWorkspace();
-  const activeTool = tools.find((tool) => tool.id === workspace.tool);
-  const sectionRoman = activeTool?.numeral ?? "N/A";
 
   return (
     <>
