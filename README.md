@@ -4,30 +4,31 @@
 
 <p align="center">
    <strong>Browser PDF tools built with Next.js.</strong><br>
-   <em>Compress, merge, split, inspect, extract text from, and convert PDFs without uploading files.</em>
+   <em>Compress, merge, split, and convert PDFs without uploading them anywhere.</em>
 </p>
 
 ## Features
 
-- Compress PDF files to reduce file size
-- Merge multiple PDFs into a single document
-- Split PDFs and extract specific pages
-- Process files in the browser without uploading them
-- Work offline after the app loads
+- Compress PDFs with object streams, leaving images and layout untouched
+- Merge several PDFs into one, in the order you choose
+- Split a PDF and pull out specific pages
+- Inspect page count, dimensions, PDF version, and metadata
+- Extract selectable text to a plain .txt file
+- Convert images to a PDF, or render PDF pages as PNG/JPG
+- Everything runs in the browser and keeps working offline once loaded
 
 ## Tech stack
 
-- Framework: Next.js 16 (App Router)
-- UI: React 19
-- Core libraries: `pdf-lib`, `pdfjs-dist`
-- Language: TypeScript
-- Package manager: Bun
+- Next.js 16 (App Router) with React 19
+- Tailwind CSS 4 and [coss ui](https://coss.com/ui) components
+- `pdf-lib` and `pdfjs-dist` for the PDF work
+- TypeScript, Bun
 
 ## Getting started
 
 ### Prerequisites
 
-- Node.js 20+ or Bun
+- Node.js 24+ or Bun
 
 ### Installation
 
@@ -47,8 +48,10 @@ Open [http://localhost:3000](http://localhost:3000) to view the app.
 
 ```
 app/               # Next.js App Router pages, styles, and layouts
-app/components/    # Reusable UI components and workspace panels
-app/features/      # PDF business logic, services, and hooks
-app/lib/           # Utilities for file handling and downloads
-public/            # Static assets and compiled PDF workers
+app/components/    # Workspace panels and PDF components
+app/features/      # PDF services and hooks
+app/lib/           # File handling and download helpers
+components/        # Shared UI: coss ui primitives and the navbar
+lib/               # cn() class helper
+public/            # Static assets and the pdf.js worker
 ```
