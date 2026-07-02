@@ -45,8 +45,8 @@ export function PdfWorkspace() {
           <em className="italic text-primary">on your device</em>
         </h1>
         <p className="mt-3 max-w-[52ch] font-heading italic text-lg leading-normal text-muted-foreground">
-          Compress, merge, split, inspect, extract text, and convert — all
-          processed in your browser. Nothing is uploaded.
+          Compress, merge, split, and convert PDFs right in your browser. Your
+          files never leave your machine.
         </p>
       </section>
 

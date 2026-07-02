@@ -20,7 +20,7 @@ export function InspectPanel({ workspace }: Props) {
             Read <em>the colophon</em>
           </>
         }
-        lede="Inspect page count, dimensions, file size, PDF version, and embedded document metadata without uploading the file."
+        lede="Page count, dimensions, PDF version, and whatever metadata the file carries."
       />
 
       <FileUploadZone

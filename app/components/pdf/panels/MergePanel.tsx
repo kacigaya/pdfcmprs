@@ -22,8 +22,9 @@ export function MergePanel({ workspace }: Props) {
         }
         lede={
           <>
-            Combine multiple PDFs into one volume. <em>Order</em> is preserved,
-            use the arrows to reorder before merging.
+            Combine several PDFs into one volume. Files merge{" "}
+            <em>in the order shown</em>, so use the arrows to arrange them
+            first.
           </>
         }
       />

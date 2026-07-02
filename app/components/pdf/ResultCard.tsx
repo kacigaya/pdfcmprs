@@ -136,7 +136,7 @@ export function ResultCard({
         </p>
       ) : (
         <p className="font-heading italic leading-normal text-muted-foreground">
-          No operation yet. Choose a file and run an action.
+          Pick a file on the left and run a tool. Results land here.
         </p>
       )}
 
