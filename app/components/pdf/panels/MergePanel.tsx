@@ -1,9 +1,9 @@
 "use client";
 
+import { Button } from "@/components/ui/button";
 import type { PdfWorkspaceState } from "../../../features/pdf/hooks/usePdfWorkspace";
-import { Dropzone } from "../Dropzone";
-import { FileRow } from "../FileRow";
-import { PdfThumbnail } from "../PdfThumbnail";
+import { FileUploadZone } from "../FileUploadZone";
+import { PanelHeader } from "../PanelHeader";
 
 interface Props {
   workspace: PdfWorkspaceState;
@@ -12,68 +12,51 @@ interface Props {
 export function MergePanel({ workspace }: Props) {
   const { mergeFiles } = workspace;
   return (
-    <section className="panel" data-testid="merge-panel">
-      <header className="panel-header">
-        <div>
-          <p className="panel-eyebrow">II.Merge</p>
-          <h2 className="panel-title">
+    <section data-testid="merge-panel">
+      <PanelHeader
+        eyebrow="II. Merge"
+        title={
+          <>
             Bind <em>the volumes</em>
-          </h2>
-        </div>
-      </header>
-      <p className="panel-lede">
-        Combine multiple PDFs into one volume. <em>Order</em> is preserved, use
-        the arrows to reorder before merging.
-      </p>
-
-      <Dropzone
-        multiple
-        label="Drop your PDFs or click to browse"
-        hint="At least two files required."
-        onFiles={workspace.addMergeFiles}
+          </>
+        }
+        lede={
+          <>
+            Combine multiple PDFs into one volume. <em>Order</em> is preserved,
+            use the arrows to reorder before merging.
+          </>
+        }
       />
 
-      {mergeFiles.length > 0 ? (
-        <div className="file-list">
-          {mergeFiles.map((file, index) => (
-            <FileRow
-              key={`${file.name}-${index}-${file.size}`}
-              file={file}
-              index={index}
-              preview={<PdfThumbnail file={file} alt="" />}
-              onRemove={() => workspace.removeMergeFile(index)}
-              onMoveUp={
-                index > 0 ? () => workspace.moveMergeFile(index, -1) : undefined
-              }
-              onMoveDown={
-                index < mergeFiles.length - 1
-                  ? () => workspace.moveMergeFile(index, 1)
-                  : undefined
-              }
-            />
-          ))}
-        </div>
-      ) : null}
+      <FileUploadZone
+        multiple
+        previews
+        files={mergeFiles}
+        label="Drop your PDFs here"
+        hint="At least two files required"
+        onFiles={workspace.addMergeFiles}
+        onRemove={workspace.removeMergeFile}
+        onMove={workspace.moveMergeFile}
+        onClear={workspace.clearMergeFiles}
+      />
 
-      <div className="actions">
-        <button
-          type="button"
-          className="button button-primary"
+      <div className="mt-6 flex flex-wrap items-center gap-2 border-t border-border pt-4">
+        <Button
           disabled={mergeFiles.length < 2 || workspace.isRunning}
+          loading={workspace.isRunning}
           onClick={workspace.runMerge}
           data-testid="run-merge"
         >
           {workspace.isRunning ? "Merging…" : "Merge"}
-        </button>
+        </Button>
         {mergeFiles.length > 0 ? (
-          <button
-            type="button"
-            className="button button-secondary"
+          <Button
+            variant="outline"
             onClick={workspace.clearMergeFiles}
             disabled={workspace.isRunning}
           >
             Clear
-          </button>
+          </Button>
         ) : null}
       </div>
     </section>

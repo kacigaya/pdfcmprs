@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { cn } from "@/lib/utils";
 import { loadPdfDocument, renderPageToDataUrl } from "../../lib/pdfPreview";
 
 interface Props {
@@ -11,7 +12,16 @@ interface Props {
   className?: string;
 }
 
-export function PdfThumbnail({ file, page = 1, scale = 0.4, alt = "", className }: Props) {
+const baseClassName =
+  "block aspect-[0.71] w-12 rounded-xs border border-border bg-muted object-cover shadow-xs";
+
+export function PdfThumbnail({
+  file,
+  page = 1,
+  scale = 0.4,
+  alt = "",
+  className,
+}: Props) {
   const [src, setSrc] = useState<string | null>(null);
   const [error, setError] = useState(false);
 
@@ -34,9 +44,33 @@ export function PdfThumbnail({ file, page = 1, scale = 0.4, alt = "", className 
     };
   }, [file, page, scale]);
 
-  const cls = `thumbnail${className ? ` ${className}` : ""}`;
-  if (error) return <span className={`${cls} thumbnail--error`} aria-hidden />;
-  if (!src) return <span className={`${cls} thumbnail--loading`} aria-hidden />;
+  if (error)
+    return (
+      <span
+        className={cn(
+          baseClassName,
+          "flex items-center justify-center font-heading italic text-muted-foreground",
+          className,
+        )}
+        aria-hidden
+      >
+        ?
+      </span>
+    );
+  if (!src)
+    return (
+      <span
+        className={cn(baseClassName, "animate-pulse", className)}
+        aria-hidden
+      />
+    );
   // eslint-disable-next-line @next/next/no-img-element
-  return <img className={cls} src={src} alt={alt} loading="lazy" />;
+  return (
+    <img
+      className={cn(baseClassName, className)}
+      src={src}
+      alt={alt}
+      loading="lazy"
+    />
+  );
 }

@@ -1,9 +1,9 @@
 "use client";
 
+import { Button } from "@/components/ui/button";
 import type { PdfWorkspaceState } from "../../../features/pdf/hooks/usePdfWorkspace";
-import { Dropzone } from "../Dropzone";
-import { FileRow } from "../FileRow";
-import { PdfThumbnail } from "../PdfThumbnail";
+import { FileUploadZone } from "../FileUploadZone";
+import { PanelHeader } from "../PanelHeader";
 
 interface Props {
   workspace: PdfWorkspaceState;
@@ -12,47 +12,35 @@ interface Props {
 export function ExtractTextPanel({ workspace }: Props) {
   const file = workspace.extractFile;
   return (
-    <section className="panel" data-testid="extract-panel">
-      <header className="panel-header">
-        <div>
-          <p className="panel-eyebrow">V.Extract</p>
-          <h2 className="panel-title">
+    <section data-testid="extract-panel">
+      <PanelHeader
+        eyebrow="V. Extract"
+        title={
+          <>
             Lift <em>the text</em>
-          </h2>
-        </div>
-      </header>
-      <p className="panel-lede">
-        Extract selectable text from every PDF page and download the result as a
-        plain text file.
-      </p>
-
-      <Dropzone
-        label={file ? "Replace loaded PDF" : "Drop a PDF or click to browse"}
-        hint="Scanned pages need OCR before text can be extracted."
-        onFiles={(files) => workspace.setExtractFile(files[0] ?? null)}
+          </>
+        }
+        lede="Extract selectable text from every PDF page and download the result as a plain text file."
       />
 
-      {file ? (
-        <div className="file-list">
-          <FileRow
-            file={file}
-            index={0}
-            preview={<PdfThumbnail file={file} alt="" />}
-            onRemove={() => workspace.setExtractFile(null)}
-          />
-        </div>
-      ) : null}
+      <FileUploadZone
+        previews
+        files={file ? [file] : []}
+        label="Drop your PDF here"
+        hint="Scanned pages need OCR before text can be extracted"
+        onFiles={(files) => workspace.setExtractFile(files[0] ?? null)}
+        onRemove={() => workspace.setExtractFile(null)}
+      />
 
-      <div className="actions">
-        <button
-          type="button"
-          className="button button-primary"
+      <div className="mt-6 flex flex-wrap items-center gap-2 border-t border-border pt-4">
+        <Button
           disabled={!file || workspace.isRunning}
+          loading={workspace.isRunning}
           onClick={workspace.runExtract}
           data-testid="run-extract"
         >
           {workspace.isRunning ? "Extracting…" : "Extract Text"}
-        </button>
+        </Button>
       </div>
     </section>
   );

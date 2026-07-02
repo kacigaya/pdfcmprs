@@ -1,6 +1,14 @@
 "use client";
 
 import { useState } from "react";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
+import {
+  Progress,
+  ProgressIndicator,
+  ProgressTrack,
+} from "@/components/ui/progress";
 import { triggerDownload } from "../../lib/download";
 import type {
   StatusTone,
@@ -38,6 +46,13 @@ function stampTone(
   return tone;
 }
 
+const badgeVariantByTone = {
+  idle: "outline",
+  info: "info",
+  success: "success",
+  error: "error",
+} as const;
+
 export function ResultCard({
   status,
   progress,
@@ -56,93 +71,112 @@ export function ResultCard({
   }
 
   return (
-    <aside className="output" data-testid="result-card">
-      <div className="output-eyebrow">
+    <Card
+      className="sticky top-20 animate-rise-in p-5 sm:p-6"
+      render={<aside />}
+      data-testid="result-card"
+    >
+      <div className="mb-4 flex items-baseline justify-between border-b border-border pb-3 font-mono text-[11px] uppercase tracking-[0.24em] text-muted-foreground">
         <span>Output</span>
-        <span
-          className="output-stamp"
-          data-tone={tone === "idle" ? undefined : tone}
+        <Badge
+          variant={badgeVariantByTone[tone]}
+          className="font-mono uppercase tracking-[0.18em]"
         >
           {stampLabel(isRunning, status.tone, Boolean(result))}
-        </span>
+        </Badge>
       </div>
 
       {result ? (
         <>
-          <h3 className="output-title">{result.filename}</h3>
+          <h3 className="break-words font-heading italic text-xl leading-tight">
+            {result.filename}
+          </h3>
           {result.description ? (
-            <p className="output-message" data-testid="status-message">
+            <p
+              className="mt-2 font-heading italic leading-normal"
+              data-testid="status-message"
+            >
               {result.description}
             </p>
           ) : null}
           {result.details ? (
-            <dl className="output-details">
+            <dl className="mt-4 border-t border-border">
               {result.details.map((item) => (
-                <div key={item.label} className="output-detail-row">
-                  <dt>{item.label}</dt>
-                  <dd>{item.value}</dd>
+                <div
+                  key={item.label}
+                  className="grid grid-cols-[minmax(7rem,0.8fr)_minmax(0,1fr)] gap-3 border-b border-border py-2"
+                >
+                  <dt className="font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground/80">
+                    {item.label}
+                  </dt>
+                  <dd className="m-0 break-words text-sm">{item.value}</dd>
                 </div>
               ))}
             </dl>
           ) : null}
           {result.text ? (
-            <pre className="output-text" data-testid="extracted-text">
+            <pre
+              className="mt-4 max-h-72 overflow-auto whitespace-pre-wrap rounded-md border border-border bg-background p-3 font-mono text-xs leading-relaxed"
+              data-testid="extracted-text"
+            >
               {result.text}
             </pre>
           ) : null}
         </>
       ) : status.message ? (
         <p
-          className="output-message"
-          data-tone={status.tone === "idle" ? undefined : status.tone}
+          className={
+            status.tone === "error"
+              ? "font-heading italic leading-normal text-destructive"
+              : "font-heading italic leading-normal"
+          }
           data-testid="status-message"
         >
           {status.message}
         </p>
       ) : (
-        <p className="output-empty">
+        <p className="font-heading italic leading-normal text-muted-foreground">
           No operation yet. Choose a file and run an action.
         </p>
       )}
 
       {showProgress ? (
-        <>
-          <div className="progress" aria-hidden={!isRunning}>
-            <span style={{ width: `${pct}%` }} />
-          </div>
-          <div className="progress-meta">
+        <div className="mt-4">
+          <Progress value={pct} aria-hidden={!isRunning}>
+            <ProgressTrack className="h-2 rounded-sm border border-border bg-muted">
+              <ProgressIndicator />
+            </ProgressTrack>
+          </Progress>
+          <div className="mt-1.5 flex justify-between font-mono text-[10px] uppercase tracking-[0.22em] text-muted-foreground">
             <span>Processing</span>
             <span>{pct.toString().padStart(3, "0")}%</span>
           </div>
-        </>
+        </div>
       ) : null}
 
       {result ? (
-        <div className="output-cta">
+        <div className="mt-5 grid gap-2 border-t border-dashed border-border pt-4">
           {result.text ? (
-            <button
-              type="button"
-              className="button button-secondary"
+            <Button
+              variant="outline"
               onClick={() => copyText(result.text ?? "")}
               data-testid="copy-text-button"
             >
               {copyLabel}
-            </button>
+            </Button>
           ) : null}
           {result.blob ? (
-            <button
-              type="button"
-              className="button button-primary"
+            <Button
               onClick={() => {
                 if (result.blob) triggerDownload(result.blob, result.filename);
               }}
               data-testid="download-button"
             >
-              Download / {result.filename}
-            </button>
+              Download
+            </Button>
           ) : null}
         </div>
       ) : null}
-    </aside>
+    </Card>
   );
 }

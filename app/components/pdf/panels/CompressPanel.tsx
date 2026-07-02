@@ -1,8 +1,9 @@
 "use client";
 
+import { Button } from "@/components/ui/button";
 import type { PdfWorkspaceState } from "../../../features/pdf/hooks/usePdfWorkspace";
-import { Dropzone } from "../Dropzone";
-import { FileRow } from "../FileRow";
+import { FileUploadZone } from "../FileUploadZone";
+import { PanelHeader } from "../PanelHeader";
 
 interface Props {
   workspace: PdfWorkspaceState;
@@ -11,55 +12,42 @@ interface Props {
 export function CompressPanel({ workspace }: Props) {
   const file = workspace.compressFiles[0];
   return (
-    <section className="panel" data-testid="compress-panel">
-      <header className="panel-header">
-        <div>
-          <p className="panel-eyebrow">I.Compress</p>
-          <h2 className="panel-title">
+    <section data-testid="compress-panel">
+      <PanelHeader
+        eyebrow="I. Compress"
+        title={
+          <>
             Reduce <em>the weight</em>
-          </h2>
-        </div>
-      </header>
-      <p className="panel-lede">
-        Reduces file size with PDF object streams. Images and page layout stay
-        unchanged.
-      </p>
-
-      <Dropzone
-        label={file ? "Replace loaded PDF" : "Drop a PDF or click to browse"}
-        hint="One file at a time."
-        onFiles={workspace.addCompressFiles}
+          </>
+        }
+        lede="Reduces file size with PDF object streams. Images and page layout stay unchanged."
       />
 
-      {file ? (
-        <div className="file-list">
-          <FileRow
-            file={file}
-            index={0}
-            onRemove={workspace.clearCompressFiles}
-          />
-        </div>
-      ) : null}
+      <FileUploadZone
+        files={workspace.compressFiles.slice(0, 1)}
+        label="Drop your PDF here"
+        hint="One file at a time"
+        onFiles={workspace.addCompressFiles}
+        onRemove={workspace.clearCompressFiles}
+      />
 
-      <div className="actions">
-        <button
-          type="button"
-          className="button button-primary"
+      <div className="mt-6 flex flex-wrap items-center gap-2 border-t border-border pt-4">
+        <Button
           disabled={!file || workspace.isRunning}
+          loading={workspace.isRunning}
           onClick={workspace.runCompress}
           data-testid="run-compress"
         >
           {workspace.isRunning ? "Compressing…" : "Compress"}
-        </button>
+        </Button>
         {workspace.compressFiles.length > 0 ? (
-          <button
-            type="button"
-            className="button button-secondary"
+          <Button
+            variant="outline"
             onClick={workspace.clearCompressFiles}
             disabled={workspace.isRunning}
           >
             Clear
-          </button>
+          </Button>
         ) : null}
       </div>
     </section>

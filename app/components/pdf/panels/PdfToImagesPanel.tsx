@@ -1,96 +1,120 @@
 "use client";
 
+import { Button } from "@/components/ui/button";
+import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectItem,
+  SelectPopup,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import type { PdfWorkspaceState } from "../../../features/pdf/hooks/usePdfWorkspace";
-import { Dropzone } from "../Dropzone";
-import { FileRow } from "../FileRow";
-import { PdfThumbnail } from "../PdfThumbnail";
+import { FileUploadZone } from "../FileUploadZone";
+import { PanelHeader } from "../PanelHeader";
 
 interface Props {
   workspace: PdfWorkspaceState;
 }
 
+const formatItems = [
+  { label: "PNG", value: "png" },
+  { label: "JPG", value: "jpg" },
+];
+
+const qualityItems = [
+  { label: "Standard", value: "standard" },
+  { label: "High", value: "high" },
+  { label: "Maximum", value: "maximum" },
+];
+
+const labelClassName =
+  "font-mono text-[11px] uppercase tracking-[0.22em] text-muted-foreground";
+
 export function PdfToImagesPanel({ workspace }: Props) {
   const file = workspace.pdfImageFile;
   return (
-    <section className="panel" data-testid="pdf-to-images-panel">
-      <header className="panel-header">
-        <div>
-          <p className="panel-eyebrow">VII.Render</p>
-          <h2 className="panel-title">
+    <section data-testid="pdf-to-images-panel">
+      <PanelHeader
+        eyebrow="VII. Render"
+        title={
+          <>
             Pull <em>the proofs</em>
-          </h2>
-        </div>
-      </header>
-      <p className="panel-lede">
-        Render every PDF page as PNG or JPG. Multi-page documents download as a
-        ZIP with one image per page.
-      </p>
-
-      <Dropzone
-        label={file ? "Replace loaded PDF" : "Drop a PDF or click to browse"}
-        hint="Quality controls the render scale."
-        onFiles={(files) => workspace.setPdfImageFile(files[0] ?? null)}
+          </>
+        }
+        lede="Render every PDF page as PNG or JPG. Multi-page documents download as a ZIP with one image per page."
       />
 
-      {file ? (
-        <div className="file-list">
-          <FileRow
-            file={file}
-            index={0}
-            preview={<PdfThumbnail file={file} alt="" />}
-            onRemove={() => workspace.setPdfImageFile(null)}
-          />
+      <FileUploadZone
+        previews
+        files={file ? [file] : []}
+        label="Drop your PDF here"
+        hint="Quality controls the render scale"
+        onFiles={(files) => workspace.setPdfImageFile(files[0] ?? null)}
+        onRemove={() => workspace.setPdfImageFile(null)}
+      />
+
+      <div className="mt-6 grid gap-4 sm:grid-cols-2">
+        <div className="grid gap-1.5">
+          <Label htmlFor="pdf-image-format" className={labelClassName}>
+            Format
+          </Label>
+          <Select
+            items={formatItems}
+            value={workspace.pdfImageFormat}
+            onValueChange={(value) =>
+              workspace.setPdfImageFormat(value === "jpg" ? "jpg" : "png")
+            }
+          >
+            <SelectTrigger id="pdf-image-format">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectPopup>
+              {formatItems.map((item) => (
+                <SelectItem key={item.value} value={item.value}>
+                  {item.label}
+                </SelectItem>
+              ))}
+            </SelectPopup>
+          </Select>
         </div>
-      ) : null}
 
-      <div className="field-grid">
-        <label className="field-label" htmlFor="pdf-image-format">
-          Format
-        </label>
-        <select
-          id="pdf-image-format"
-          className="field-input field-select"
-          value={workspace.pdfImageFormat}
-          onChange={(event) =>
-            workspace.setPdfImageFormat(
-              event.target.value === "jpg" ? "jpg" : "png",
-            )
-          }
-        >
-          <option value="png">PNG</option>
-          <option value="jpg">JPG</option>
-        </select>
-
-        <label className="field-label" htmlFor="pdf-image-quality">
-          Quality
-        </label>
-        <select
-          id="pdf-image-quality"
-          className="field-input field-select"
-          value={workspace.pdfImageQuality}
-          onChange={(event) => {
-            const value = event.target.value;
-            workspace.setPdfImageQuality(
-              value === "standard" || value === "maximum" ? value : "high",
-            );
-          }}
-        >
-          <option value="standard">Standard</option>
-          <option value="high">High</option>
-          <option value="maximum">Maximum</option>
-        </select>
+        <div className="grid gap-1.5">
+          <Label htmlFor="pdf-image-quality" className={labelClassName}>
+            Quality
+          </Label>
+          <Select
+            items={qualityItems}
+            value={workspace.pdfImageQuality}
+            onValueChange={(value) =>
+              workspace.setPdfImageQuality(
+                value === "standard" || value === "maximum" ? value : "high",
+              )
+            }
+          >
+            <SelectTrigger id="pdf-image-quality">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectPopup>
+              {qualityItems.map((item) => (
+                <SelectItem key={item.value} value={item.value}>
+                  {item.label}
+                </SelectItem>
+              ))}
+            </SelectPopup>
+          </Select>
+        </div>
       </div>
 
-      <div className="actions">
-        <button
-          type="button"
-          className="button button-primary"
+      <div className="mt-6 flex flex-wrap items-center gap-2 border-t border-border pt-4">
+        <Button
           disabled={!file || workspace.isRunning}
+          loading={workspace.isRunning}
           onClick={workspace.runPdfToImages}
           data-testid="run-pdf-to-images"
         >
           {workspace.isRunning ? "Rendering…" : "Render Images"}
-        </button>
+        </Button>
       </div>
     </section>
   );

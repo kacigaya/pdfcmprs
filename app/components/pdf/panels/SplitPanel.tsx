@@ -1,9 +1,11 @@
 "use client";
 
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import type { PdfWorkspaceState } from "../../../features/pdf/hooks/usePdfWorkspace";
-import { Dropzone } from "../Dropzone";
-import { FileRow } from "../FileRow";
-import { PdfThumbnail } from "../PdfThumbnail";
+import { FileUploadZone } from "../FileUploadZone";
+import { PanelHeader } from "../PanelHeader";
 import { SplitPagesGrid } from "../SplitPagesGrid";
 
 interface Props {
@@ -13,35 +15,29 @@ interface Props {
 export function SplitPanel({ workspace }: Props) {
   const file = workspace.splitFile;
   return (
-    <section className="panel" data-testid="split-panel">
-      <header className="panel-header">
-        <div>
-          <p className="panel-eyebrow">III.Split</p>
-          <h2 className="panel-title">
+    <section data-testid="split-panel">
+      <PanelHeader
+        eyebrow="III. Split"
+        title={
+          <>
             Extract <em>the pages</em>
-          </h2>
-        </div>
-      </header>
-      <p className="panel-lede">
-        Click pages below to select them, or type a range like{" "}
-        <em>1, 3, 5-7</em> to extract only the pages you need.
-      </p>
-
-      <Dropzone
-        label={file ? "Replace loaded PDF" : "Drop a PDF or click to browse"}
-        onFiles={(files) => workspace.setSplitFile(files[0] ?? null)}
+          </>
+        }
+        lede={
+          <>
+            Click pages below to select them, or type a range like{" "}
+            <em>1, 3, 5-7</em> to extract only the pages you need.
+          </>
+        }
       />
 
-      {file ? (
-        <div className="file-list">
-          <FileRow
-            file={file}
-            index={0}
-            preview={<PdfThumbnail file={file} alt="" />}
-            onRemove={() => workspace.setSplitFile(null)}
-          />
-        </div>
-      ) : null}
+      <FileUploadZone
+        previews
+        files={file ? [file] : []}
+        label="Drop your PDF here"
+        onFiles={(files) => workspace.setSplitFile(files[0] ?? null)}
+        onRemove={() => workspace.setSplitFile(null)}
+      />
 
       {file ? (
         <SplitPagesGrid
@@ -51,34 +47,38 @@ export function SplitPanel({ workspace }: Props) {
         />
       ) : null}
 
-      <label htmlFor="split-pages" className="field-label">
-        Page selection
-      </label>
-      <input
-        id="split-pages"
-        type="text"
-        className="field-input"
-        value={workspace.splitSelection}
-        placeholder="1, 3, 5-7"
-        onChange={(event) => workspace.setSplitSelection(event.target.value)}
-        data-testid="split-selection-input"
-      />
-      <p className="field-hint">
-        Commas for individual pages · hyphens for ranges.
-      </p>
+      <div className="mt-6 grid gap-1.5">
+        <Label
+          htmlFor="split-pages"
+          className="font-mono text-[11px] uppercase tracking-[0.22em] text-muted-foreground"
+        >
+          Page selection
+        </Label>
+        <Input
+          id="split-pages"
+          type="text"
+          className="font-mono"
+          value={workspace.splitSelection}
+          placeholder="1, 3, 5-7"
+          onChange={(event) => workspace.setSplitSelection(event.target.value)}
+          data-testid="split-selection-input"
+        />
+        <p className="font-mono text-[10px] uppercase tracking-[0.16em] text-muted-foreground/80">
+          Commas for individual pages · hyphens for ranges.
+        </p>
+      </div>
 
-      <div className="actions">
-        <button
-          type="button"
-          className="button button-primary"
+      <div className="mt-6 flex flex-wrap items-center gap-2 border-t border-border pt-4">
+        <Button
           disabled={
             !file || !workspace.splitSelection.trim() || workspace.isRunning
           }
+          loading={workspace.isRunning}
           onClick={workspace.runSplit}
           data-testid="run-split"
         >
           {workspace.isRunning ? "Extracting…" : "Extract"}
-        </button>
+        </Button>
       </div>
     </section>
   );

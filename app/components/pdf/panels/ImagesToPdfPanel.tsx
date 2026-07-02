@@ -1,9 +1,10 @@
 "use client";
 
+import { Button } from "@/components/ui/button";
 import type { PdfWorkspaceState } from "../../../features/pdf/hooks/usePdfWorkspace";
 import { filterImageFiles } from "../../../lib/files";
-import { Dropzone } from "../Dropzone";
-import { FileRow } from "../FileRow";
+import { FileUploadZone } from "../FileUploadZone";
+import { PanelHeader } from "../PanelHeader";
 
 interface Props {
   workspace: PdfWorkspaceState;
@@ -12,70 +13,48 @@ interface Props {
 export function ImagesToPdfPanel({ workspace }: Props) {
   const { imageFiles } = workspace;
   return (
-    <section className="panel" data-testid="images-to-pdf-panel">
-      <header className="panel-header">
-        <div>
-          <p className="panel-eyebrow">VI.Images</p>
-          <h2 className="panel-title">
+    <section data-testid="images-to-pdf-panel">
+      <PanelHeader
+        eyebrow="VI. Images"
+        title={
+          <>
             Bind <em>the plates</em>
-          </h2>
-        </div>
-      </header>
-      <p className="panel-lede">
-        Turn JPG, PNG, or WebP images into a PDF. The image order below becomes
-        the page order in the final document.
-      </p>
-
-      <Dropzone
-        multiple
-        label="Drop images or click to browse"
-        hint="JPG, PNG, and WebP supported."
-        accept="image/jpeg,image/png,image/webp,.jpg,.jpeg,.png,.webp"
-        chooseLabel="Choose Images"
-        filterFiles={filterImageFiles}
-        onFiles={workspace.addImageFiles}
+          </>
+        }
+        lede="Turn JPG, PNG, or WebP images into a PDF. The image order below becomes the page order in the final document."
       />
 
-      {imageFiles.length > 0 ? (
-        <div className="file-list">
-          {imageFiles.map((file, index) => (
-            <FileRow
-              key={`${file.name}-${index}-${file.size}`}
-              file={file}
-              index={index}
-              onRemove={() => workspace.removeImageFile(index)}
-              onMoveUp={
-                index > 0 ? () => workspace.moveImageFile(index, -1) : undefined
-              }
-              onMoveDown={
-                index < imageFiles.length - 1
-                  ? () => workspace.moveImageFile(index, 1)
-                  : undefined
-              }
-            />
-          ))}
-        </div>
-      ) : null}
+      <FileUploadZone
+        multiple
+        files={imageFiles}
+        label="Drop your images here"
+        hint="JPG, PNG, and WebP supported"
+        accept="image/jpeg,image/png,image/webp,.jpg,.jpeg,.png,.webp"
+        chooseLabel="Select images"
+        filterFiles={filterImageFiles}
+        onFiles={workspace.addImageFiles}
+        onRemove={workspace.removeImageFile}
+        onMove={workspace.moveImageFile}
+        onClear={workspace.clearImageFiles}
+      />
 
-      <div className="actions">
-        <button
-          type="button"
-          className="button button-primary"
+      <div className="mt-6 flex flex-wrap items-center gap-2 border-t border-border pt-4">
+        <Button
           disabled={imageFiles.length === 0 || workspace.isRunning}
+          loading={workspace.isRunning}
           onClick={workspace.runImagesToPdf}
           data-testid="run-images-to-pdf"
         >
           {workspace.isRunning ? "Creating…" : "Create PDF"}
-        </button>
+        </Button>
         {imageFiles.length > 0 ? (
-          <button
-            type="button"
-            className="button button-secondary"
+          <Button
+            variant="outline"
             onClick={workspace.clearImageFiles}
             disabled={workspace.isRunning}
           >
             Clear
-          </button>
+          </Button>
         ) : null}
       </div>
     </section>

@@ -1,5 +1,7 @@
 "use client";
 
+import { Card } from "@/components/ui/card";
+import { Tabs, TabsList, TabsTab } from "@/components/ui/tabs";
 import {
   type ToolId,
   usePdfWorkspace,
@@ -17,47 +19,16 @@ interface ToolDefinition {
   id: ToolId;
   numeral: string;
   label: string;
-  subtitle: string;
 }
 
 const tools: ReadonlyArray<ToolDefinition> = [
-  {
-    id: "compress",
-    numeral: "I",
-    label: "Compress",
-    subtitle: "Reduce file size",
-  },
-  {
-    id: "merge",
-    numeral: "II",
-    label: "Merge",
-    subtitle: "Combine multiple PDFs",
-  },
-  { id: "split", numeral: "III", label: "Split", subtitle: "Extract pages" },
-  {
-    id: "inspect",
-    numeral: "IV",
-    label: "Inspect",
-    subtitle: "Read metadata",
-  },
-  {
-    id: "extract",
-    numeral: "V",
-    label: "Text",
-    subtitle: "Extract content",
-  },
-  {
-    id: "images-to-pdf",
-    numeral: "VI",
-    label: "Images",
-    subtitle: "Create PDF",
-  },
-  {
-    id: "pdf-to-images",
-    numeral: "VII",
-    label: "Render",
-    subtitle: "PDF to images",
-  },
+  { id: "compress", numeral: "I", label: "Compress" },
+  { id: "merge", numeral: "II", label: "Merge" },
+  { id: "split", numeral: "III", label: "Split" },
+  { id: "inspect", numeral: "IV", label: "Inspect" },
+  { id: "extract", numeral: "V", label: "Text" },
+  { id: "images-to-pdf", numeral: "VI", label: "Images" },
+  { id: "pdf-to-images", numeral: "VII", label: "Render" },
 ];
 
 export function PdfWorkspace() {
@@ -65,39 +36,54 @@ export function PdfWorkspace() {
 
   return (
     <>
-      <header className="masthead">
-        <h1 className="masthead-title">
-          pdf<em>cmprs</em>
+      <section className="mb-8 animate-rise-in">
+        <p className="font-mono text-[11px] uppercase tracking-[0.24em] text-muted-foreground">
+          Browser PDF toolkit
+        </p>
+        <h1 className="mt-2 max-w-[22ch] font-heading text-4xl leading-[1.05] tracking-tight sm:text-5xl">
+          PDF tools that stay{" "}
+          <em className="italic text-primary">on your device</em>
         </h1>
-        <div className="masthead-bottom">
-          <p className="masthead-tagline">
-            Compress, merge, split, inspect, extract text from, and convert
-            PDFs in your browser. Files stay on your device.
-          </p>
-        </div>
-      </header>
+        <p className="mt-3 max-w-[52ch] font-heading italic text-lg leading-normal text-muted-foreground">
+          Compress, merge, split, inspect, extract text, and convert — all
+          processed in your browser. Nothing is uploaded.
+        </p>
+      </section>
 
-      <nav className="toc" aria-label="Outils PDF">
-        {tools.map((tool) => (
-          <button
-            key={tool.id}
-            type="button"
-            className="toc-item"
-            data-active={workspace.tool === tool.id}
-            onClick={() => workspace.setTool(tool.id)}
-            data-testid={`tab-${tool.id}`}
+      <Tabs
+        value={workspace.tool}
+        onValueChange={(value) => workspace.setTool(value as ToolId)}
+      >
+        <div className="mb-6 overflow-x-auto border-y border-border">
+          <TabsList
+            variant="underline"
+            className="w-max min-w-full justify-start gap-1"
+            aria-label="PDF tools"
           >
-            <span className="toc-numeral">{tool.numeral}.</span>
-            <span className="toc-text">
-              <span className="toc-label">{tool.label}</span>
-              <span className="toc-sub">{tool.subtitle}</span>
-            </span>
-          </button>
-        ))}
-      </nav>
+            {tools.map((tool) => (
+              <TabsTab
+                key={tool.id}
+                value={tool.id}
+                data-testid={`tab-${tool.id}`}
+                className="grow-0 gap-2 px-3"
+              >
+                <span
+                  className="font-heading italic text-primary"
+                  aria-hidden
+                >
+                  {tool.numeral}.
+                </span>
+                <span className="font-mono text-xs uppercase tracking-[0.18em]">
+                  {tool.label}
+                </span>
+              </TabsTab>
+            ))}
+          </TabsList>
+        </div>
+      </Tabs>
 
-      <div className="workspace">
-        <div>
+      <div className="grid items-start gap-6 lg:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)]">
+        <Card className="animate-rise-in p-5 sm:p-7">
           {workspace.tool === "compress" ? (
             <CompressPanel workspace={workspace} />
           ) : null}
@@ -119,7 +105,7 @@ export function PdfWorkspace() {
           {workspace.tool === "pdf-to-images" ? (
             <PdfToImagesPanel workspace={workspace} />
           ) : null}
-        </div>
+        </Card>
         <ResultCard
           status={workspace.status}
           progress={workspace.progress}
@@ -127,21 +113,6 @@ export function PdfWorkspace() {
           isRunning={workspace.isRunning}
         />
       </div>
-
-      <footer className="colophon">
-        <span>Processed client-side · No server upload</span>
-        <span>
-          <a
-            href="https://github.com/kacigaya/pdfcmprs"
-            target="_blank"
-            rel="noreferrer"
-          >
-            GitHub
-          </a>
-          {" · "}
-          <em>pdfcmprs</em> · {new Date().getFullYear()}
-        </span>
-      </footer>
     </>
   );
 }

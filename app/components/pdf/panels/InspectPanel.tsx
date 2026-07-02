@@ -1,9 +1,9 @@
 "use client";
 
+import { Button } from "@/components/ui/button";
 import type { PdfWorkspaceState } from "../../../features/pdf/hooks/usePdfWorkspace";
-import { Dropzone } from "../Dropzone";
-import { FileRow } from "../FileRow";
-import { PdfThumbnail } from "../PdfThumbnail";
+import { FileUploadZone } from "../FileUploadZone";
+import { PanelHeader } from "../PanelHeader";
 
 interface Props {
   workspace: PdfWorkspaceState;
@@ -12,47 +12,35 @@ interface Props {
 export function InspectPanel({ workspace }: Props) {
   const file = workspace.inspectFile;
   return (
-    <section className="panel" data-testid="inspect-panel">
-      <header className="panel-header">
-        <div>
-          <p className="panel-eyebrow">IV.Inspect</p>
-          <h2 className="panel-title">
+    <section data-testid="inspect-panel">
+      <PanelHeader
+        eyebrow="IV. Inspect"
+        title={
+          <>
             Read <em>the colophon</em>
-          </h2>
-        </div>
-      </header>
-      <p className="panel-lede">
-        Inspect page count, dimensions, file size, PDF version, and embedded
-        document metadata without uploading the file.
-      </p>
-
-      <Dropzone
-        label={file ? "Replace loaded PDF" : "Drop a PDF or click to browse"}
-        hint="Metadata stays in this browser tab."
-        onFiles={(files) => workspace.setInspectFile(files[0] ?? null)}
+          </>
+        }
+        lede="Inspect page count, dimensions, file size, PDF version, and embedded document metadata without uploading the file."
       />
 
-      {file ? (
-        <div className="file-list">
-          <FileRow
-            file={file}
-            index={0}
-            preview={<PdfThumbnail file={file} alt="" />}
-            onRemove={() => workspace.setInspectFile(null)}
-          />
-        </div>
-      ) : null}
+      <FileUploadZone
+        previews
+        files={file ? [file] : []}
+        label="Drop your PDF here"
+        hint="Metadata stays in this browser tab"
+        onFiles={(files) => workspace.setInspectFile(files[0] ?? null)}
+        onRemove={() => workspace.setInspectFile(null)}
+      />
 
-      <div className="actions">
-        <button
-          type="button"
-          className="button button-primary"
+      <div className="mt-6 flex flex-wrap items-center gap-2 border-t border-border pt-4">
+        <Button
           disabled={!file || workspace.isRunning}
+          loading={workspace.isRunning}
           onClick={workspace.runInspect}
           data-testid="run-inspect"
         >
           {workspace.isRunning ? "Inspecting…" : "Inspect"}
-        </button>
+        </Button>
       </div>
     </section>
   );
