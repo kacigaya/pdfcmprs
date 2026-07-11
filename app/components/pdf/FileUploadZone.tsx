@@ -184,12 +184,7 @@ export function FileUploadZone({
         </div>
       ) : (
         <div className="flex flex-col items-center justify-center px-4 py-3 text-center">
-          <div
-            className="mb-2 flex size-11 shrink-0 items-center justify-center rounded-full border border-border bg-background"
-            aria-hidden
-          >
-            <EmptyIcon className="size-4 opacity-60" />
-          </div>
+          <EmptyIcon className="mb-2 size-4 shrink-0 opacity-60" aria-hidden />
           <p className="mb-1.5 font-heading italic text-base leading-snug">
             {label}
           </p>
