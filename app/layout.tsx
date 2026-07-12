@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { DM_Sans, Fraunces, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 
@@ -24,10 +24,13 @@ const jetbrainsMono = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://pdfcmprs.vercel.app"),
+  metadataBase: new URL("https://pdfcmprs.netlify.app"),
   title: "pdfcmprs: Browser PDF tools",
   description:
     "Compress, merge, split, inspect, extract text from, and convert PDFs in your browser.",
+  alternates: {
+    canonical: "/",
+  },
   openGraph: {
     type: "website",
     locale: "en_US",
@@ -57,6 +60,13 @@ export const metadata: Metadata = {
       },
     ],
   },
+};
+
+export const viewport: Viewport = {
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "#f1ead8" },
+    { media: "(prefers-color-scheme: dark)", color: "#14110d" },
+  ],
 };
 
 export default function RootLayout({

@@ -3,7 +3,7 @@ import { PdfWorkspace } from "./components/pdf/PdfWorkspace";
 
 export default function HomePage() {
   return (
-    <div className="relative z-[2]">
+    <div className="relative z-10">
       <Navbar />
       <main className="mx-auto w-full max-w-6xl px-4 pt-10 pb-16 sm:px-6">
         <PdfWorkspace />

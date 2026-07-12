@@ -1,7 +1,7 @@
 "use client";
 
 import { Card } from "@/components/ui/card";
-import { Tabs, TabsList, TabsTab } from "@/components/ui/tabs";
+import { Tabs, TabsList, TabsPanel, TabsTab } from "@/components/ui/tabs";
 import {
   type ToolId,
   usePdfWorkspace,
@@ -40,11 +40,11 @@ export function PdfWorkspace() {
         <p className="font-mono text-[11px] uppercase tracking-[0.24em] text-muted-foreground">
           Browser PDF toolkit
         </p>
-        <h1 className="mt-2 max-w-[22ch] font-heading text-4xl leading-[1.05] tracking-tight sm:text-5xl">
+        <h1 className="mt-2 max-w-[22ch] text-balance font-heading text-4xl leading-[1.05] tracking-tight sm:text-5xl">
           PDF tools that stay{" "}
           <em className="italic text-primary">on your device</em>
         </h1>
-        <p className="mt-3 max-w-[52ch] font-heading italic text-lg leading-normal text-muted-foreground">
+        <p className="mt-3 max-w-[52ch] text-pretty font-heading italic text-lg leading-normal text-muted-foreground">
           Compress, merge, split, and convert PDFs right in your browser. Your
           files never leave your machine.
         </p>
@@ -53,6 +53,7 @@ export function PdfWorkspace() {
       <Tabs
         value={workspace.tool}
         onValueChange={(value) => workspace.setTool(value as ToolId)}
+        className="gap-0"
       >
         <div className="mb-6 overflow-x-auto border-y border-border">
           <TabsList
@@ -80,39 +81,48 @@ export function PdfWorkspace() {
             ))}
           </TabsList>
         </div>
-      </Tabs>
 
-      <div className="grid items-start gap-6 lg:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)]">
-        <Card className="animate-rise-in p-5 sm:p-7">
-          {workspace.tool === "compress" ? (
-            <CompressPanel workspace={workspace} />
-          ) : null}
-          {workspace.tool === "merge" ? (
-            <MergePanel workspace={workspace} />
-          ) : null}
-          {workspace.tool === "split" ? (
-            <SplitPanel workspace={workspace} />
-          ) : null}
-          {workspace.tool === "inspect" ? (
-            <InspectPanel workspace={workspace} />
-          ) : null}
-          {workspace.tool === "extract" ? (
-            <ExtractTextPanel workspace={workspace} />
-          ) : null}
-          {workspace.tool === "images-to-pdf" ? (
-            <ImagesToPdfPanel workspace={workspace} />
-          ) : null}
-          {workspace.tool === "pdf-to-images" ? (
-            <PdfToImagesPanel workspace={workspace} />
-          ) : null}
-        </Card>
-        <ResultCard
-          status={workspace.status}
-          progress={workspace.progress}
-          result={workspace.result}
-          isRunning={workspace.isRunning}
-        />
-      </div>
+        <div className="grid items-start gap-6 lg:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)]">
+          <Card className="animate-rise-in p-5 sm:p-7">
+            <TabsPanel value="compress">
+              <CompressPanel workspace={workspace} />
+            </TabsPanel>
+            <TabsPanel value="merge">
+              <MergePanel workspace={workspace} />
+            </TabsPanel>
+            <TabsPanel value="split">
+              <SplitPanel workspace={workspace} />
+            </TabsPanel>
+            <TabsPanel value="inspect">
+              <InspectPanel workspace={workspace} />
+            </TabsPanel>
+            <TabsPanel value="extract">
+              <ExtractTextPanel workspace={workspace} />
+            </TabsPanel>
+            <TabsPanel value="images-to-pdf">
+              <ImagesToPdfPanel workspace={workspace} />
+            </TabsPanel>
+            <TabsPanel value="pdf-to-images">
+              <PdfToImagesPanel workspace={workspace} />
+            </TabsPanel>
+            {workspace.status.tone === "error" && workspace.status.message ? (
+              <p
+                role="alert"
+                data-testid="panel-error"
+                className="mt-3 text-pretty font-heading italic leading-normal text-destructive"
+              >
+                {workspace.status.message}
+              </p>
+            ) : null}
+          </Card>
+          <ResultCard
+            status={workspace.status}
+            progress={workspace.progress}
+            result={workspace.result}
+            isRunning={workspace.isRunning}
+          />
+        </div>
+      </Tabs>
     </>
   );
 }

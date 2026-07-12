@@ -65,8 +65,12 @@ export function ResultCard({
   const [copyLabel, setCopyLabel] = useState("Copy Text");
 
   async function copyText(text: string) {
-    await navigator.clipboard.writeText(text);
-    setCopyLabel("Copied");
+    try {
+      await navigator.clipboard.writeText(text);
+      setCopyLabel("Copied");
+    } catch {
+      setCopyLabel("Copy failed");
+    }
     window.setTimeout(() => setCopyLabel("Copy Text"), 1400);
   }
 
@@ -74,6 +78,7 @@ export function ResultCard({
     <Card
       className="sticky top-20 animate-rise-in p-5 sm:p-6"
       render={<aside />}
+      aria-busy={isRunning}
       data-testid="result-card"
     >
       <div className="mb-4 flex items-baseline justify-between border-b border-border pb-3 font-mono text-[11px] uppercase tracking-[0.24em] text-muted-foreground">
@@ -93,7 +98,7 @@ export function ResultCard({
           </h3>
           {result.description ? (
             <p
-              className="mt-2 font-heading italic leading-normal"
+              className="mt-2 text-pretty font-heading italic leading-normal"
               data-testid="status-message"
             >
               {result.description}
@@ -125,24 +130,25 @@ export function ResultCard({
         </>
       ) : status.message ? (
         <p
+          role={status.tone === "error" ? undefined : "status"}
           className={
             status.tone === "error"
-              ? "font-heading italic leading-normal text-destructive"
-              : "font-heading italic leading-normal"
+              ? "text-pretty font-heading italic leading-normal text-destructive"
+              : "text-pretty font-heading italic leading-normal"
           }
           data-testid="status-message"
         >
           {status.message}
         </p>
       ) : (
-        <p className="font-heading italic leading-normal text-muted-foreground">
+        <p className="text-pretty font-heading italic leading-normal text-muted-foreground">
           Pick a file on the left and run a tool. Results land here.
         </p>
       )}
 
       {showProgress ? (
         <div className="mt-4">
-          <Progress value={pct} aria-hidden={!isRunning}>
+          <Progress value={pct} aria-label="Processing progress">
             <ProgressTrack className="h-2 rounded-sm border border-border bg-muted">
               <ProgressIndicator />
             </ProgressTrack>
@@ -162,7 +168,7 @@ export function ResultCard({
               onClick={() => copyText(result.text ?? "")}
               data-testid="copy-text-button"
             >
-              {copyLabel}
+              <span aria-live="polite">{copyLabel}</span>
             </Button>
           ) : null}
           {result.blob ? (

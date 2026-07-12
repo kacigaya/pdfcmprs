@@ -75,7 +75,7 @@ export function SplitPagesGrid({ file, selection, onChange }: Props) {
       } catch (caught) {
         if (active) {
           setError(
-            caught instanceof Error ? caught.message : "Aperçu indisponible.",
+            caught instanceof Error ? caught.message : "Unknown error.",
           );
         }
       } finally {

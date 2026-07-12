@@ -12,11 +12,11 @@ export function PanelHeader({ eyebrow, title, lede }: PanelHeaderProps) {
       <p className="font-mono text-[11px] uppercase tracking-[0.22em] text-muted-foreground">
         {eyebrow}
       </p>
-      <h2 className="mt-1 font-heading text-3xl leading-tight tracking-tight sm:text-4xl [&_em]:italic [&_em]:text-primary">
+      <h2 className="mt-1 text-balance font-heading text-3xl leading-tight tracking-tight sm:text-4xl [&_em]:italic [&_em]:text-primary">
         {title}
       </h2>
       {lede ? (
-        <p className="mt-3 max-w-[52ch] font-heading italic leading-normal text-muted-foreground [&_em]:text-primary">
+        <p className="mt-3 max-w-[52ch] text-pretty font-heading italic leading-normal text-muted-foreground [&_em]:text-primary">
           {lede}
         </p>
       ) : null}
