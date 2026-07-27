@@ -107,12 +107,16 @@ export function FileUploadZone({
             </h3>
             <div className="flex gap-2">
               <Button variant="outline" size="sm" onClick={openFileDialog}>
-                <Upload className="-ms-0.5 size-3.5 opacity-60" aria-hidden />
+                <Upload data-icon="inline-start" className="-ms-0.5 size-3.5 opacity-60" aria-hidden />
                 {multiple ? "Add files" : "Replace"}
               </Button>
               {onClear ? (
                 <Button variant="outline" size="sm" onClick={onClear}>
-                  <Trash2 className="-ms-0.5 size-3.5 opacity-60" aria-hidden />
+                  <Trash2
+                    data-icon="inline-start"
+                    className="-ms-0.5 size-3.5 opacity-60"
+                    aria-hidden
+                  />
                   Remove all
                 </Button>
               ) : null}
@@ -194,7 +198,7 @@ export function FileUploadZone({
             </p>
           ) : null}
           <Button variant="outline" className="mt-4" onClick={openFileDialog}>
-            <Upload className="-ms-1 opacity-60" aria-hidden />
+            <Upload data-icon="inline-start" className="-ms-1 opacity-60" aria-hidden />
             {chooseLabel ?? `Select PDF${multiple ? "s" : ""}`}
           </Button>
         </div>

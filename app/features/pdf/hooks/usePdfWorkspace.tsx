@@ -69,6 +69,7 @@ export interface PdfWorkspaceState {
   moveImageFile: (index: number, direction: -1 | 1) => void;
   setPdfImageFile: (file: File | null) => void;
   status: WorkspaceStatus;
+  announcement: React.ReactNode;
   progress: number;
   result: WorkspaceResult | null;
   isRunning: boolean;
@@ -462,6 +463,11 @@ export function usePdfWorkspace(): PdfWorkspaceState {
     moveImageFile,
     setPdfImageFile: setPdfImageFileSafe,
     status,
+    announcement: (
+      <span aria-live="polite" className="sr-only">
+        {status.message}
+      </span>
+    ),
     progress,
     result,
     isRunning,

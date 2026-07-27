@@ -36,6 +36,7 @@ export function PdfWorkspace() {
 
   return (
     <>
+      {workspace.announcement}
       <section className="mb-8 animate-rise-in">
         <p className="font-mono text-[11px] uppercase tracking-[0.24em] text-muted-foreground">
           Browser PDF toolkit

@@ -130,7 +130,6 @@ export function ResultCard({
         </>
       ) : status.message ? (
         <p
-          role={status.tone === "error" ? undefined : "status"}
           className={
             status.tone === "error"
               ? "text-pretty font-heading italic leading-normal text-destructive"

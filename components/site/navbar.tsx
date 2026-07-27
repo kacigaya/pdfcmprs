@@ -1,4 +1,6 @@
-import { Button } from "@/components/ui/button";
+"use client";
+
+import { buttonVariants } from "@/components/ui/button";
 
 export function Navbar() {
   return (
@@ -12,20 +14,14 @@ export function Navbar() {
           <em className="-ml-[0.04em] italic text-primary">cmprs</em>
         </a>
         <div className="flex items-center gap-3">
-          <Button
-            variant="outline"
-            size="sm"
-            render={
-              // eslint-disable-next-line jsx-a11y/anchor-has-content
-              <a
-                href="https://github.com/kacigaya/pdfcmprs"
-                target="_blank"
-                rel="noreferrer"
-              />
-            }
+          <a
+            className={buttonVariants({ variant: "outline", size: "sm" })}
+            href="https://github.com/kacigaya/pdfcmprs"
+            target="_blank"
+            rel="noreferrer"
           >
             GitHub
-          </Button>
+          </a>
         </div>
       </div>
     </header>
