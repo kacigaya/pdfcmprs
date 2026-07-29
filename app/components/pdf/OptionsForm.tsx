@@ -133,7 +133,9 @@ export function OptionsForm({
                     items={field.options as { label: string; value: string }[]}
                     value={String(values[field.name])}
                     disabled={disabled}
-                    onValueChange={(value) => onChange(field.name, value)}
+                    onValueChange={(value) =>
+                      value !== null && onChange(field.name, value)
+                    }
                   >
                     <SelectTrigger id={id} data-testid={id}>
                       <SelectValue />
