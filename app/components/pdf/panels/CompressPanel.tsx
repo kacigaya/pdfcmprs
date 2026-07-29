@@ -1,50 +1,64 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import type { PdfWorkspaceState } from "../../../features/pdf/hooks/usePdfWorkspace";
+import { useFileSlot } from "../../../features/pdf/hooks/useFiles";
+import type { ToolPanelProps } from "../../../features/pdf/registry";
+import { compressPdf } from "../../../features/pdf/services/compress";
 import { FileUploadZone } from "../FileUploadZone";
-import { PanelHeader } from "../PanelHeader";
 
-interface Props {
-  workspace: PdfWorkspaceState;
+function formatPercent(ratio: number): string {
+  return `${Math.max(0, Math.round(ratio * 100))}%`;
 }
 
-export function CompressPanel({ workspace }: Props) {
-  const file = workspace.compressFiles[0];
+export default function CompressPanel({ run }: ToolPanelProps) {
+  const slot = useFileSlot(run.reset);
+  const { file } = slot;
+
+  async function handleRun() {
+    if (!file) {
+      run.fail("Add a PDF file first.");
+      return;
+    }
+    await run.run(async (report) => {
+      report(45);
+      const out = await compressPdf(file);
+      const saved =
+        out.originalSize > out.compressedSize
+          ? `Saved ${formatPercent(out.ratio)}. ${out.compressedSize} bytes vs ${out.originalSize} bytes.`
+          : `No size reduction. Output is ${out.compressedSize} bytes.`;
+      return {
+        blob: out.blob,
+        filename: out.filename,
+        description: saved,
+        message: `Compression complete. ${saved}`,
+      };
+    });
+  }
+
   return (
     <section data-testid="compress-panel">
-      <PanelHeader
-        eyebrow="I. Compress"
-        title={
-          <>
-            Reduce <em>the weight</em>
-          </>
-        }
-        lede="Reduces file size with PDF object streams. Images and page layout stay unchanged."
-      />
-
       <FileUploadZone
-        files={workspace.compressFiles.slice(0, 1)}
+        files={slot.files}
         label="Drop your PDF here"
         hint="One file at a time"
-        onFiles={workspace.addCompressFiles}
-        onRemove={workspace.clearCompressFiles}
+        onFiles={slot.onFiles}
+        onRemove={slot.onRemove}
       />
 
       <div className="mt-6 flex flex-wrap items-center gap-2 border-t border-border pt-4">
         <Button
-          disabled={!file || workspace.isRunning}
-          loading={workspace.isRunning}
-          onClick={workspace.runCompress}
+          disabled={!file || run.isRunning}
+          loading={run.isRunning}
+          onClick={handleRun}
           data-testid="run-compress"
         >
-          {workspace.isRunning ? "Compressing…" : "Compress"}
+          {run.isRunning ? "Compressing…" : "Compress"}
         </Button>
-        {workspace.compressFiles.length > 0 ? (
+        {file ? (
           <Button
             variant="outline"
-            onClick={workspace.clearCompressFiles}
-            disabled={workspace.isRunning}
+            onClick={slot.onClear}
+            disabled={run.isRunning}
           >
             Clear
           </Button>

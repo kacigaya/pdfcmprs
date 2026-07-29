@@ -2,13 +2,18 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
+import { formatPageSelection, parsePageSelection } from "../../lib/pages";
 import { loadPdfDocument, renderPageToDataUrl } from "../../lib/pdfPreview";
-import { parsePageSelection } from "../../features/pdf/services/split";
 
-interface Props {
+interface PageGridProps {
   file: File;
+  /** Page selection string, e.g. "1, 3, 5-7". */
   selection: string;
   onChange: (selection: string) => void;
+  /** Reported so panels can validate against the real page count. */
+  onTotalChange?: (total: number) => void;
+  /** Small overlay in the page corner — used by rotate/delete tools. */
+  renderBadge?: (page: number) => React.ReactNode;
 }
 
 interface RenderedPage {
@@ -18,27 +23,17 @@ interface RenderedPage {
 
 const MAX_PREVIEW_PAGES = 80;
 
-function formatSelection(pages: Set<number>): string {
-  if (pages.size === 0) return "";
-  const sorted = Array.from(pages).sort((a, b) => a - b);
-  const ranges: string[] = [];
-  let start = sorted[0];
-  let prev = start;
-  for (let i = 1; i < sorted.length; i += 1) {
-    const v = sorted[i];
-    if (v === prev + 1) {
-      prev = v;
-      continue;
-    }
-    ranges.push(start === prev ? String(start) : `${start}-${prev}`);
-    start = v;
-    prev = v;
-  }
-  ranges.push(start === prev ? String(start) : `${start}-${prev}`);
-  return ranges.join(", ");
-}
-
-export function SplitPagesGrid({ file, selection, onChange }: Props) {
+/**
+ * Thumbnail grid with click-to-select pages, kept in sync with the text
+ * selection field. Shared by split, delete, rotate, extract, and organize.
+ */
+export function PageGrid({
+  file,
+  selection,
+  onChange,
+  onTotalChange,
+  renderBadge,
+}: PageGridProps) {
   const [pages, setPages] = useState<RenderedPage[]>([]);
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(true);
@@ -61,6 +56,7 @@ export function SplitPagesGrid({ file, selection, onChange }: Props) {
         }
         const totalPages = doc.numPages;
         setTotal(totalPages);
+        onTotalChange?.(totalPages);
         const limit = Math.min(totalPages, MAX_PREVIEW_PAGES);
         if (totalPages > MAX_PREVIEW_PAGES) setTruncated(true);
         const accumulated: RenderedPage[] = [];
@@ -74,9 +70,7 @@ export function SplitPagesGrid({ file, selection, onChange }: Props) {
         await doc.destroy();
       } catch (caught) {
         if (active) {
-          setError(
-            caught instanceof Error ? caught.message : "Unknown error.",
-          );
+          setError(caught instanceof Error ? caught.message : "Unknown error.");
         }
       } finally {
         if (active) setLoading(false);
@@ -85,7 +79,7 @@ export function SplitPagesGrid({ file, selection, onChange }: Props) {
     return () => {
       active = false;
     };
-  }, [file]);
+  }, [file, onTotalChange]);
 
   const selectedSet = useMemo(() => {
     if (!selection.trim() || total === 0) return new Set<number>();
@@ -100,7 +94,7 @@ export function SplitPagesGrid({ file, selection, onChange }: Props) {
     const next = new Set(selectedSet);
     if (next.has(page)) next.delete(page);
     else next.add(page);
-    onChange(formatSelection(next));
+    onChange(formatPageSelection(Array.from(next)));
   };
 
   const selectAll = (): void => {
@@ -171,6 +165,7 @@ export function SplitPagesGrid({ file, selection, onChange }: Props) {
                   ✓
                 </span>
               ) : null}
+              {renderBadge ? renderBadge(page) : null}
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 src={src}

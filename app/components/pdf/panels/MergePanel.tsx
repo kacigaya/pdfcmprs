@@ -1,60 +1,59 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import type { PdfWorkspaceState } from "../../../features/pdf/hooks/usePdfWorkspace";
+import { useFileList } from "../../../features/pdf/hooks/useFiles";
+import type { ToolPanelProps } from "../../../features/pdf/registry";
+import { mergePdfs } from "../../../features/pdf/services/merge";
 import { FileUploadZone } from "../FileUploadZone";
-import { PanelHeader } from "../PanelHeader";
 
-interface Props {
-  workspace: PdfWorkspaceState;
-}
+export default function MergePanel({ run }: ToolPanelProps) {
+  const list = useFileList(run.reset);
 
-export function MergePanel({ workspace }: Props) {
-  const { mergeFiles } = workspace;
+  async function handleRun() {
+    if (list.files.length < 2) {
+      run.fail("Add at least 2 PDF files to merge.");
+      return;
+    }
+    await run.run(async (report) => {
+      report(50);
+      const out = await mergePdfs(list.files);
+      return {
+        blob: out.blob,
+        filename: out.filename,
+        description: `${out.pageCount} pages combined from ${list.files.length} files.`,
+        message: `Merge complete. ${out.pageCount} pages combined.`,
+      };
+    });
+  }
+
   return (
     <section data-testid="merge-panel">
-      <PanelHeader
-        eyebrow="II. Merge"
-        title={
-          <>
-            Bind <em>the volumes</em>
-          </>
-        }
-        lede={
-          <>
-            Combine several PDFs into one volume. Files merge{" "}
-            <em>in the order shown</em>, so use the arrows to arrange them
-            first.
-          </>
-        }
-      />
-
       <FileUploadZone
         multiple
         previews
-        files={mergeFiles}
+        files={list.files}
         label="Drop your PDFs here"
         hint="At least two files required"
-        onFiles={workspace.addMergeFiles}
-        onRemove={workspace.removeMergeFile}
-        onMove={workspace.moveMergeFile}
-        onClear={workspace.clearMergeFiles}
+        onFiles={list.onFiles}
+        onRemove={list.onRemove}
+        onMove={list.onMove}
+        onClear={list.onClear}
       />
 
       <div className="mt-6 flex flex-wrap items-center gap-2 border-t border-border pt-4">
         <Button
-          disabled={mergeFiles.length < 2 || workspace.isRunning}
-          loading={workspace.isRunning}
-          onClick={workspace.runMerge}
+          disabled={list.files.length < 2 || run.isRunning}
+          loading={run.isRunning}
+          onClick={handleRun}
           data-testid="run-merge"
         >
-          {workspace.isRunning ? "Merging…" : "Merge"}
+          {run.isRunning ? "Merging…" : "Merge"}
         </Button>
-        {mergeFiles.length > 0 ? (
+        {list.files.length > 0 ? (
           <Button
             variant="outline"
-            onClick={workspace.clearMergeFiles}
-            disabled={workspace.isRunning}
+            onClick={list.onClear}
+            disabled={run.isRunning}
           >
             Clear
           </Button>

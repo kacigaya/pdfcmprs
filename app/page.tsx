@@ -1,31 +1,29 @@
 import { Navbar } from "@/components/site/navbar";
-import { PdfWorkspace } from "./components/pdf/PdfWorkspace";
+import { SiteFooter } from "./components/site/SiteFooter";
+import { ToolCatalog } from "./components/site/ToolCatalog";
 
 export default function HomePage() {
   return (
     <div className="relative z-10">
       <Navbar />
       <main className="mx-auto w-full max-w-6xl px-4 pt-10 pb-16 sm:px-6">
-        <PdfWorkspace />
+        <section className="mb-8 animate-rise-in">
+          <p className="font-mono text-[11px] uppercase tracking-[0.24em] text-muted-foreground">
+            Browser PDF toolkit
+          </p>
+          <h1 className="mt-2 max-w-[22ch] text-balance font-heading text-4xl leading-[1.05] tracking-tight sm:text-5xl">
+            PDF tools that stay{" "}
+            <em className="italic text-primary">on your device</em>
+          </h1>
+          <p className="mt-3 max-w-[52ch] text-pretty font-heading italic text-lg leading-normal text-muted-foreground">
+            Compress, merge, split, convert, and sign PDFs right in your
+            browser. Your files never leave your machine.
+          </p>
+        </section>
+
+        <ToolCatalog />
       </main>
-      <footer className="mx-auto flex w-full max-w-6xl flex-wrap justify-between gap-3 border-t border-border px-4 py-6 font-mono text-[11px] uppercase tracking-[0.2em] text-muted-foreground sm:px-6">
-        <span>Processed client-side · No server upload</span>
-        <span>
-          <a
-            href="https://github.com/kacigaya/pdfcmprs"
-            target="_blank"
-            rel="noreferrer"
-            className="transition-colors hover:text-foreground"
-          >
-            GitHub
-          </a>
-          {" · "}
-          <em className="font-heading normal-case italic tracking-normal">
-            pdfcmprs
-          </em>{" "}
-          · {new Date().getFullYear()}
-        </span>
-      </footer>
+      <SiteFooter />
     </div>
   );
 }

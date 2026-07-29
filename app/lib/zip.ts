@@ -10,27 +10,14 @@ function makeCrcTable(): Uint32Array {
   return table;
 }
 
-const crcTable = makeCrcTable();
+const CRC_TABLE = makeCrcTable();
 
-function crc32(bytes: Uint8Array): number {
+export function crc32(bytes: Uint8Array): number {
   let crc = 0xffffffff;
   for (const byte of bytes) {
-    crc = crcTable[(crc ^ byte) & 0xff] ^ (crc >>> 8);
+    crc = CRC_TABLE[(crc ^ byte) & 0xff] ^ (crc >>> 8);
   }
   return (crc ^ 0xffffffff) >>> 0;
-}
-
-function writeUint16(out: number[], value: number) {
-  out.push(value & 0xff, (value >>> 8) & 0xff);
-}
-
-function writeUint32(out: number[], value: number) {
-  out.push(
-    value & 0xff,
-    (value >>> 8) & 0xff,
-    (value >>> 16) & 0xff,
-    (value >>> 24) & 0xff,
-  );
 }
 
 export interface ZipEntry {
@@ -38,59 +25,116 @@ export interface ZipEntry {
   bytes: Uint8Array;
 }
 
-export function createStoredZip(entries: ZipEntry[]): Blob {
-  const encoder = new TextEncoder();
-  const out: number[] = [];
-  const central: number[] = [];
+const LOCAL_HEADER_SIZE = 30;
+const CENTRAL_HEADER_SIZE = 46;
+const END_RECORD_SIZE = 22;
 
-  for (const entry of entries) {
-    const name = encoder.encode(entry.filename);
-    const offset = out.length;
-    const crc = crc32(entry.bytes);
+/** Sequential writer over a preallocated buffer. */
+class ByteWriter {
+  private readonly view: DataView;
+  private offset = 0;
 
-    writeUint32(out, 0x04034b50);
-    writeUint16(out, 20);
-    writeUint16(out, 0);
-    writeUint16(out, 0);
-    writeUint16(out, 0);
-    writeUint16(out, 0);
-    writeUint32(out, crc);
-    writeUint32(out, entry.bytes.length);
-    writeUint32(out, entry.bytes.length);
-    writeUint16(out, name.length);
-    writeUint16(out, 0);
-    out.push(...name, ...entry.bytes);
-
-    writeUint32(central, 0x02014b50);
-    writeUint16(central, 20);
-    writeUint16(central, 20);
-    writeUint16(central, 0);
-    writeUint16(central, 0);
-    writeUint16(central, 0);
-    writeUint16(central, 0);
-    writeUint32(central, crc);
-    writeUint32(central, entry.bytes.length);
-    writeUint32(central, entry.bytes.length);
-    writeUint16(central, name.length);
-    writeUint16(central, 0);
-    writeUint16(central, 0);
-    writeUint16(central, 0);
-    writeUint16(central, 0);
-    writeUint32(central, 0);
-    writeUint32(central, offset);
-    central.push(...name);
+  constructor(readonly bytes: Uint8Array) {
+    this.view = new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength);
   }
 
-  const centralOffset = out.length;
-  out.push(...central);
-  writeUint32(out, 0x06054b50);
-  writeUint16(out, 0);
-  writeUint16(out, 0);
-  writeUint16(out, entries.length);
-  writeUint16(out, entries.length);
-  writeUint32(out, central.length);
-  writeUint32(out, centralOffset);
-  writeUint16(out, 0);
+  get position(): number {
+    return this.offset;
+  }
 
-  return new Blob([new Uint8Array(out)], { type: "application/zip" });
+  u16(value: number): void {
+    this.view.setUint16(this.offset, value, true);
+    this.offset += 2;
+  }
+
+  u32(value: number): void {
+    this.view.setUint32(this.offset, value, true);
+    this.offset += 4;
+  }
+
+  raw(data: Uint8Array): void {
+    this.bytes.set(data, this.offset);
+    this.offset += data.length;
+  }
+}
+
+/**
+ * Minimal ZIP writer using the STORE method (no compression) — enough for
+ * bundling already-compressed output like PNG/JPG pages or a set of PDFs.
+ *
+ * Writes into a preallocated buffer rather than a number[]: entries here are
+ * routinely multi-megabyte, and spreading those into an array argument list
+ * overflows the call stack.
+ */
+export function createStoredZip(entries: ZipEntry[]): Blob {
+  const encoder = new TextEncoder();
+  const prepared = entries.map((entry) => ({
+    name: encoder.encode(entry.filename),
+    bytes: entry.bytes,
+    crc: crc32(entry.bytes),
+  }));
+
+  const localSize = prepared.reduce(
+    (sum, entry) => sum + LOCAL_HEADER_SIZE + entry.name.length + entry.bytes.length,
+    0,
+  );
+  const centralSize = prepared.reduce(
+    (sum, entry) => sum + CENTRAL_HEADER_SIZE + entry.name.length,
+    0,
+  );
+
+  const writer = new ByteWriter(
+    new Uint8Array(localSize + centralSize + END_RECORD_SIZE),
+  );
+
+  const offsets: number[] = [];
+  for (const entry of prepared) {
+    offsets.push(writer.position);
+    writer.u32(0x04034b50);
+    writer.u16(20); // version needed
+    writer.u16(0); // flags
+    writer.u16(0); // method: store
+    writer.u16(0); // mod time
+    writer.u16(0); // mod date
+    writer.u32(entry.crc);
+    writer.u32(entry.bytes.length);
+    writer.u32(entry.bytes.length);
+    writer.u16(entry.name.length);
+    writer.u16(0); // extra field length
+    writer.raw(entry.name);
+    writer.raw(entry.bytes);
+  }
+
+  const centralOffset = writer.position;
+  prepared.forEach((entry, index) => {
+    writer.u32(0x02014b50);
+    writer.u16(20); // version made by
+    writer.u16(20); // version needed
+    writer.u16(0); // flags
+    writer.u16(0); // method: store
+    writer.u16(0); // mod time
+    writer.u16(0); // mod date
+    writer.u32(entry.crc);
+    writer.u32(entry.bytes.length);
+    writer.u32(entry.bytes.length);
+    writer.u16(entry.name.length);
+    writer.u16(0); // extra field length
+    writer.u16(0); // comment length
+    writer.u16(0); // disk number
+    writer.u16(0); // internal attributes
+    writer.u32(0); // external attributes
+    writer.u32(offsets[index]);
+    writer.raw(entry.name);
+  });
+
+  writer.u32(0x06054b50);
+  writer.u16(0); // disk number
+  writer.u16(0); // central directory disk
+  writer.u16(prepared.length);
+  writer.u16(prepared.length);
+  writer.u32(centralSize);
+  writer.u32(centralOffset);
+  writer.u16(0); // comment length
+
+  return new Blob([writer.bytes as BlobPart], { type: "application/zip" });
 }

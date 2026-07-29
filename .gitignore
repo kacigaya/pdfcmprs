@@ -7,3 +7,4 @@ dist/
 coverage/
 tsconfig.tsbuildinfo
 public/pdf.worker.min.mjs
+public/wasm/

@@ -1,57 +1,62 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import type { PdfWorkspaceState } from "../../../features/pdf/hooks/usePdfWorkspace";
+import { useFileList } from "../../../features/pdf/hooks/useFiles";
+import type { ToolPanelProps } from "../../../features/pdf/registry";
+import { imagesToPdf } from "../../../features/pdf/services/imagesToPdf";
 import { filterImageFiles } from "../../../lib/files";
 import { FileUploadZone } from "../FileUploadZone";
-import { PanelHeader } from "../PanelHeader";
 
-interface Props {
-  workspace: PdfWorkspaceState;
-}
+export default function ImagesToPdfPanel({ run }: ToolPanelProps) {
+  const list = useFileList(run.reset);
 
-export function ImagesToPdfPanel({ workspace }: Props) {
-  const { imageFiles } = workspace;
+  async function handleRun() {
+    if (list.files.length === 0) {
+      run.fail("Add at least one image first.");
+      return;
+    }
+    await run.run(async (report) => {
+      report(55);
+      const out = await imagesToPdf(list.files);
+      return {
+        blob: out.blob,
+        filename: out.filename,
+        description: `${out.pageCount} images bound into a PDF.`,
+        message: `Conversion complete. ${out.pageCount} pages created.`,
+      };
+    });
+  }
+
   return (
     <section data-testid="images-to-pdf-panel">
-      <PanelHeader
-        eyebrow="VI. Images"
-        title={
-          <>
-            Bind <em>the plates</em>
-          </>
-        }
-        lede="Turn JPG, PNG, or WebP images into a PDF. The image order below becomes the page order in the final document."
-      />
-
       <FileUploadZone
         multiple
-        files={imageFiles}
+        files={list.files}
         label="Drop your images here"
         hint="JPG, PNG, and WebP supported"
         accept="image/jpeg,image/png,image/webp,.jpg,.jpeg,.png,.webp"
         chooseLabel="Select images"
         filterFiles={filterImageFiles}
-        onFiles={workspace.addImageFiles}
-        onRemove={workspace.removeImageFile}
-        onMove={workspace.moveImageFile}
-        onClear={workspace.clearImageFiles}
+        onFiles={list.onFiles}
+        onRemove={list.onRemove}
+        onMove={list.onMove}
+        onClear={list.onClear}
       />
 
       <div className="mt-6 flex flex-wrap items-center gap-2 border-t border-border pt-4">
         <Button
-          disabled={imageFiles.length === 0 || workspace.isRunning}
-          loading={workspace.isRunning}
-          onClick={workspace.runImagesToPdf}
+          disabled={list.files.length === 0 || run.isRunning}
+          loading={run.isRunning}
+          onClick={handleRun}
           data-testid="run-images-to-pdf"
         >
-          {workspace.isRunning ? "Creating…" : "Create PDF"}
+          {run.isRunning ? "Creating…" : "Create PDF"}
         </Button>
-        {imageFiles.length > 0 ? (
+        {list.files.length > 0 ? (
           <Button
             variant="outline"
-            onClick={workspace.clearImageFiles}
-            disabled={workspace.isRunning}
+            onClick={list.onClear}
+            disabled={run.isRunning}
           >
             Clear
           </Button>

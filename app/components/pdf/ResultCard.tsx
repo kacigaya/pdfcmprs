@@ -14,7 +14,7 @@ import type {
   StatusTone,
   WorkspaceResult,
   WorkspaceStatus,
-} from "../../features/pdf/hooks/usePdfWorkspace";
+} from "../../features/pdf/types";
 
 interface ResultCardProps {
   status: WorkspaceStatus;
