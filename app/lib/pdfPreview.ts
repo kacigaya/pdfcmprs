@@ -43,6 +43,72 @@ export async function renderPageToDataUrl(
   return canvas.toDataURL("image/png");
 }
 
+export interface RenderedPixels {
+  data: Uint8ClampedArray;
+  width: number;
+  height: number;
+}
+
+/**
+ * Render a page and hand back its raw pixels, for the formats browsers cannot
+ * encode (BMP, TIFF) and for the tools that transform pixels before re-encoding.
+ */
+export async function renderPageToPixels(
+  doc: PDFDocumentProxy,
+  pageNumber: number,
+  scale: number,
+): Promise<RenderedPixels> {
+  const page = await doc.getPage(pageNumber);
+  const viewport = page.getViewport({ scale });
+  const canvas = document.createElement("canvas");
+  canvas.width = Math.ceil(viewport.width);
+  canvas.height = Math.ceil(viewport.height);
+  const ctx = canvas.getContext("2d", { willReadFrequently: true });
+  if (!ctx) throw new Error("Canvas 2D context unavailable");
+  // PDF pages are transparent by default; flatten onto white so greyscale and
+  // inversion operate on what the reader actually shows.
+  ctx.fillStyle = "#ffffff";
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+  await page.render({ canvas, canvasContext: ctx, viewport }).promise;
+  page.cleanup();
+  const image = ctx.getImageData(0, 0, canvas.width, canvas.height);
+  return { data: image.data, width: canvas.width, height: canvas.height };
+}
+
+/** Encode raw pixels back to a Blob through a canvas. */
+export async function pixelsToBlob(
+  pixels: RenderedPixels,
+  type: string,
+  quality?: number,
+): Promise<Blob> {
+  const canvas = document.createElement("canvas");
+  canvas.width = pixels.width;
+  canvas.height = pixels.height;
+  const ctx = canvas.getContext("2d");
+  if (!ctx) throw new Error("Canvas 2D context unavailable");
+  // Copy into a fresh buffer: ImageData requires a plain ArrayBuffer, and the
+  // canvas-derived array is typed as possibly shared.
+  ctx.putImageData(
+    new ImageData(
+      new Uint8ClampedArray(pixels.data),
+      pixels.width,
+      pixels.height,
+    ),
+    0,
+    0,
+  );
+  return new Promise((resolve, reject) => {
+    canvas.toBlob(
+      (blob) => {
+        if (blob) resolve(blob);
+        else reject(new Error(`This browser cannot encode ${type}.`));
+      },
+      type,
+      quality,
+    );
+  });
+}
+
 export async function renderPageToBlob(
   doc: PDFDocumentProxy,
   pageNumber: number,

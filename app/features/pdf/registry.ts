@@ -129,6 +129,24 @@ const editPanel = (
   };
 };
 
+const rasterPanel = (
+  name: keyof typeof import("../../components/pdf/panels/rasterPanels"),
+) => {
+  return async () => {
+    const panels = await import("../../components/pdf/panels/rasterPanels");
+    return { default: panels[name] };
+  };
+};
+
+const textPanel = (
+  name: keyof typeof import("../../components/pdf/panels/textPanels"),
+) => {
+  return async () => {
+    const panels = await import("../../components/pdf/panels/textPanels");
+    return { default: panels[name] };
+  };
+};
+
 export const TOOLS: ReadonlyArray<ToolDefinition> = [
   {
     slug: "compress-pdf",
@@ -187,13 +205,175 @@ export const TOOLS: ReadonlyArray<ToolDefinition> = [
     load: () => import("../../components/pdf/panels/ImagesToPdfPanel"),
   },
   {
+    slug: "text-to-pdf",
+    title: "Text to PDF",
+    category: "to-pdf",
+    summary: "Lay a plain text file out as a paginated PDF with word wrapping.",
+    keywords: ["text", "txt", "plain", "convert", "typeset"],
+    engine: "pdf-lib",
+    preset: { sourceFormat: "text" },
+    load: textPanel("TextToPdfPanel"),
+  },
+  {
+    slug: "markdown-to-pdf",
+    title: "Markdown to PDF",
+    category: "to-pdf",
+    summary:
+      "Render Markdown as a PDF. Headings and lists are formatted; other syntax is flattened.",
+    keywords: ["markdown", "md", "readme", "convert", "notes"],
+    engine: "pdf-lib",
+    preset: { sourceFormat: "markdown" },
+    load: textPanel("TextToPdfPanel"),
+  },
+  {
+    slug: "json-to-pdf",
+    title: "JSON to PDF",
+    category: "to-pdf",
+    summary: "Pretty-print a JSON file into a monospaced PDF.",
+    keywords: ["json", "data", "pretty", "convert", "api"],
+    engine: "pdf-lib",
+    preset: { sourceFormat: "json", monospace: true },
+    load: textPanel("TextToPdfPanel"),
+  },
+  {
+    slug: "xml-to-pdf",
+    title: "XML to PDF",
+    category: "to-pdf",
+    summary: "Lay an XML document out as a monospaced PDF.",
+    keywords: ["xml", "markup", "data", "convert", "feed"],
+    engine: "pdf-lib",
+    preset: { sourceFormat: "xml", monospace: true },
+    load: textPanel("TextToPdfPanel"),
+  },
+  {
+    slug: "csv-to-pdf",
+    title: "CSV to PDF",
+    category: "to-pdf",
+    summary:
+      "Turn comma-separated rows into a PDF table with the header row in bold.",
+    keywords: ["csv", "spreadsheet", "table", "rows", "convert"],
+    engine: "pdf-lib",
+    preset: { sourceFormat: "csv", monospace: true },
+    load: textPanel("TextToPdfPanel"),
+  },
+  {
+    slug: "email-to-pdf",
+    title: "Email to PDF",
+    category: "to-pdf",
+    summary: "Convert a saved .eml message, headers first, into a PDF.",
+    keywords: ["email", "eml", "message", "mail", "archive", "convert"],
+    engine: "pdf-lib",
+    preset: { sourceFormat: "email" },
+    load: textPanel("TextToPdfPanel"),
+  },
+  {
     slug: "pdf-to-image",
     title: "PDF to Image",
     category: "from-pdf",
-    summary: "Render every page of a PDF as a PNG or JPG image.",
+    summary:
+      "Render every page as PNG, JPG, WebP, BMP, or TIFF. Multi-page files download as a ZIP.",
     keywords: ["image", "png", "jpg", "jpeg", "render", "export", "convert"],
     engine: "pdfjs",
-    load: () => import("../../components/pdf/panels/PdfToImagesPanel"),
+    load: rasterPanel("PdfToImagePanel"),
+  },
+  {
+    slug: "pdf-to-png",
+    title: "PDF to PNG",
+    category: "from-pdf",
+    summary: "Render every page as a lossless PNG image.",
+    keywords: ["png", "image", "lossless", "render", "export"],
+    engine: "pdfjs",
+    preset: { format: "png" },
+    load: rasterPanel("PdfToImagePanel"),
+  },
+  {
+    slug: "pdf-to-jpg",
+    title: "PDF to JPG",
+    category: "from-pdf",
+    summary: "Render every page as a compact JPG image.",
+    keywords: ["jpg", "jpeg", "image", "photo", "render", "export"],
+    engine: "pdfjs",
+    preset: { format: "jpg" },
+    load: rasterPanel("PdfToImagePanel"),
+  },
+  {
+    slug: "pdf-to-webp",
+    title: "PDF to WebP",
+    category: "from-pdf",
+    summary: "Render every page as WebP, smaller than PNG at similar quality.",
+    keywords: ["webp", "image", "web", "render", "export", "small"],
+    engine: "pdfjs",
+    preset: { format: "webp" },
+    load: rasterPanel("PdfToImagePanel"),
+  },
+  {
+    slug: "pdf-to-bmp",
+    title: "PDF to BMP",
+    category: "from-pdf",
+    summary: "Render every page as an uncompressed 24-bit bitmap.",
+    keywords: ["bmp", "bitmap", "image", "uncompressed", "render"],
+    engine: "pdfjs",
+    preset: { format: "bmp" },
+    load: rasterPanel("PdfToImagePanel"),
+  },
+  {
+    slug: "pdf-to-tiff",
+    title: "PDF to TIFF",
+    category: "from-pdf",
+    summary: "Render every page as TIFF, the archival and print standard.",
+    keywords: ["tiff", "tif", "image", "archive", "print", "render"],
+    engine: "pdfjs",
+    preset: { format: "tiff" },
+    load: rasterPanel("PdfToImagePanel"),
+  },
+  {
+    slug: "pdf-to-cbz",
+    title: "PDF to CBZ",
+    category: "from-pdf",
+    summary: "Package the pages as a CBZ comic-book archive.",
+    keywords: ["cbz", "comic", "archive", "manga", "reader", "zip"],
+    engine: "pdfjs",
+    load: rasterPanel("PdfToCbzPanel"),
+  },
+  {
+    slug: "pdf-to-greyscale",
+    title: "PDF to Greyscale",
+    category: "from-pdf",
+    summary:
+      "Strip all colour for cheaper printing. Pages are rasterised in the process.",
+    keywords: ["greyscale", "grayscale", "black and white", "mono", "print"],
+    engine: "pdfjs",
+    load: rasterPanel("PdfToGreyscalePanel"),
+  },
+  {
+    slug: "invert-colors",
+    title: "Invert Colors",
+    category: "edit",
+    summary:
+      "Flip light and dark for comfortable night reading. Pages are rasterised.",
+    keywords: ["invert", "negative", "dark mode", "night", "colours"],
+    engine: "pdfjs",
+    load: rasterPanel("InvertColorsPanel"),
+  },
+  {
+    slug: "adjust-colors",
+    title: "Adjust Colors",
+    category: "edit",
+    summary:
+      "Tune brightness, contrast, and saturation. Pages are rasterised.",
+    keywords: ["colours", "brightness", "contrast", "saturation", "tune"],
+    engine: "pdfjs",
+    load: rasterPanel("AdjustColorsPanel"),
+  },
+  {
+    slug: "scanner-effect",
+    title: "Scanner Effect",
+    category: "edit",
+    summary:
+      "Make a clean digital file look photocopied. Pages are rasterised.",
+    keywords: ["scanner", "scan", "photocopy", "noise", "aged", "fax"],
+    engine: "pdfjs",
+    load: rasterPanel("ScannerEffectPanel"),
   },
 
   /* ------------------------------------------------ organize & manage */
