@@ -13,6 +13,13 @@ const LEGACY_TAB_REDIRECTS: ReadonlyArray<[string, string]> = [
 
 const nextConfig: NextConfig = {
   reactStrictMode: true,
+  turbopack: {
+    resolveAlias: {
+      // coherentpdf's js_of_ocaml output references Node's fs in a code path
+      // the browser never reaches. See app/lib/wasm/nodeStub.ts.
+      fs: { browser: "./app/lib/wasm/nodeStub.ts" },
+    },
+  },
   async redirects() {
     return LEGACY_TAB_REDIRECTS.map(([from, to]) => ({
       source: `/tools/${from}`,

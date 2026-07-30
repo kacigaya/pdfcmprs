@@ -14,6 +14,11 @@ import {
   type BlankPagePosition,
   type StackDirection,
 } from "../../../features/pdf/services/pageOps";
+import {
+  bookletPdf,
+  nUpPdf,
+  posterizePdf,
+} from "../../../features/pdf/services/impositionOps";
 import { createToolPanel, type ToolInputSpec } from "../ToolForm";
 
 const SINGLE_PDF: ToolInputSpec = {
@@ -270,6 +275,92 @@ export const DividePagesPanel = createToolPanel({
       filename: out.filename,
       description: `Each page split into ${values.columns} x ${values.rows} · ${out.pageCount} pages total.`,
       message: `Divided into ${out.pageCount} pages.`,
+    };
+  },
+});
+
+export const NUpPanel = createToolPanel({
+  input: SINGLE_PDF,
+  fields: [
+    { kind: "number", name: "columns", label: "Columns", default: 2, min: 1, max: 8 },
+    { kind: "number", name: "rows", label: "Rows", default: 2, min: 1, max: 8 },
+    { kind: "number", name: "margin", label: "Sheet margin (pt)", default: 18, min: 0 },
+    { kind: "number", name: "spacing", label: "Gap between pages (pt)", default: 8, min: 0 },
+    { kind: "checkbox", name: "landscape", label: "Landscape sheets", default: false },
+  ],
+  actionLabel: "Combine N-up",
+  runningLabel: "Imposing…",
+  execute: async ({ files, values, report }) => {
+    report(40);
+    const out = await nUpPdf(files[0], {
+      columns: Number(values.columns),
+      rows: Number(values.rows),
+      margin: Number(values.margin),
+      spacing: Number(values.spacing),
+      landscape: Boolean(values.landscape),
+    });
+    return {
+      blob: out.blob,
+      filename: out.filename,
+      description: `${out.perSheet} pages per sheet · ${out.pageCount} sheets produced.`,
+      message: `Imposed ${out.perSheet}-up onto ${out.pageCount} sheets.`,
+    };
+  },
+});
+
+export const BookletPanel = createToolPanel({
+  input: SINGLE_PDF,
+  fields: [
+    { kind: "number", name: "margin", label: "Sheet margin (pt)", default: 12, min: 0 },
+    { kind: "number", name: "spacing", label: "Centre gutter (pt)", default: 0, min: 0 },
+  ],
+  actionLabel: "Build booklet",
+  runningLabel: "Imposing…",
+  execute: async ({ files, values, report }) => {
+    report(40);
+    const out = await bookletPdf(files[0], {
+      margin: Number(values.margin),
+      spacing: Number(values.spacing),
+    });
+    return {
+      blob: out.blob,
+      filename: out.filename,
+      description:
+        `${out.sheets} sheets in saddle-stitch order. Print double-sided, flip on the short edge, then fold.` +
+        (out.padded > 0 ? ` ${out.padded} blank pages added as padding.` : ""),
+      message: `Booklet ready — ${out.sheets} sheets.`,
+    };
+  },
+});
+
+export const PosterizePanel = createToolPanel({
+  input: SINGLE_PDF,
+  fields: [
+    { kind: "number", name: "columns", label: "Sheets across", default: 2, min: 1, max: 10 },
+    { kind: "number", name: "rows", label: "Sheets down", default: 2, min: 1, max: 10 },
+    {
+      kind: "number",
+      name: "overlap",
+      label: "Overlap (pt)",
+      default: 18,
+      min: 0,
+      hint: "Repeats a strip on adjacent tiles so sheets can be trimmed and taped.",
+    },
+  ],
+  actionLabel: "Build poster",
+  runningLabel: "Tiling…",
+  execute: async ({ files, values, report }) => {
+    report(40);
+    const out = await posterizePdf(files[0], {
+      columns: Number(values.columns),
+      rows: Number(values.rows),
+      overlap: Number(values.overlap),
+    });
+    return {
+      blob: out.blob,
+      filename: out.filename,
+      description: `${out.tilesPerPage} tiles per page · ${out.pageCount} sheets to print and tape.`,
+      message: `Poster split into ${out.pageCount} sheets.`,
     };
   },
 });

@@ -101,6 +101,34 @@ export const CATEGORIES: ReadonlyArray<CategoryDefinition> = [
   },
 ];
 
+/** Panels grouped by batch share a chunk — one lazy load covers the group. */
+const organizePanel = (
+  name: keyof typeof import("../../components/pdf/panels/organizePanels"),
+) => {
+  return async () => {
+    const panels = await import("../../components/pdf/panels/organizePanels");
+    return { default: panels[name] };
+  };
+};
+
+const securePanel = (
+  name: keyof typeof import("../../components/pdf/panels/securePanels"),
+) => {
+  return async () => {
+    const panels = await import("../../components/pdf/panels/securePanels");
+    return { default: panels[name] };
+  };
+};
+
+const editPanel = (
+  name: keyof typeof import("../../components/pdf/panels/editPanels"),
+) => {
+  return async () => {
+    const panels = await import("../../components/pdf/panels/editPanels");
+    return { default: panels[name] };
+  };
+};
+
 export const TOOLS: ReadonlyArray<ToolDefinition> = [
   {
     slug: "compress-pdf",
@@ -166,6 +194,337 @@ export const TOOLS: ReadonlyArray<ToolDefinition> = [
     keywords: ["image", "png", "jpg", "jpeg", "render", "export", "convert"],
     engine: "pdfjs",
     load: () => import("../../components/pdf/panels/PdfToImagesPanel"),
+  },
+
+  /* ------------------------------------------------ organize & manage */
+  {
+    slug: "rotate-pdf",
+    title: "Rotate PDF",
+    category: "organize",
+    summary:
+      "Turn selected pages by 90°, 180°, or 270° without touching their content.",
+    keywords: ["rotate", "turn", "orientation", "landscape", "portrait"],
+    engine: "pdf-lib",
+    load: organizePanel("RotatePanel"),
+  },
+  {
+    slug: "delete-pages",
+    title: "Delete Pages",
+    category: "organize",
+    summary: "Remove the pages you select and keep everything else intact.",
+    keywords: ["delete", "remove", "drop", "pages", "erase"],
+    engine: "pdf-lib",
+    load: organizePanel("DeletePagesPanel"),
+  },
+  {
+    slug: "extract-pages",
+    title: "Extract Pages",
+    category: "organize",
+    summary: "Copy the pages you select into a brand new PDF.",
+    keywords: ["extract", "pull", "copy", "pages", "subset"],
+    engine: "pdf-lib",
+    load: organizePanel("ExtractPagesPanel"),
+  },
+  {
+    slug: "reverse-pages",
+    title: "Reverse Pages",
+    category: "organize",
+    summary: "Flip the page order so the document reads last page first.",
+    keywords: ["reverse", "flip", "invert", "order", "backwards"],
+    engine: "pdf-lib",
+    load: organizePanel("ReversePagesPanel"),
+  },
+  {
+    slug: "add-blank-page",
+    title: "Add Blank Page",
+    category: "organize",
+    summary:
+      "Insert blank pages at the start, the end, after a page, or between every page.",
+    keywords: ["blank", "insert", "empty", "add", "spacer"],
+    engine: "pdf-lib",
+    load: organizePanel("AddBlankPagePanel"),
+  },
+  {
+    slug: "alternate-and-mix",
+    title: "Alternate & Mix",
+    category: "organize",
+    summary:
+      "Interleave two PDFs page by page — ideal for pairing front and back scans.",
+    keywords: ["alternate", "mix", "interleave", "zip", "collate", "scan"],
+    engine: "pdf-lib",
+    load: organizePanel("AlternateMixPanel"),
+  },
+  {
+    slug: "combine-to-single-page",
+    title: "Combine to Single Page",
+    category: "organize",
+    summary: "Stack every page onto one long or one wide sheet.",
+    keywords: ["combine", "single", "stack", "one page", "long"],
+    engine: "pdf-lib",
+    load: organizePanel("CombineToSinglePagePanel"),
+  },
+  {
+    slug: "divide-pages",
+    title: "Divide Pages",
+    category: "organize",
+    summary:
+      "Split each page into a grid of smaller pages — two-up scans back into singles.",
+    keywords: ["divide", "split", "grid", "cut", "halve", "two up"],
+    engine: "pdf-lib",
+    load: organizePanel("DividePagesPanel"),
+  },
+  {
+    slug: "pdfs-to-zip",
+    title: "PDFs to ZIP",
+    category: "organize",
+    summary: "Bundle several PDFs into one ZIP archive without re-encoding them.",
+    keywords: ["zip", "archive", "bundle", "package", "download"],
+    engine: "native",
+    load: organizePanel("PdfsToZipPanel"),
+  },
+  {
+    slug: "n-up-pdf",
+    title: "N-Up PDF",
+    category: "organize",
+    summary:
+      "Place several pages on each sheet in a grid — saves paper when printing.",
+    keywords: ["n-up", "nup", "2up", "grid", "impose", "print", "paper"],
+    engine: "pdf-lib",
+    load: organizePanel("NUpPanel"),
+  },
+  {
+    slug: "pdf-booklet",
+    title: "PDF Booklet",
+    category: "organize",
+    summary:
+      "Impose pages two-up in saddle-stitch order, ready to print double-sided and fold.",
+    keywords: ["booklet", "saddle", "stitch", "fold", "impose", "print", "zine"],
+    engine: "pdf-lib",
+    load: organizePanel("BookletPanel"),
+  },
+  {
+    slug: "posterize-pdf",
+    title: "Posterize PDF",
+    category: "organize",
+    summary:
+      "Split each page across a grid of sheets, with overlap for taping them together.",
+    keywords: ["poster", "posterize", "tile", "enlarge", "wall", "split"],
+    engine: "pdf-lib",
+    load: organizePanel("PosterizePanel"),
+  },
+
+  /* ------------------------------------------------- secure & optimize */
+  {
+    slug: "encrypt-pdf",
+    title: "Encrypt PDF",
+    category: "secure",
+    summary:
+      "Lock a PDF with a password using AES-256, AES-128, or legacy RC4-40.",
+    keywords: ["encrypt", "password", "protect", "lock", "secure", "aes"],
+    engine: "qpdf",
+    load: securePanel("EncryptPanel"),
+  },
+  {
+    slug: "decrypt-pdf",
+    title: "Decrypt PDF",
+    category: "secure",
+    summary: "Remove a known password so the PDF opens without one.",
+    keywords: ["decrypt", "unlock", "password", "remove", "open"],
+    engine: "qpdf",
+    load: securePanel("DecryptPanel"),
+  },
+  {
+    slug: "change-permissions",
+    title: "Change Permissions",
+    category: "secure",
+    summary:
+      "Control printing, copying, editing, and screen-reader access with an owner password.",
+    keywords: ["permissions", "restrict", "printing", "copying", "owner"],
+    engine: "qpdf",
+    load: securePanel("PermissionsPanel"),
+  },
+  {
+    slug: "repair-pdf",
+    title: "Repair PDF",
+    category: "secure",
+    summary:
+      "Rebuild a damaged cross-reference table so broken files open again.",
+    keywords: ["repair", "fix", "recover", "damaged", "corrupt", "broken"],
+    engine: "mupdf",
+    load: securePanel("RepairPanel"),
+  },
+  {
+    slug: "linearize-pdf",
+    title: "Linearize PDF",
+    category: "secure",
+    summary:
+      "Reorder the file for fast web view so the first page renders before the rest downloads.",
+    keywords: ["linearize", "optimize", "web", "fast", "stream"],
+    engine: "qpdf",
+    load: securePanel("LinearizePanel"),
+  },
+  {
+    slug: "remove-restrictions",
+    title: "Remove Restrictions",
+    category: "secure",
+    summary:
+      "Lift printing, copying, and editing limits from a PDF that is not password-encrypted.",
+    keywords: ["restrictions", "unlock", "permissions", "remove", "owner"],
+    engine: "qpdf",
+    load: securePanel("RemoveRestrictionsPanel"),
+  },
+  {
+    slug: "sanitize-pdf",
+    title: "Sanitize PDF",
+    category: "secure",
+    summary:
+      "Strip JavaScript, auto-run actions, launch actions, and embedded attachments.",
+    keywords: ["sanitize", "clean", "javascript", "malware", "strip", "safe"],
+    engine: "pdf-lib",
+    load: securePanel("SanitizePanel"),
+  },
+  {
+    slug: "edit-metadata",
+    title: "Edit Metadata",
+    category: "secure",
+    summary: "Set the title, author, subject, keywords, creator, and producer.",
+    keywords: ["metadata", "title", "author", "properties", "edit", "info"],
+    engine: "pdf-lib",
+    load: editPanel("EditMetadataPanel"),
+  },
+  {
+    slug: "remove-metadata",
+    title: "Remove Metadata",
+    category: "secure",
+    summary:
+      "Clear the document info dictionary and the XMP packet that readers prefer.",
+    keywords: ["metadata", "strip", "privacy", "anonymize", "xmp", "clean"],
+    engine: "pdf-lib",
+    load: editPanel("RemoveMetadataPanel"),
+  },
+  {
+    slug: "fix-page-size",
+    title: "Fix Page Size",
+    category: "secure",
+    summary: "Rescale every page onto one uniform sheet size.",
+    keywords: ["page size", "a4", "letter", "resize", "uniform", "normalize"],
+    engine: "pdf-lib",
+    load: editPanel("FixPageSizePanel"),
+  },
+  {
+    slug: "page-dimensions",
+    title: "Page Dimensions",
+    category: "secure",
+    summary: "Report the size and orientation of every page, grouped into runs.",
+    keywords: ["dimensions", "size", "measure", "orientation", "points"],
+    engine: "pdf-lib",
+    load: editPanel("PageDimensionsPanel"),
+  },
+
+  /* --------------------------------------------------- edit & modify */
+  {
+    slug: "add-page-numbers",
+    title: "Add Page Numbers",
+    category: "edit",
+    summary:
+      "Stamp page numbers with a custom format, position, font, and starting value.",
+    keywords: ["page numbers", "pagination", "numbering", "folio"],
+    engine: "pdf-lib",
+    load: editPanel("PageNumbersPanel"),
+  },
+  {
+    slug: "bates-numbering",
+    title: "Bates Numbering",
+    category: "edit",
+    summary:
+      "Apply sequential fixed-width legal stamps with a prefix, suffix, and increment.",
+    keywords: ["bates", "legal", "discovery", "sequential", "numbering"],
+    engine: "pdf-lib",
+    load: editPanel("BatesPanel"),
+  },
+  {
+    slug: "add-watermark",
+    title: "Add Watermark",
+    category: "edit",
+    summary: "Overlay rotated, semi-transparent text across the pages.",
+    keywords: ["watermark", "confidential", "draft", "overlay", "stamp"],
+    engine: "pdf-lib",
+    load: editPanel("WatermarkPanel"),
+  },
+  {
+    slug: "header-and-footer",
+    title: "Header & Footer",
+    category: "edit",
+    summary:
+      "Add running headers and footers with placeholders for page numbers and filename.",
+    keywords: ["header", "footer", "running", "title", "margin"],
+    engine: "pdf-lib",
+    load: editPanel("HeaderFooterPanel"),
+  },
+  {
+    slug: "add-stamps",
+    title: "Add Stamps",
+    category: "edit",
+    summary: "Place a text stamp such as APPROVED or DRAFT at any corner.",
+    keywords: ["stamp", "approved", "draft", "mark", "annotate"],
+    engine: "pdf-lib",
+    load: editPanel("StampsPanel"),
+  },
+  {
+    slug: "crop-pdf",
+    title: "Crop PDF",
+    category: "edit",
+    summary: "Trim the page edges by adjusting the crop box.",
+    keywords: ["crop", "trim", "margins", "cut", "edges"],
+    engine: "pdf-lib",
+    load: editPanel("CropPanel"),
+  },
+  {
+    slug: "flatten-pdf",
+    title: "Flatten PDF",
+    category: "edit",
+    summary: "Bake interactive form fields into static, non-editable content.",
+    keywords: ["flatten", "form", "fields", "static", "lock"],
+    engine: "pdf-lib",
+    load: editPanel("FlattenPanel"),
+  },
+  {
+    slug: "remove-annotations",
+    title: "Remove Annotations",
+    category: "edit",
+    summary:
+      "Strip comments, highlights, and links, purging the objects from the file.",
+    keywords: ["annotations", "comments", "highlights", "links", "remove"],
+    engine: "pdf-lib",
+    load: editPanel("RemoveAnnotationsPanel"),
+  },
+  {
+    slug: "remove-blank-pages",
+    title: "Remove Blank Pages",
+    category: "edit",
+    summary:
+      "Detect and drop pages with almost no ink — tuned for scanner speckle.",
+    keywords: ["blank", "empty", "remove", "scan", "clean"],
+    engine: "pdfjs",
+    load: editPanel("RemoveBlankPagesPanel"),
+  },
+  {
+    slug: "change-background",
+    title: "Change Background",
+    category: "edit",
+    summary: "Paint a solid colour behind the existing page content.",
+    keywords: ["background", "colour", "color", "fill", "paper", "tint"],
+    engine: "pdf-lib",
+    load: editPanel("ChangeBackgroundPanel"),
+  },
+  {
+    slug: "table-of-contents",
+    title: "Table of Contents",
+    category: "edit",
+    summary: "Build a contents page from the document's existing bookmarks.",
+    keywords: ["contents", "toc", "index", "bookmarks", "outline"],
+    engine: "pdf-lib",
+    load: editPanel("TableOfContentsPanel"),
   },
 ];
 

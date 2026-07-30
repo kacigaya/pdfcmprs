@@ -19,8 +19,10 @@ export function Navbar() {
             href="https://github.com/kacigaya/pdfcmprs"
             target="_blank"
             rel="noreferrer"
+            // AGPL-3.0 section 13: offer the corresponding source to users.
+            title="Source code (AGPL-3.0)"
           >
-            GitHub
+            Source
           </a>
         </div>
       </div>

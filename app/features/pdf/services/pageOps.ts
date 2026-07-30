@@ -4,6 +4,7 @@ import { allPages, parsePageSelection } from "../../../lib/pages";
 import { createStoredZip } from "../../../lib/zip";
 import {
   copyPagesInto,
+  ensurePageContents,
   loadPdf,
   PAGE_SIZES,
   savePdf,
@@ -57,6 +58,7 @@ export async function deletePages(
 
 export async function reversePages(file: File): Promise<PdfSaveResult> {
   const source = await loadPdf(file);
+  ensurePageContents(source);
   const out = await PDFDocument.create();
   const order = allPages(source.getPageCount()).reverse();
   await copyPagesInto(out, source, order);
@@ -68,6 +70,7 @@ export async function reorderPages(
   order: ReadonlyArray<number>,
 ): Promise<PdfSaveResult> {
   const source = await loadPdf(file);
+  ensurePageContents(source);
   const total = source.getPageCount();
   if (order.length === 0) throw new Error("Page order is empty.");
   for (const page of order) {
@@ -85,6 +88,7 @@ export async function extractPages(
   selection: string,
 ): Promise<PdfSaveResult & { pages: number[] }> {
   const source = await loadPdf(file);
+  ensurePageContents(source);
   const pages = parsePageSelection(selection, source.getPageCount());
   const out = await PDFDocument.create();
   await copyPagesInto(out, source, pages);
@@ -176,6 +180,7 @@ export async function combineToSinglePage(
   gap: number,
 ): Promise<PdfSaveResult> {
   const source = await loadPdf(file);
+  ensurePageContents(source);
   const total = source.getPageCount();
   if (total === 0) throw new Error("This PDF has no pages.");
 
@@ -232,6 +237,7 @@ export async function dividePages(
   }
 
   const source = await loadPdf(file);
+  ensurePageContents(source);
   const out = await PDFDocument.create();
   const pageCount = source.getPageCount();
 
@@ -278,6 +284,7 @@ export async function removeBlankPages(
   const { findBlankPages } = await import("./blankDetection");
   const blanks = await findBlankPages(file, threshold);
   const source = await loadPdf(file);
+  ensurePageContents(source);
   const total = source.getPageCount();
   const keep = allPages(total).filter((page) => !blanks.includes(page));
   if (keep.length === 0) {

@@ -1,4 +1,4 @@
-import { PDFDocument } from "pdf-lib";
+import { PDFDocument, PDFName } from "pdf-lib";
 import { bytesToPdfBlob } from "../../../lib/blob";
 import { withPdfExtension } from "../../../lib/files";
 
@@ -54,6 +54,27 @@ export async function savePdf(
     filename: withPdfExtension(sourceName, suffix),
     pageCount: doc.getPageCount(),
   };
+}
+
+/**
+ * Give every page a content stream if it lacks one.
+ *
+ * pdf-lib's embedPages throws "Can't embed page with missing Contents" for a
+ * genuinely empty page, which real documents do contain (inserted blanks,
+ * some scanner output). Any tool that re-composites pages must call this first
+ * or it will fail on the whole file because of one blank page.
+ *
+ * Returns how many pages were patched.
+ */
+export function ensurePageContents(doc: PDFDocument): number {
+  const contents = PDFName.of("Contents");
+  let patched = 0;
+  for (const page of doc.getPages()) {
+    if (page.node.has(contents)) continue;
+    page.node.set(contents, doc.context.register(doc.context.stream("")));
+    patched += 1;
+  }
+  return patched;
 }
 
 /** Copy the given 1-based pages from `source` into a fresh document. */

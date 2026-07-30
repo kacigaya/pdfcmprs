@@ -37,7 +37,17 @@ export interface EmscriptenFs {
   unlink(path: string): void;
   mkdir(path: string): void;
   readdir(path: string): string[];
-  analyzePath(path: string): { exists: boolean };
+  stat(path: string): unknown;
+}
+
+/** MEMFS throws an opaque ErrnoError for a missing path; there is no exists(). */
+function fileExists(fs: EmscriptenFs, path: string): boolean {
+  try {
+    fs.stat(path);
+    return true;
+  } catch {
+    return false;
+  }
 }
 
 export interface EmscriptenInstance {
@@ -93,36 +103,54 @@ export async function runCliTool(
     locateFile: (path: string) => string;
   },
 ): Promise<Uint8Array> {
-  const errors: string[] = [];
   const instance = await factory({
     noInitialRun: true,
     locateFile: options.locateFile,
-    printErr: (line: string) => errors.push(line),
-    print: () => undefined,
   });
 
   for (const [name, data] of Object.entries(options.inputs)) {
     instance.FS.writeFile(name, data);
   }
 
+  // These builds ignore Module.print/printErr/out/err and write straight to
+  // the console, so the only way to surface the engine's own diagnostics is
+  // to intercept console during the call. callMain is synchronous, so nothing
+  // else can interleave.
+  const captured: string[] = [];
+  const original = {
+    log: console.log,
+    warn: console.warn,
+    error: console.error,
+  };
+  const collect = (...parts: unknown[]) => {
+    captured.push(parts.map(String).join(" "));
+  };
+
   let code: number;
+  let thrown: unknown;
+  console.log = collect;
+  console.warn = collect;
+  console.error = collect;
   try {
     code = instance.callMain(options.args);
   } catch (error) {
-    const detail = errors.join("\n").trim();
-    throw new Error(
-      detail || (error instanceof Error ? error.message : "Engine failed."),
-    );
+    code = -1;
+    thrown = error;
+  } finally {
+    console.log = original.log;
+    console.warn = original.warn;
+    console.error = original.error;
   }
 
-  if (code !== 0 && !instance.FS.analyzePath(options.output).exists) {
-    const detail = errors.join("\n").trim();
-    throw new Error(detail || `Engine exited with code ${code}.`);
-  }
-
-  if (!instance.FS.analyzePath(options.output).exists) {
-    const detail = errors.join("\n").trim();
-    throw new Error(detail || "Engine produced no output.");
+  const produced = fileExists(instance.FS, options.output);
+  if (!produced) {
+    const detail = captured
+      .map((line) => line.replace(/^[^:]*\.(mjs|js):\s*/, "").trim())
+      .filter(Boolean)
+      .join(" · ");
+    if (detail) throw new Error(detail);
+    if (thrown instanceof Error) throw new Error(thrown.message);
+    throw new Error(`Engine exited with code ${code} and produced no output.`);
   }
 
   const result = instance.FS.readFile(options.output);

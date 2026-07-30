@@ -1,0 +1,87 @@
+pdfcmprs
+Copyright (c) 2026 Gaya KACI
+Licensed under the GNU Affero General Public License v3.0 or later.
+
+This product bundles third-party components. Each is listed below with its
+license. Where a component is copyleft, its terms apply to that component and
+are the reason pdfcmprs as a whole is distributed under the AGPL-3.0.
+
+================================================================================
+Why pdfcmprs is AGPL-3.0
+================================================================================
+
+Ghostscript, MuPDF, and CoherentPDF are distributed under the AGPL-3.0. Because
+pdfcmprs ships and invokes them, the combined work must be offered under the
+same terms. AGPL-3.0 section 13 additionally requires that users interacting
+with the software over a network be offered the corresponding source; the
+"Source" link in the site footer serves that purpose.
+
+Note that all processing happens locally in the visitor's browser — no document
+is uploaded to a server. The network clause applies to the software itself, not
+to any document handling.
+
+================================================================================
+Copyleft components (AGPL-3.0 / LGPL-3.0)
+================================================================================
+
+MuPDF (mupdf)
+  Copyright (c) Artifex Software, Inc.
+  License: AGPL-3.0-or-later
+  https://mupdf.com/
+  Used for: repairing damaged PDFs, EPUB/MOBI/FB2/CBZ/XPS conversion,
+  PDF-to-SVG output.
+
+Ghostscript / GhostPDL (@jspawn/ghostscript-wasm)
+  Copyright (c) Artifex Software, Inc.
+  License: AGPL-3.0
+  https://www.ghostscript.com/
+  Used for: image-recompressing compression, greyscale conversion.
+
+CoherentPDF (coherentpdf)
+  Copyright (c) Coherent Graphics Ltd.
+  License: AGPL-3.0-or-later
+  https://www.coherentpdf.com/
+  Used for: booklet imposition, N-up, posterize, Bates numbering.
+
+wasm-vips
+  Copyright (c) Kleis Auke Wolthuizen
+  License: MIT (bundling libvips and its dependencies, which include
+  LGPL-3.0-or-later components)
+  https://github.com/kleisauke/wasm-vips
+  Used for: HEIC, PSD, TIFF, and BMP image handling.
+
+================================================================================
+Permissive components
+================================================================================
+
+pdf-lib .................. MIT ....... https://github.com/Hopding/pdf-lib
+pdf.js (pdfjs-dist) ...... Apache-2.0  https://mozilla.github.io/pdf.js/
+qpdf (@neslinesli93/
+  qpdf-wasm) ............. Apache-2.0  https://qpdf.sourceforge.io/
+  (the npm wrapper itself is published under ISC)
+Tesseract.js ............. Apache-2.0  https://tesseract.js.org/
+OpenCV (@techstark/
+  opencv-js) ............. Apache-2.0  https://opencv.org/
+PDFKit ................... MIT ....... https://pdfkit.org/
+Cropper.js ............... MIT ....... https://fengyuanchen.github.io/cropperjs/
+pixelmatch ............... ISC ....... https://github.com/mapbox/pixelmatch
+jsdiff (diff) ............ BSD-3-Clause https://github.com/kpdecker/jsdiff
+microdiff ................ MIT ....... https://github.com/AsyncBanana/microdiff
+UTIF2 .................... MIT ....... https://github.com/photopea/UTIF.js
+heic-decode ............... BSD-3-Clause https://github.com/catdad-experiments/heic-decode
+Next.js .................. MIT ....... https://nextjs.org/
+React .................... MIT ....... https://react.dev/
+Tailwind CSS ............. MIT ....... https://tailwindcss.com/
+Base UI (@base-ui/react) . MIT ....... https://base-ui.com/
+lucide-react ............. ISC ....... https://lucide.dev/
+
+================================================================================
+Obtaining the source
+================================================================================
+
+The complete corresponding source for pdfcmprs is at:
+
+  https://github.com/kacigaya/pdfcmprs
+
+Full license texts for the bundled components are available in their respective
+package directories under node_modules/, and at the project URLs listed above.
