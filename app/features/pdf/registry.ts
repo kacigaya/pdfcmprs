@@ -147,6 +147,15 @@ const textPanel = (
   };
 };
 
+const dataPanel = (
+  name: keyof typeof import("../../components/pdf/panels/dataPanels"),
+) => {
+  return async () => {
+    const panels = await import("../../components/pdf/panels/dataPanels");
+    return { default: panels[name] };
+  };
+};
+
 export const TOOLS: ReadonlyArray<ToolDefinition> = [
   {
     slug: "compress-pdf",
@@ -344,6 +353,65 @@ export const TOOLS: ReadonlyArray<ToolDefinition> = [
     keywords: ["greyscale", "grayscale", "black and white", "mono", "print"],
     engine: "pdfjs",
     load: rasterPanel("PdfToGreyscalePanel"),
+  },
+  {
+    slug: "pdf-to-json",
+    title: "PDF to JSON",
+    category: "from-pdf",
+    summary:
+      "Export every text run with its coordinates, for scripting and data pipelines.",
+    keywords: ["json", "data", "structured", "coordinates", "extract", "api"],
+    engine: "pdfjs",
+    load: dataPanel("PdfToJsonPanel"),
+  },
+  {
+    slug: "pdf-to-csv",
+    title: "PDF to CSV",
+    category: "from-pdf",
+    summary:
+      "Infer rows and columns from the text layout and export them as CSV.",
+    keywords: ["csv", "table", "spreadsheet", "rows", "columns", "extract"],
+    engine: "pdfjs",
+    load: dataPanel("PdfToCsvPanel"),
+  },
+  {
+    slug: "pdf-to-excel",
+    title: "PDF to Excel",
+    category: "from-pdf",
+    summary: "Build an .xlsx workbook with one sheet per page.",
+    keywords: ["excel", "xlsx", "spreadsheet", "workbook", "table", "convert"],
+    engine: "pdfjs",
+    load: dataPanel("PdfToExcelPanel"),
+  },
+  {
+    slug: "extract-tables",
+    title: "Extract Tables",
+    category: "from-pdf",
+    summary:
+      "Find table-like regions on each page and export just those as CSV.",
+    keywords: ["tables", "extract", "grid", "csv", "data", "scrape"],
+    engine: "pdfjs",
+    load: dataPanel("ExtractTablesPanel"),
+  },
+  {
+    slug: "pdf-to-svg",
+    title: "PDF to SVG",
+    category: "from-pdf",
+    summary:
+      "Export each page as true vector SVG — paths and text stay scalable, not traced.",
+    keywords: ["svg", "vector", "scalable", "illustrator", "convert", "export"],
+    engine: "mupdf",
+    load: dataPanel("PdfToSvgPanel"),
+  },
+  {
+    slug: "ocr-pdf",
+    title: "OCR PDF",
+    category: "from-pdf",
+    summary:
+      "Read text from scanned pages and rebuild the file as a searchable PDF.",
+    keywords: ["ocr", "scan", "recognise", "searchable", "text", "tesseract"],
+    engine: "tesseract",
+    load: dataPanel("OcrPanel"),
   },
   {
     slug: "invert-colors",

@@ -10,17 +10,35 @@ import { PDFDocument } from "pdf-lib";
 const MUPDF_PATH = `${import.meta.dir}/../../../node_modules/mupdf/dist/mupdf.js`;
 
 type MupdfBuffer = { asUint8Array(): Uint8Array };
+type MupdfPage = {
+  getBounds(): unknown;
+  run(device: unknown, matrix: unknown): void;
+};
 type MupdfDoc = {
   countPages(): number;
   saveToBuffer(options: string): MupdfBuffer;
+  loadPage(index: number): MupdfPage;
 };
 
-async function loadMupdf() {
-  return (await import(MUPDF_PATH)) as {
-    Document: {
-      openDocument(data: Uint8Array, mimeType: string): MupdfDoc;
-    };
+interface MupdfModule {
+  Document: {
+    openDocument(data: Uint8Array, mimeType: string): MupdfDoc;
   };
+  Buffer: new () => MupdfBuffer;
+  DocumentWriter: new (
+    buffer: MupdfBuffer,
+    format: string,
+    options: string,
+  ) => {
+    beginPage(bounds: unknown): { close(): void };
+    endPage(): void;
+    close(): void;
+  };
+  Matrix: { identity: unknown };
+}
+
+async function loadMupdf() {
+  return (await import(MUPDF_PATH)) as unknown as MupdfModule;
 }
 
 async function samplePdf(pages = 1): Promise<Uint8Array> {
@@ -55,6 +73,26 @@ describe("mupdf engine", () => {
     // The rebuilt file must be readable by a strict parser again.
     const reopened = await PDFDocument.load(rebuilt, { updateMetadata: false });
     expect(reopened.getPageCount()).toBe(2);
+  });
+
+  test("exports a page as real vector SVG", async () => {
+    const mupdf = await loadMupdf();
+    const doc = mupdf.Document.openDocument(await samplePdf(), "application/pdf");
+    const page = doc.loadPage(0);
+
+    const buffer = new mupdf.Buffer();
+    const writer = new mupdf.DocumentWriter(buffer, "svg", "");
+    const device = writer.beginPage(page.getBounds());
+    page.run(device, mupdf.Matrix.identity);
+    device.close();
+    writer.endPage();
+    writer.close();
+
+    const svg = new TextDecoder().decode(buffer.asUint8Array());
+    expect(svg).toContain("<svg");
+    expect(svg).toContain('xmlns="http://www.w3.org/2000/svg"');
+    // Vector output, not a raster image wrapped in an <svg> element.
+    expect(svg).not.toContain("data:image/png;base64");
   });
 
   test("the rebuilt file carries a valid trailer again", async () => {
