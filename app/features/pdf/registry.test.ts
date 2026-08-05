@@ -4,12 +4,15 @@ import { CATEGORIES, ENGINE_IDS, getTool, TOOLS } from "./registry";
 /** Route segments that already exist as real files under app/. */
 const RESERVED_SLUGS = new Set([
   "api",
+  "settings",
   "robots.txt",
   "sitemap.xml",
   "_next",
   "wasm",
   "favicon.ico",
   "apple-icon.png",
+  "manifest.webmanifest",
+  "sw.js",
 ]);
 
 describe("tool registry", () => {

@@ -21,6 +21,7 @@ const ASSETS: ReadonlyArray<[string, string]> = [
 
   ["@jspawn/ghostscript-wasm/gs.js", "wasm/ghostscript/gs.js"],
   ["@jspawn/ghostscript-wasm/gs.wasm", "wasm/ghostscript/gs.wasm"],
+  ["pdfkit/js/data/sRGB_IEC61966_2_1.icc", "wasm/ghostscript/srgb.icc"],
 
   ["mupdf/dist/mupdf.js", "wasm/mupdf/mupdf.js"],
   ["mupdf/dist/mupdf-wasm.js", "wasm/mupdf/mupdf-wasm.js"],
@@ -33,6 +34,12 @@ const ASSETS: ReadonlyArray<[string, string]> = [
   ["wasm-vips/lib/vips-resvg.wasm", "wasm/vips/vips-resvg.wasm"],
 
   ["@techstark/opencv-js/dist/opencv.js", "wasm/opencv/opencv.js"],
+
+  ["@matbee/libreoffice-converter/wasm/soffice.js", "libreoffice-wasm/soffice.js"],
+  ["@matbee/libreoffice-converter/wasm/soffice.wasm", "libreoffice-wasm/soffice.wasm"],
+  ["@matbee/libreoffice-converter/wasm/soffice.data", "libreoffice-wasm/soffice.data"],
+  ["@matbee/libreoffice-converter/wasm/soffice.worker.js", "libreoffice-wasm/soffice.worker.js"],
+  ["@matbee/libreoffice-converter/dist/browser.worker.global.js", "libreoffice-wasm/browser.worker.global.js"],
 ];
 // coherentpdf, pdfkit, tesseract.js, utif2, heic-decode and the diff libraries
 // are plain JS — the bundler code-splits them, so they need no copy here.

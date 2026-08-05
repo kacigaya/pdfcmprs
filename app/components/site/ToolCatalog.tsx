@@ -10,6 +10,7 @@ import {
   TOOLS,
   type ToolDefinition,
 } from "../../features/pdf/registry";
+import { copy, useSettings } from "../../lib/settings";
 
 function matches(tool: ToolDefinition, query: string): boolean {
   if (!query) return true;
@@ -26,6 +27,8 @@ function matches(tool: ToolDefinition, query: string): boolean {
 
 export function ToolCatalog() {
   const [query, setQuery] = useState("");
+  const [settings] = useSettings();
+  const words = copy(settings.language);
 
   const groups = useMemo(() => {
     const visible = TOOLS.filter((tool) => matches(tool, query));
@@ -41,7 +44,7 @@ export function ToolCatalog() {
     <>
       <div className="mb-8">
         <label htmlFor="tool-search" className="sr-only">
-          Search tools
+          {words.search}
         </label>
         <div className="relative">
           <Search
@@ -53,7 +56,7 @@ export function ToolCatalog() {
             type="search"
             value={query}
             onValueChange={setQuery}
-            placeholder="Search tools — rotate, watermark, ocr…"
+            placeholder={`${words.search} — rotate, watermark, ocr…`}
             className="ps-9"
             data-testid="tool-search"
           />
@@ -62,8 +65,7 @@ export function ToolCatalog() {
           className="mt-2 font-mono text-[10px] uppercase tracking-[0.22em] text-muted-foreground"
           aria-live="polite"
         >
-          {total} {total === 1 ? "tool" : "tools"}
-          {query ? " matched" : " available"}
+          {total} {words.tools} {query ? words.matched : words.available}
         </p>
       </div>
 

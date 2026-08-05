@@ -55,7 +55,11 @@ routes, the catalog, the metadata, and the sitemap.
 | PDF to Image | Render pages as PNG or JPG (ZIP for multi-page) |
 | PDF to Text | Extract selectable text to a `.txt` file |
 
-More tools are in progress; see the registry for the current set.
+The catalog now includes more than 110 routes, including PDF/A conversion,
+font outlining, rasterization and deskewing, attachment/bookmark/layer editing,
+forms, visual and certificate signing, timestamping, visual comparison,
+workflows, Office/OpenDocument/ebook conversion, DOCX/Markdown/AI exports, and
+format-specific image converters. The registry is the authoritative live list.
 
 ## Tech stack
 
@@ -76,6 +80,8 @@ that needs one actually runs:
 | CoherentPDF | Booklet, N-up, posterize, Bates numbering |
 | Tesseract.js | OCR |
 | wasm-vips | HEIC, PSD, TIFF, BMP |
+| LibreOffice WASM | Word, Excel, PowerPoint, OpenDocument and legacy office files |
+| `zgapdfsigner` | PKCS#12 signatures and RFC 3161 timestamps |
 
 Engine binaries are copied out of `node_modules` into `public/wasm/` by
 `scripts/copy-assets.ts` and served from your own origin, so a self-hosted
@@ -106,6 +112,18 @@ Open [http://localhost:3000](http://localhost:3000) to view the app.
 ```bash
 bun run check     # typecheck, unit tests, production build
 bun run test      # unit tests only
+bun run build:static # export a fully static build to out/
+```
+
+The production server sends COOP/COEP headers so threaded WASM engines can use
+their fastest path. Static hosts should configure the same headers when
+possible. The installable PWA caches same-origin routes and engine assets after
+first use, so tools remain available offline.
+
+### Docker
+
+```bash
+docker compose up --build
 ```
 
 ### Project structure

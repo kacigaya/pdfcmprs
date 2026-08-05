@@ -11,6 +11,7 @@ import type { OptionField } from "../OptionsForm";
 /** Accept anything — these formats are all plain text under the hood. */
 const TEXT_INPUT: ToolInputSpec = {
   kind: "single",
+  batch: true,
   label: "Drop your file here",
   accept: ".txt,.md,.markdown,.json,.xml,.csv,.tsv,.eml,text/*",
   chooseLabel: "Select file",

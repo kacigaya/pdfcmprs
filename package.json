@@ -5,6 +5,7 @@
   "scripts": {
     "dev": "bun run copy-assets && next dev",
     "build": "bun run copy-assets && next build",
+    "build:static": "bun run copy-assets && NEXT_STATIC_EXPORT=1 next build",
     "copy-assets": "bun run scripts/copy-assets.ts",
     "start": "next start",
     "typecheck": "tsc --noEmit",
@@ -15,6 +16,7 @@
   "dependencies": {
     "@base-ui/react": "^1.6.0",
     "@jspawn/ghostscript-wasm": "0.0.2",
+    "@matbee/libreoffice-converter": "2.5.0",
     "@neslinesli93/qpdf-wasm": "0.3.0",
     "@tailwindcss/postcss": "^4.3.2",
     "@techstark/opencv-js": "5.0.0-release.1",
@@ -38,7 +40,8 @@
     "tailwindcss": "^4.3.2",
     "tesseract.js": "7.0.0",
     "utif2": "4.1.0",
-    "wasm-vips": "0.0.18"
+    "wasm-vips": "0.0.18",
+    "zgapdfsigner": "2.7.5"
   },
   "devDependencies": {
     "@happy-dom/global-registrator": "20.11.1",

@@ -11,8 +11,11 @@ const LEGACY_TAB_REDIRECTS: ReadonlyArray<[string, string]> = [
   ["pdf-to-images", "pdf-to-image"],
 ];
 
+const staticExport = process.env.NEXT_STATIC_EXPORT === "1";
+
 const nextConfig: NextConfig = {
   reactStrictMode: true,
+  ...(staticExport ? { output: "export", trailingSlash: true, images: { unoptimized: true } } : {}),
   turbopack: {
     resolveAlias: {
       // coherentpdf's js_of_ocaml output references Node's fs in a code path
@@ -20,13 +23,21 @@ const nextConfig: NextConfig = {
       fs: { browser: "./app/lib/wasm/nodeStub.ts" },
     },
   },
-  async redirects() {
-    return LEGACY_TAB_REDIRECTS.map(([from, to]) => ({
-      source: `/tools/${from}`,
-      destination: `/${to}`,
-      permanent: true,
-    }));
-  },
+  ...(staticExport ? {} : {
+    async redirects() {
+      return LEGACY_TAB_REDIRECTS.map(([from, to]) => ({ source: `/tools/${from}`, destination: `/${to}`, permanent: true }));
+    },
+    async headers() {
+      return [{
+        source: "/:path*",
+        headers: [
+          { key: "Cross-Origin-Opener-Policy", value: "same-origin" },
+          { key: "Cross-Origin-Embedder-Policy", value: "require-corp" },
+          { key: "X-Content-Type-Options", value: "nosniff" },
+        ],
+      }];
+    },
+  }),
 };
 
 export default nextConfig;

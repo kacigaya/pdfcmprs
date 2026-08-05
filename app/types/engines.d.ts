@@ -21,7 +21,6 @@ declare module "coherentpdf" {
 
   export function all(pdf: Pdf): Range;
   export function range(from: number, to: number): Range;
-  export function deleteRange(range: Range): void;
 
   /** N-up / booklet imposition. */
   export function impose(
@@ -113,4 +112,33 @@ declare module "coherentpdf" {
   export const leftJustify: number;
   export const centreJustify: number;
   export const rightJustify: number;
+
+  export function attachFileFromMemory(data: Uint8Array, filename: string, pdf: Pdf): void;
+  export function removeAttachedFiles(pdf: Pdf): void;
+  export function startGetAttachments(pdf: Pdf): void;
+  export function numberGetAttachments(): number;
+  export function getAttachmentName(index: number): string;
+  export function getAttachmentPage(index: number): number;
+  export function getAttachmentData(index: number): Uint8Array;
+  export function endGetAttachments(): void;
+
+  export function getBookmarksJSON(pdf: Pdf): Uint8Array;
+  export function setBookmarksJSON(pdf: Pdf, data: Uint8Array): void;
+
+  export const decimalArabic: number;
+  export const uppercaseRoman: number;
+  export const lowercaseRoman: number;
+  export const uppercaseLetters: number;
+  export const lowercaseLetters: number;
+  export function addPageLabels(pdf: Pdf, style: number, prefix: string, offset: number, range: Range, progress: boolean): void;
+
+  export function stampOn(stamp: Pdf, pdf: Pdf, range: Range): void;
+  export function stampUnder(stamp: Pdf, pdf: Pdf, range: Range): void;
+
+  export function startGetOCGList(pdf: Pdf): number;
+  export function ocgListEntry(index: number): string;
+  export function endGetOCGList(): void;
+  export function ocgRename(pdf: Pdf, from: string, to: string): void;
+  export function ocgCoalesce(pdf: Pdf): void;
+  export function ocgOrderAll(pdf: Pdf): void;
 }

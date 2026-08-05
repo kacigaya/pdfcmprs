@@ -1,6 +1,7 @@
 import { PDFDocument, PDFName } from "pdf-lib";
 import { bytesToPdfBlob } from "../../../lib/blob";
 import { withPdfExtension } from "../../../lib/files";
+import { runQpdf } from "../../../lib/wasm/loadEngine";
 
 export const SAVE_OPTIONS = {
   useObjectStreams: true,
@@ -24,9 +25,21 @@ export async function loadPdf(file: File): Promise<PDFDocument> {
   } catch (error) {
     const message = error instanceof Error ? error.message : "";
     if (/encrypt/i.test(message)) {
-      throw new Error(
-        "This PDF is encrypted. Remove the password with Decrypt PDF first.",
-      );
+      if (typeof window === "undefined") {
+        throw new Error("This PDF is encrypted.");
+      }
+      const password = window.prompt(`Enter the password for ${file.name}:`);
+      if (password === null) throw new Error("Password entry was cancelled.");
+      try {
+        const decrypted = await runQpdf(
+          ["--decrypt", `--password=${password}`, "in.pdf", "out.pdf"],
+          { "in.pdf": new Uint8Array(buffer) },
+          "out.pdf",
+        );
+        return await PDFDocument.load(decrypted, { updateMetadata: false });
+      } catch {
+        throw new Error("The password is incorrect or the PDF cannot be decrypted.");
+      }
     }
     throw new Error("Could not read this PDF — it may be damaged.");
   }

@@ -42,6 +42,18 @@ export type OptionField =
       placeholder?: string;
       mono?: boolean;
     })
+  | (FieldBase & {
+      kind: "password";
+      default: string;
+      placeholder?: string;
+    })
+  | (FieldBase & {
+      kind: "textarea";
+      default: string;
+      placeholder?: string;
+      mono?: boolean;
+      rows?: number;
+    })
   | (FieldBase & { kind: "checkbox"; default: boolean })
   | (FieldBase & { kind: "color"; default: string });
 
@@ -102,7 +114,8 @@ export function OptionsForm({
             key={field.name}
             className={cn(
               "grid gap-1.5",
-              field.kind === "checkbox" && "sm:col-span-2",
+              (field.kind === "checkbox" || field.kind === "textarea") &&
+                "sm:col-span-2",
             )}
           >
             {field.kind === "checkbox" ? (
@@ -179,6 +192,36 @@ export function OptionsForm({
                     className={field.mono ? "font-mono" : undefined}
                     value={String(values[field.name])}
                     onValueChange={(value) => onChange(field.name, value)}
+                    data-testid={id}
+                  />
+                ) : null}
+                {field.kind === "password" ? (
+                  <Input
+                    id={id}
+                    type="password"
+                    nativeInput
+                    disabled={disabled}
+                    placeholder={field.placeholder}
+                    value={String(values[field.name])}
+                    onChange={(event) => onChange(field.name, event.target.value)}
+                    autoComplete="current-password"
+                    data-testid={id}
+                  />
+                ) : null}
+                {field.kind === "textarea" ? (
+                  <textarea
+                    id={id}
+                    disabled={disabled}
+                    placeholder={field.placeholder}
+                    rows={field.rows ?? 6}
+                    className={cn(
+                      "w-full resize-y rounded-md border border-input bg-background px-3 py-2 text-sm outline-none transition-colors placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-2 focus-visible:ring-ring/30 disabled:cursor-not-allowed disabled:opacity-50",
+                      field.mono && "font-mono",
+                    )}
+                    value={String(values[field.name])}
+                    onChange={(event) =>
+                      onChange(field.name, event.target.value)
+                    }
                     data-testid={id}
                   />
                 ) : null}

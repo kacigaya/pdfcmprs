@@ -38,8 +38,8 @@ describe("filterImageFiles", () => {
   });
 
   test("falls back to known image extensions", () => {
-    const names = ["a.jpg", "b.jpeg", "c.png", "d.webp"];
-    expect(filterImageFiles(names.map((n) => makeFile(n)))).toHaveLength(4);
+    const names = ["a.jpg", "b.jpeg", "c.png", "d.webp", "e.bmp", "f.heic", "g.tiff", "h.psd", "i.svg"];
+    expect(filterImageFiles(names.map((n) => makeFile(n)))).toHaveLength(names.length);
   });
 
   test("drops non-images", () => {

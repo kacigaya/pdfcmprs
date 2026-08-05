@@ -35,13 +35,20 @@ Ghostscript / GhostPDL (@jspawn/ghostscript-wasm)
   Copyright (c) Artifex Software, Inc.
   License: AGPL-3.0
   https://www.ghostscript.com/
-  Used for: image-recompressing compression, greyscale conversion.
+  Used for: image-recompressing compression, PDF/A conversion, font outlining.
 
 CoherentPDF (coherentpdf)
   Copyright (c) Coherent Graphics Ltd.
   License: AGPL-3.0-or-later
   https://www.coherentpdf.com/
-  Used for: booklet imposition, N-up, posterize, Bates numbering.
+  Used for: booklet imposition, N-up, posterize, attachments, bookmarks,
+  page labels, overlays, and optional-content layers.
+
+LibreOffice WASM (@matbee/libreoffice-converter)
+  Copyright (c) Matbee and The Document Foundation contributors
+  License: MPL-2.0 (LibreOffice components also include MPL-2.0/LGPL-3.0-or-later)
+  https://github.com/matbeedotcom/libreoffice-document-converter
+  Used for: Office, OpenDocument, Publisher, Visio, and legacy document conversion.
 
 wasm-vips
   Copyright (c) Kleis Auke Wolthuizen
@@ -69,6 +76,8 @@ jsdiff (diff) ............ BSD-3-Clause https://github.com/kpdecker/jsdiff
 microdiff ................ MIT ....... https://github.com/AsyncBanana/microdiff
 UTIF2 .................... MIT ....... https://github.com/photopea/UTIF.js
 heic-decode ............... BSD-3-Clause https://github.com/catdad-experiments/heic-decode
+zgapdfsigner ............. MIT ....... https://github.com/zboris12/zgapdfsigner
+node-forge ............... BSD-3-Clause OR GPL-2.0 https://github.com/digitalbazaar/forge
 Next.js .................. MIT ....... https://nextjs.org/
 React .................... MIT ....... https://react.dev/
 Tailwind CSS ............. MIT ....... https://tailwindcss.com/

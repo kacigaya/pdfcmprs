@@ -12,7 +12,7 @@ export function filterPdfFiles(files: Iterable<File>): File[] {
 export function filterImageFiles(files: Iterable<File>): File[] {
   return Array.from(files).filter((file) => {
     if (file.type.startsWith("image/")) return true;
-    return /\.(jpe?g|png|webp)$/i.test(file.name);
+    return /\.(jpe?g|png|webp|bmp|heic|heif|tiff?|psd|svg)$/i.test(file.name);
   });
 }
 

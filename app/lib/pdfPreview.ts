@@ -23,6 +23,10 @@ export async function loadPdfDocument(file: File): Promise<PDFDocumentProxy> {
   const pdfjs = await getPdfJs();
   const buffer = await file.arrayBuffer();
   const task = pdfjs.getDocument({ data: new Uint8Array(buffer) });
+  task.onPassword = (updatePassword: (password: string) => void) => {
+    const password = window.prompt(`Enter the password for ${file.name}:`);
+    if (password !== null) updatePassword(password);
+  };
   return task.promise;
 }
 

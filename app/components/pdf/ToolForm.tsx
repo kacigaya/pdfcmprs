@@ -9,6 +9,7 @@ import type { ToolRun } from "../../features/pdf/hooks/useToolRun";
 import type { ToolDefinition } from "../../features/pdf/registry";
 import type { ProgressReporter, ToolOutcome } from "../../features/pdf/types";
 import { filterPdfFiles } from "../../lib/files";
+import { createStoredZip } from "../../lib/zip";
 import { FileUploadZone } from "./FileUploadZone";
 import { PageGrid } from "./PageGrid";
 import {
@@ -20,6 +21,8 @@ import {
 
 export interface ToolInputSpec {
   kind: "single" | "multiple";
+  /** Run single-file tools once per input and download the results as a ZIP. */
+  batch?: boolean;
   label: string;
   hint?: string;
   accept?: string;
@@ -70,7 +73,7 @@ interface ToolFormProps {
  * panel instead.
  */
 export function ToolForm({ run, tool, config }: ToolFormProps) {
-  const isMultiple = config.input.kind === "multiple";
+  const isMultiple = config.input.kind === "multiple" || config.input.batch;
   const slot = useFileSlot(run.reset);
   const list = useFileList(run.reset);
   const binding = isMultiple ? list : slot;
@@ -115,7 +118,37 @@ export function ToolForm({ run, tool, config }: ToolFormProps) {
       run.fail(problem);
       return;
     }
-    await run.run((report) => config.execute({ ...context, report }));
+    await run.run(async (report) => {
+      if (!config.input.batch || files.length === 1) {
+        return config.execute({ ...context, report });
+      }
+
+      const outcomes = [];
+      for (let index = 0; index < files.length; index += 1) {
+        const outcome = await config.execute({
+          ...context,
+          files: [files[index]],
+          report: (percent) =>
+            report(((index + percent / 100) / files.length) * 100),
+        });
+        outcomes.push(outcome);
+      }
+
+      const entries = await Promise.all(
+        outcomes.map(async (outcome) => ({
+          filename: outcome.filename,
+          bytes: outcome.blob
+            ? new Uint8Array(await outcome.blob.arrayBuffer())
+            : new TextEncoder().encode(outcome.text ?? outcome.description ?? ""),
+        })),
+      );
+      return {
+        blob: createStoredZip(entries),
+        filename: `${tool.slug}-batch.zip`,
+        description: `${outcomes.length} files processed.`,
+        message: `Processed ${outcomes.length} files.`,
+      };
+    });
   }
 
   return (

@@ -13,6 +13,7 @@ import { createToolPanel, type ToolInputSpec } from "../ToolForm";
 
 const SINGLE_PDF: ToolInputSpec = {
   kind: "single",
+  batch: true,
   label: "Drop your PDF here",
   previews: true,
 };
@@ -100,6 +101,7 @@ export const PdfToSvgPanel = createToolPanel({
 export const OcrPanel = createToolPanel({
   input: {
     kind: "single",
+    batch: true,
     label: "Drop your scanned PDF here",
     hint: "Language data downloads on first use",
     previews: true,

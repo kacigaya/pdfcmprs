@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { DM_Sans, Fraunces, JetBrains_Mono } from "next/font/google";
 import { ThemeProvider } from "@/components/theme-provider";
+import { AppRuntime } from "./components/site/AppRuntime";
 import "./globals.css";
 
 const fraunces = Fraunces({
@@ -29,6 +30,7 @@ export const metadata: Metadata = {
   title: "pdfcmprs: Browser PDF tools",
   description:
     "Compress, merge, split, inspect, extract text from, and convert PDFs in your browser.",
+  manifest: "/manifest.webmanifest",
   alternates: {
     canonical: "/",
   },
@@ -80,7 +82,7 @@ export default function RootLayout({
       <body
         className={`${fraunces.variable} ${dmSans.variable} ${jetbrainsMono.variable}`}
       >
-        <ThemeProvider>{children}</ThemeProvider>
+        <ThemeProvider><AppRuntime />{children}</ThemeProvider>
       </body>
     </html>
   );

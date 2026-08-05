@@ -156,15 +156,71 @@ const dataPanel = (
   };
 };
 
+const advancedPanel = (
+  name: keyof typeof import("../../components/pdf/panels/advancedPanels"),
+) => async () => {
+  const panels = await import("../../components/pdf/panels/advancedPanels");
+  return { default: panels[name] };
+};
+
+const IMAGE_ALIASES: ReadonlyArray<ToolDefinition> = [
+  ["jpg-to-pdf", "JPG to PDF", "jpg jpeg photo"],
+  ["png-to-pdf", "PNG to PDF", "png lossless"],
+  ["webp-to-pdf", "WebP to PDF", "webp image"],
+  ["bmp-to-pdf", "BMP to PDF", "bmp bitmap"],
+  ["heic-to-pdf", "HEIC to PDF", "heic heif iphone"],
+  ["tiff-to-pdf", "TIFF to PDF", "tiff tif scan"],
+  ["psd-to-pdf", "PSD to PDF", "psd photoshop"],
+  ["svg-to-pdf", "SVG to PDF", "svg vector"],
+].map(([slug, title, words]) => ({
+  slug,
+  title,
+  category: "to-pdf",
+  summary: `Convert ${title.replace(" to PDF", "")} images into a PDF.`,
+  keywords: [...words.split(" "), "convert", "pdf"],
+  engine: "vips",
+  load: () => import("../../components/pdf/panels/ImagesToPdfPanel"),
+}));
+
+const DOCUMENT_CONVERSIONS: ReadonlyArray<ToolDefinition> = [
+  ["word-to-pdf", "Word to PDF", "doc docx word"],
+  ["excel-to-pdf", "Excel to PDF", "xls xlsx excel spreadsheet"],
+  ["powerpoint-to-pdf", "PowerPoint to PDF", "ppt pptx slides"],
+  ["odt-to-pdf", "ODT to PDF", "odt writer"],
+  ["ods-to-pdf", "ODS to PDF", "ods calc"],
+  ["odp-to-pdf", "ODP to PDF", "odp impress"],
+  ["odg-to-pdf", "ODG to PDF", "odg draw"],
+  ["rtf-to-pdf", "RTF to PDF", "rtf rich text"],
+  ["pages-to-pdf", "Pages to PDF", "pages apple"],
+  ["wpd-to-pdf", "WordPerfect to PDF", "wpd wordperfect"],
+  ["wps-to-pdf", "WPS to PDF", "wps writer"],
+  ["pub-to-pdf", "Publisher to PDF", "pub publisher"],
+  ["vsd-to-pdf", "Visio to PDF", "vsd visio diagram"],
+  ["xps-to-pdf", "XPS to PDF", "xps oxps"],
+  ["epub-to-pdf", "EPUB to PDF", "epub ebook"],
+  ["mobi-to-pdf", "MOBI to PDF", "mobi kindle ebook"],
+  ["fb2-to-pdf", "FB2 to PDF", "fb2 ebook"],
+  ["cbz-to-pdf", "CBZ to PDF", "cbz comic archive"],
+].map(([slug, title, words]) => ({
+  slug,
+  title,
+  category: "to-pdf",
+  summary: `Convert ${title.replace(" to PDF", "")} files to PDF locally in your browser.`,
+  keywords: [...words.split(" "), "convert", "pdf"],
+  engine: /^(xps|epub|mobi|fb2|cbz)-/.test(slug) ? "mupdf" : "libreoffice",
+  preset: { sourceFormat: slug.replace(/-to-pdf$/, "") },
+  load: advancedPanel("DocumentToPdfPanel"),
+}));
+
 export const TOOLS: ReadonlyArray<ToolDefinition> = [
   {
     slug: "compress-pdf",
     title: "Compress PDF",
     category: "secure",
     summary:
-      "Shrink a PDF by rewriting it with object streams, leaving images and layout untouched.",
+      "Shrink PDFs with lossless, light, balanced, or aggressive compression.",
     keywords: ["compress", "shrink", "reduce", "size", "optimize"],
-    engine: "pdf-lib",
+    engine: "ghostscript",
     load: () => import("../../components/pdf/panels/CompressPanel"),
   },
   {
@@ -208,9 +264,9 @@ export const TOOLS: ReadonlyArray<ToolDefinition> = [
     slug: "image-to-pdf",
     title: "Image to PDF",
     category: "to-pdf",
-    summary: "Bind JPG, PNG, or WebP images into a single PDF document.",
-    keywords: ["image", "jpg", "jpeg", "png", "webp", "photo", "convert"],
-    engine: "pdf-lib",
+    summary: "Bind common and professional image formats into a single PDF document.",
+    keywords: ["image", "jpg", "jpeg", "png", "webp", "bmp", "heic", "tiff", "psd", "svg", "photo", "convert"],
+    engine: "vips",
     load: () => import("../../components/pdf/panels/ImagesToPdfPanel"),
   },
   {
@@ -774,6 +830,42 @@ export const TOOLS: ReadonlyArray<ToolDefinition> = [
     engine: "pdf-lib",
     load: editPanel("TableOfContentsPanel"),
   },
+
+  /* ------------------------------------------- advanced BentoPDF parity */
+  { slug: "pdf-editor", title: "PDF Editor", category: "edit", summary: "Add text and shapes, or permanently redact page regions.", keywords: ["editor", "text", "shape", "redact"], engine: "pdf-lib", load: advancedPanel("EditorPanel") },
+  { slug: "pdf-multi-tool", title: "PDF Multi Tool", category: "edit", summary: "Apply several text, shape, and redaction edits in one pass.", keywords: ["multi", "editor", "batch", "redact"], engine: "pdf-lib", load: advancedPanel("EditorPanel") },
+  { slug: "organize-duplicate-pages", title: "Organize & Duplicate Pages", category: "organize", summary: "Reorder pages and repeat page numbers to duplicate them.", keywords: ["organize", "duplicate", "reorder", "pages"], engine: "pdf-lib", load: advancedPanel("OrganizeDuplicatePanel") },
+  { slug: "workflow-builder", title: "PDF Workflow Builder", category: "automate", summary: "Run a saved sequence of local PDF operations.", keywords: ["workflow", "pipeline", "automate", "chain"], engine: "native", load: advancedPanel("WorkflowPanel") },
+  { slug: "compare-pdfs", title: "Compare PDFs", category: "automate", summary: "Pixel-compare two PDFs and export changed-page diff images.", keywords: ["compare", "diff", "changes", "visual"], engine: "pdfjs", load: advancedPanel("ComparePanel") },
+  { slug: "create-pdf-forms", title: "Create PDF Forms", category: "edit", summary: "Add text, checkbox, and dropdown form fields.", keywords: ["form", "field", "acroform", "create"], engine: "pdf-lib", load: advancedPanel("CreateFormPanel") },
+  { slug: "fill-pdf-forms", title: "PDF Form Filler", category: "edit", summary: "Fill existing PDF form fields from structured values.", keywords: ["form", "fill", "fields", "acroform"], engine: "pdf-lib", load: advancedPanel("FillFormPanel") },
+
+  { slug: "add-attachments", title: "Add Attachments", category: "edit", summary: "Embed arbitrary files inside a PDF.", keywords: ["attachment", "embed", "portfolio"], engine: "cpdf", load: advancedPanel("AddAttachmentsPanel") },
+  { slug: "extract-attachments", title: "Extract Attachments", category: "from-pdf", summary: "Download every embedded attachment as a ZIP.", keywords: ["attachment", "extract", "embedded", "zip"], engine: "cpdf", load: advancedPanel("ExtractAttachmentsPanel") },
+  { slug: "remove-attachments", title: "Remove Attachments", category: "secure", summary: "Remove all document and page attachments.", keywords: ["attachment", "remove", "sanitize"], engine: "cpdf", load: advancedPanel("RemoveAttachmentsPanel") },
+  { slug: "edit-bookmarks", title: "Edit Bookmarks", category: "organize", summary: "Export or replace the document outline as JSON.", keywords: ["bookmarks", "outline", "chapters", "edit"], engine: "cpdf", load: advancedPanel("BookmarksPanel") },
+  { slug: "add-page-labels", title: "Add Page Labels", category: "organize", summary: "Apply decimal, Roman, or alphabetic viewer page labels.", keywords: ["labels", "roman", "prefix", "pages"], engine: "cpdf", load: advancedPanel("PageLabelsPanel") },
+  { slug: "overlay-pdfs", title: "Overlay PDFs", category: "edit", summary: "Stamp one PDF above or below another.", keywords: ["overlay", "underlay", "stamp", "letterhead"], engine: "cpdf", load: advancedPanel("OverlayPanel") },
+  { slug: "pdf-layers", title: "PDF Layers", category: "edit", summary: "List, rename, order, and coalesce optional content groups.", keywords: ["layers", "ocg", "optional content"], engine: "cpdf", load: advancedPanel("LayersPanel") },
+  { slug: "rotate-custom-degrees", title: "Rotate by Custom Degrees", category: "organize", summary: "Rotate page content by any angle and expand the canvas to fit.", keywords: ["rotate", "angle", "degrees", "deskew"], engine: "pdf-lib", load: advancedPanel("CustomRotatePanel") },
+  { slug: "change-text-color", title: "Change Text Color", category: "edit", summary: "Recolour dark printed text while preserving light backgrounds.", keywords: ["text", "color", "colour", "ink"], engine: "pdfjs", load: advancedPanel("ChangeTextColorPanel") },
+
+  { slug: "sign-pdf", title: "Sign PDF", category: "secure", summary: "Place a visible signature block on a PDF page.", keywords: ["sign", "signature", "visible"], engine: "pdf-lib", load: advancedPanel("VisibleSignaturePanel") },
+  { slug: "digital-sign-pdf", title: "Digitally Sign PDF", category: "secure", summary: "Apply a cryptographic X.509 signature using a PKCS#12 certificate.", keywords: ["digital", "signature", "p12", "pfx", "certificate"], engine: "pdf-lib", load: advancedPanel("DigitalSignaturePanel") },
+  { slug: "validate-signatures", title: "Validate PDF Signatures", category: "secure", summary: "Inspect signature dictionaries and verify byte-range integrity.", keywords: ["validate", "signature", "certificate", "integrity"], engine: "native", load: advancedPanel("ValidateSignaturePanel") },
+  { slug: "timestamp-pdf", title: "Timestamp PDF", category: "secure", summary: "Apply an RFC 3161 timestamp from a trusted authority.", keywords: ["timestamp", "tsa", "rfc3161", "trusted"], engine: "pdf-lib", load: advancedPanel("TimestampPanel") },
+
+  { slug: "pdf-to-pdfa", title: "PDF to PDF/A", category: "secure", summary: "Convert to PDF/A-1b, PDF/A-2b, or PDF/A-3b for archiving.", keywords: ["pdfa", "archive", "compliance"], engine: "ghostscript", load: advancedPanel("PdfAPanel") },
+  { slug: "rasterize-pdf", title: "Rasterize PDF", category: "secure", summary: "Bake every page into a flattened raster image.", keywords: ["rasterize", "flatten", "image", "secure"], engine: "pdfjs", load: advancedPanel("RasterizePanel") },
+  { slug: "deskew-pdf", title: "Deskew PDF", category: "secure", summary: "Detect and straighten slightly rotated scanned pages.", keywords: ["deskew", "straighten", "scan", "rotate"], engine: "pdfjs", load: advancedPanel("DeskewPanel") },
+  { slug: "fonts-to-outlines", title: "Convert Fonts to Outlines", category: "secure", summary: "Replace fonts with vector outlines for portable print output.", keywords: ["font", "outline", "curves", "print"], engine: "ghostscript", load: advancedPanel("FontOutlinesPanel") },
+  { slug: "extract-images", title: "Extract Images", category: "from-pdf", summary: "Extract original embedded raster images without rendering full pages.", keywords: ["extract", "images", "embedded", "assets"], engine: "mupdf", load: advancedPanel("ExtractImagesPanel") },
+  { slug: "pdf-to-docx", title: "PDF to DOCX", category: "from-pdf", summary: "Export selectable PDF text as an editable Word document.", keywords: ["docx", "word", "editable", "text"], engine: "pdfjs", load: advancedPanel("PdfToDocxPanel") },
+  { slug: "pdf-to-markdown", title: "PDF to Markdown", category: "from-pdf", summary: "Export document text as page-structured Markdown.", keywords: ["markdown", "md", "text", "export"], engine: "pdfjs", load: advancedPanel("PdfToMarkdownPanel") },
+  { slug: "prepare-pdf-for-ai", title: "Prepare PDF for AI", category: "from-pdf", summary: "Export page text and positioned blocks as model-ready JSON.", keywords: ["ai", "llm", "json", "rag", "chunks"], engine: "pdfjs", load: advancedPanel("PdfForAiPanel") },
+
+  ...IMAGE_ALIASES,
+  ...DOCUMENT_CONVERSIONS,
 ];
 
 const TOOLS_BY_SLUG = new Map(TOOLS.map((tool) => [tool.slug, tool]));

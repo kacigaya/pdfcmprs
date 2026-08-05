@@ -29,6 +29,7 @@ import type { OptionField } from "../OptionsForm";
 
 const SINGLE_PDF: ToolInputSpec = {
   kind: "single",
+  batch: true,
   label: "Drop your PDF here",
   previews: true,
 };

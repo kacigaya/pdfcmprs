@@ -1,6 +1,8 @@
 import type { MetadataRoute } from "next";
 import { TOOLS } from "./features/pdf/registry";
 
+export const dynamic = "force-static";
+
 const BASE_URL = "https://pdfcmprs.netlify.app";
 
 export default function sitemap(): MetadataRoute.Sitemap {

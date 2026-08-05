@@ -1,0 +1,10 @@
+{
+  "name": "pdfcmprs — Browser PDF toolkit",
+  "short_name": "pdfcmprs",
+  "description": "Private PDF tools that run entirely in your browser.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#f1ead8",
+  "theme_color": "#c83c1d",
+  "icons": [{ "src": "/icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable" }]
+}

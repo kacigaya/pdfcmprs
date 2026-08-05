@@ -96,6 +96,8 @@ html {
     background: var(--paper);
 }
 
+html[data-compact="true"] .max-w-6xl { max-width: 56rem; }
+
 body {
     font-family: var(--font-sans), system-ui, sans-serif;
     font-size: 16px;

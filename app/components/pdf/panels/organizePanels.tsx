@@ -23,6 +23,7 @@ import { createToolPanel, type ToolInputSpec } from "../ToolForm";
 
 const SINGLE_PDF: ToolInputSpec = {
   kind: "single",
+  batch: true,
   label: "Drop your PDF here",
   previews: true,
 };
