@@ -61,14 +61,21 @@ describe("useToolRun", () => {
     expect(result.current.isRunning).toBe(false);
   });
 
-  test("non-Error throws fall back to a generic message", async () => {
+  test("surfaces string and message-object throws", async () => {
     const { result } = renderHook(() => useToolRun());
     await act(async () => {
       await result.current.run(async () => {
         throw "boom";
       });
     });
-    expect(result.current.status.message).toBe("Unexpected error.");
+    expect(result.current.status.message).toBe("boom");
+
+    await act(async () => {
+      await result.current.run(async () => {
+        throw { message: "engine failed" };
+      });
+    });
+    expect(result.current.status.message).toBe("engine failed");
   });
 
   test("refuses a second run while one is in flight", async () => {

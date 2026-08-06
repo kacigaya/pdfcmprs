@@ -239,7 +239,7 @@ export const ValidateSignaturePanel = createToolPanel({ input: PDF, actionLabel:
 
 export const TimestampPanel = createToolPanel({
   input: PDF,
-  fields: [{ kind: "text", name: "url", label: "RFC 3161 TSA URL", default: "https://freetsa.org/tsr" }],
+  fields: [{ kind: "text", name: "url", label: "RFC 3161 TSA URL", default: "https://rfc3161.ai.moda" }],
   actionLabel: "Timestamp PDF",
   runningLabel: "Timestamping…",
   execute: async ({ files, values }) => ({ ...(await timestampPdf(files[0], String(values.url))), message: "Trusted timestamp applied." }),

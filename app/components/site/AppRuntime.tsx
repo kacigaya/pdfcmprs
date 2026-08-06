@@ -4,7 +4,7 @@ import { useEffect } from "react";
 import { useSettings } from "../../lib/settings";
 
 export function AppRuntime() {
-  const [settings] = useSettings();
+  const [settings, , ready] = useSettings();
   useEffect(() => {
     document.documentElement.lang = settings.language;
     document.documentElement.dataset.compact = String(settings.compact);
@@ -14,7 +14,7 @@ export function AppRuntime() {
   }, []);
   useEffect(() => {
     const handler = (event: KeyboardEvent) => {
-      if (!settings.shortcuts || event.metaKey || event.ctrlKey || event.altKey) return;
+      if (!ready || !settings.shortcuts || event.metaKey || event.ctrlKey || event.altKey) return;
       if (event.key === "/" && !/input|textarea|select/i.test((event.target as HTMLElement).tagName)) {
         event.preventDefault();
         document.querySelector<HTMLInputElement>("#tool-search")?.focus();
@@ -23,6 +23,6 @@ export function AppRuntime() {
     };
     window.addEventListener("keydown", handler);
     return () => window.removeEventListener("keydown", handler);
-  }, [settings.shortcuts]);
+  }, [ready, settings.shortcuts]);
   return null;
 }

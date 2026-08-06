@@ -2,14 +2,14 @@
 
 import type { PDFDocumentProxy } from "pdfjs-dist";
 
-type PdfJsModule = typeof import("pdfjs-dist");
+type PdfJsModule = typeof import("pdfjs-dist/legacy/build/pdf.mjs");
 
 let modulePromise: Promise<PdfJsModule> | null = null;
 let workerConfigured = false;
 
 async function getPdfJs(): Promise<PdfJsModule> {
   if (!modulePromise) {
-    modulePromise = import("pdfjs-dist");
+    modulePromise = import("pdfjs-dist/legacy/build/pdf.mjs");
   }
   const pdfjs = await modulePromise;
   if (!workerConfigured) {

@@ -8,6 +8,57 @@ import { rasterizePdf, type RasterQuality } from "./rasterOps";
 import { loadPdf, savePdf } from "./pdfCore";
 import { readPositionedText } from "./textExport";
 
+type OfficeConverter = import("@matbee/libreoffice-converter/browser").WorkerBrowserConverter;
+let officeConverterPromise: Promise<OfficeConverter> | null = null;
+type FullMupdf = import("@bentopdf/pymupdf-wasm").PyMuPDF;
+let fullMupdfPromise: Promise<FullMupdf> | null = null;
+
+function stopOfficeConverter(converter: OfficeConverter) {
+  (converter as unknown as { worker: Worker | null }).worker?.terminate();
+  officeConverterPromise = null;
+}
+
+async function getFullMupdf() {
+  if (!fullMupdfPromise) {
+    const moduleUrl = "/wasm/pymupdf/index.js";
+    fullMupdfPromise = import(/* webpackIgnore: true */ moduleUrl).then(async ({ PyMuPDF }: typeof import("@bentopdf/pymupdf-wasm")) => {
+      const engine = new PyMuPDF({ assetPath: "/wasm/pymupdf/" });
+      await engine.load();
+      return engine;
+    }).catch((error) => {
+      fullMupdfPromise = null;
+      throw error;
+    });
+  }
+  return fullMupdfPromise;
+}
+
+async function getOfficeConverter() {
+  if (officeConverterPromise) return officeConverterPromise;
+  const { WorkerBrowserConverter } = await import("@matbee/libreoffice-converter/browser");
+  const converter = new WorkerBrowserConverter({
+    sofficeJs: "/libreoffice-wasm/soffice.js",
+    sofficeWasm: "/libreoffice-wasm/soffice.wasm",
+    sofficeData: "/libreoffice-wasm/soffice.data",
+    sofficeWorkerJs: "/libreoffice-wasm/soffice.worker.js",
+    browserWorkerJs: "/libreoffice-wasm/browser.worker.global.js",
+  });
+  officeConverterPromise = new Promise<OfficeConverter>((resolve, reject) => {
+    const timeout = window.setTimeout(
+      () => reject(new Error("LibreOffice took too long to initialize. Reload the page and try again.")),
+      90_000,
+    );
+    converter.initialize().then(
+      () => { window.clearTimeout(timeout); resolve(converter); },
+      (error) => { window.clearTimeout(timeout); reject(error); },
+    );
+  }).catch((error) => {
+    stopOfficeConverter(converter);
+    throw error;
+  });
+  return officeConverterPromise;
+}
+
 export async function ghostscriptPdf(
   file: File,
   mode: "pdfa1" | "pdfa2" | "pdfa3" | "outlines",
@@ -176,43 +227,29 @@ export async function documentToPdf(file: File) {
   const extension = file.name.split(".").pop()?.toLowerCase() || "document";
   const office = new Set(["doc", "docx", "xls", "xlsx", "ppt", "pptx", "odt", "ods", "odp", "odg", "rtf", "pub", "wpd", "wps", "vsd", "pages"]);
   if (office.has(extension)) {
-    const { WorkerBrowserConverter } = await import("@matbee/libreoffice-converter/browser");
-    const converter = new WorkerBrowserConverter({
-      sofficeJs: "/libreoffice-wasm/soffice.js",
-      sofficeWasm: "/libreoffice-wasm/soffice.wasm",
-      sofficeData: "/libreoffice-wasm/soffice.data",
-      sofficeWorkerJs: "/libreoffice-wasm/soffice.worker.js",
-      browserWorkerJs: "/libreoffice-wasm/browser.worker.global.js",
-    });
-    try {
-      await converter.initialize();
-      const result = await converter.convert(new Uint8Array(await file.arrayBuffer()), {
+    const converter = await getOfficeConverter();
+    const input = new Uint8Array(await file.arrayBuffer());
+    const result = await new Promise<Awaited<ReturnType<OfficeConverter["convert"]>>>((resolve, reject) => {
+      const timeout = window.setTimeout(() => {
+        stopOfficeConverter(converter);
+        reject(new Error("LibreOffice took too long to convert this document. Reload the page and try a smaller file."));
+      }, 120_000);
+      converter.convert(input, {
         outputFormat: "pdf",
         inputFormat: extension as "doc",
-      }, file.name);
-      return { blob: bytesToPdfBlob(new Uint8Array(result.data)), filename: `${file.name.replace(/\.[^.]+$/, "")}.pdf` };
-    } finally {
-      await converter.destroy();
-    }
+      }, file.name).then(
+        (value) => { window.clearTimeout(timeout); resolve(value); },
+        (error) => { window.clearTimeout(timeout); reject(error); },
+      );
+    });
+    return { blob: bytesToPdfBlob(new Uint8Array(result.data)), filename: `${file.name.replace(/\.[^.]+$/, "")}.pdf` };
   }
 
-  const mupdf = await loadMupdf();
-  const doc = mupdf.Document.openDocument(new Uint8Array(await file.arrayBuffer()), extension);
-  if (extension !== "xps" && extension !== "cbz") doc.layout(595, 842, 12);
-  const buffer = new mupdf.Buffer();
-  const writer = new mupdf.DocumentWriter(buffer, "pdf", "compress");
-  try {
-    for (let index = 0; index < doc.countPages(); index += 1) {
-      const page = doc.loadPage(index);
-      const device = writer.beginPage(page.getBounds());
-      page.run(device, [1, 0, 0, 1, 0, 0]);
-      writer.endPage();
-    }
-    writer.close();
-    return { blob: bytesToPdfBlob(new Uint8Array(buffer.asUint8Array())), filename: `${file.name.replace(/\.[^.]+$/, "")}.pdf` };
-  } finally {
-    doc.destroy();
-  }
+  const engine = await getFullMupdf();
+  return {
+    blob: await engine.convertToPdf(file, { filetype: extension }),
+    filename: `${file.name.replace(/\.[^.]+$/, "")}.pdf`,
+  };
 }
 
 function escapeXml(value: string) {
@@ -271,9 +308,16 @@ export async function digitalSign(file: File, certificate: File, password: strin
 export async function timestampPdf(file: File, tsaUrl: string) {
   const url = new URL(tsaUrl);
   if (url.protocol !== "https:" && url.protocol !== "http:") throw new Error("Use a valid HTTP(S) timestamp authority URL.");
-  const { PdfSigner } = await import("zgapdfsigner");
-  const bytes = await new PdfSigner({ signdate: { url: url.href } }).sign(new Uint8Array(await file.arrayBuffer()));
-  return { blob: bytesToPdfBlob(bytes), filename: withPdfExtension(file.name, "-timestamped") };
+  try {
+    const { PdfSigner } = await import("zgapdfsigner");
+    const bytes = await new PdfSigner({ signdate: { url: url.href } }).sign(new Uint8Array(await file.arrayBuffer()));
+    return { blob: bytesToPdfBlob(bytes), filename: withPdfExtension(file.name, "-timestamped") };
+  } catch (error) {
+    if (error instanceof TypeError && /fetch/i.test(error.message)) {
+      throw new Error("The timestamp authority blocked this browser request. Use a TSA that permits cross-origin POST requests.");
+    }
+    throw error;
+  }
 }
 
 export async function inspectSignatures(file: File) {

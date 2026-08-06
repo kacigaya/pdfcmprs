@@ -17,9 +17,18 @@ export interface AppSettings {
 export const DEFAULT_SETTINGS: AppSettings = { language: "en", compact: false, shortcuts: true };
 const KEY = "pdfcmprs-settings-v1";
 
+export function normalizeSettings(value: unknown): AppSettings {
+  const input = value && typeof value === "object" ? value as Partial<AppSettings> : {};
+  return {
+    language: typeof input.language === "string" && input.language in LANGUAGES ? input.language as Language : DEFAULT_SETTINGS.language,
+    compact: typeof input.compact === "boolean" ? input.compact : DEFAULT_SETTINGS.compact,
+    shortcuts: typeof input.shortcuts === "boolean" ? input.shortcuts : DEFAULT_SETTINGS.shortcuts,
+  };
+}
+
 export function readSettings(): AppSettings {
   if (typeof localStorage === "undefined") return DEFAULT_SETTINGS;
-  try { return { ...DEFAULT_SETTINGS, ...JSON.parse(localStorage.getItem(KEY) || "{}") }; }
+  try { return normalizeSettings(JSON.parse(localStorage.getItem(KEY) || "{}")); }
   catch { return DEFAULT_SETTINGS; }
 }
 
@@ -30,13 +39,14 @@ export function writeSettings(settings: AppSettings) {
 
 export function useSettings() {
   const [settings, setSettings] = useState(DEFAULT_SETTINGS);
+  const [ready, setReady] = useState(false);
   useEffect(() => {
-    const update = () => setSettings(readSettings());
+    const update = () => { setSettings(readSettings()); setReady(true); };
     update();
     window.addEventListener("pdfcmprs-settings", update);
     return () => window.removeEventListener("pdfcmprs-settings", update);
   }, []);
-  return [settings, (next: AppSettings) => { writeSettings(next); setSettings(next); }] as const;
+  return [settings, (next: AppSettings) => { writeSettings(next); setSettings(next); }, ready] as const;
 }
 
 const COPY: Record<Language, { search: string; available: string; matched: string; tools: string; settings: string }> = {

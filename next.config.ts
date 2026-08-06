@@ -15,6 +15,7 @@ const staticExport = process.env.NEXT_STATIC_EXPORT === "1";
 
 const nextConfig: NextConfig = {
   reactStrictMode: true,
+  allowedDevOrigins: ["127.0.0.1"],
   ...(staticExport ? { output: "export", trailingSlash: true, images: { unoptimized: true } } : {}),
   turbopack: {
     resolveAlias: {

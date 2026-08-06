@@ -14,7 +14,7 @@ const PUBLIC = join(ROOT, "public");
 
 /** [source relative to node_modules, destination relative to public] */
 const ASSETS: ReadonlyArray<[string, string]> = [
-  ["pdfjs-dist/build/pdf.worker.min.mjs", "pdf.worker.min.mjs"],
+  ["pdfjs-dist/legacy/build/pdf.worker.min.mjs", "pdf.worker.min.mjs"],
 
   ["@neslinesli93/qpdf-wasm/dist/qpdf.js", "wasm/qpdf/qpdf.js"],
   ["@neslinesli93/qpdf-wasm/dist/qpdf.wasm", "wasm/qpdf/qpdf.wasm"],
@@ -52,5 +52,16 @@ for (const [from, to] of ASSETS) {
   await cp(source, destination);
   copied += 1;
 }
+
+await cp(
+  join(MODULES, "@bentopdf/pymupdf-wasm/assets"),
+  join(PUBLIC, "wasm/pymupdf"),
+  { recursive: true },
+);
+await cp(
+  join(MODULES, "@bentopdf/pymupdf-wasm/dist/index.js"),
+  join(PUBLIC, "wasm/pymupdf/index.js"),
+);
+copied += 1;
 
 console.log(`copy-assets: ${copied} files -> public/`);

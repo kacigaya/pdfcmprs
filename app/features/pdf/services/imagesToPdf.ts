@@ -20,7 +20,43 @@ async function bitmapToPngBytes(source: ImageBitmapSource): Promise<ArrayBuffer>
   return blob.arrayBuffer();
 }
 
+async function svgToPngBytes(file: File): Promise<ArrayBuffer> {
+  const url = URL.createObjectURL(file);
+  try {
+    const image = new Image();
+    image.src = url;
+    await image.decode();
+    const canvas = document.createElement("canvas");
+    canvas.width = image.naturalWidth;
+    canvas.height = image.naturalHeight;
+    const context = canvas.getContext("2d");
+    if (!context) throw new Error("Canvas 2D context unavailable");
+    context.drawImage(image, 0, 0);
+    return bitmapToPngBytes(canvas);
+  } finally {
+    URL.revokeObjectURL(url);
+  }
+}
+
 async function imageFileToPngPages(file: File): Promise<ArrayBuffer[]> {
+  if (/\.svg$/i.test(file.name) || /svg/i.test(file.type)) {
+    return [await svgToPngBytes(file)];
+  }
+  if (/\.psd$/i.test(file.name) || /photoshop/i.test(file.type)) {
+    const { readPsd } = await import("ag-psd");
+    const psd = readPsd(await file.arrayBuffer(), {
+      useImageData: true,
+      skipLayerImageData: true,
+      skipThumbnail: true,
+    });
+    if (!psd.imageData) throw new Error("This PSD has no composite image.");
+    const image = new ImageData(
+      new Uint8ClampedArray(psd.imageData.data),
+      psd.imageData.width,
+      psd.imageData.height,
+    );
+    return [await bitmapToPngBytes(await createImageBitmap(image))];
+  }
   if (/\.tiff?$/i.test(file.name) || /tiff/i.test(file.type)) {
     const buffer = await file.arrayBuffer();
     const utif = await import("utif2");

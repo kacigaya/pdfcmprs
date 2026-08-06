@@ -64,7 +64,14 @@ export function useToolRun(): ToolRun {
     } catch (error) {
       setStatus({
         tone: "error",
-        message: error instanceof Error ? error.message : "Unexpected error.",
+        message:
+          error instanceof Error
+            ? error.message
+            : typeof error === "string"
+              ? error
+              : error && typeof error === "object" && "message" in error
+                ? String(error.message)
+              : "Unexpected error.",
       });
       setProgress(0);
     } finally {
