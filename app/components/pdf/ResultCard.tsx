@@ -141,7 +141,7 @@ export function ResultCard({
         </p>
       ) : (
         <p className="text-pretty font-heading italic leading-normal text-muted-foreground">
-          Pick a file on the left and run a tool. Results land here.
+          Add a file and run the tool — your result appears here.
         </p>
       )}
 

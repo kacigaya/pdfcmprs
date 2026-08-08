@@ -1,5 +1,8 @@
 @import "tailwindcss";
 
+/* Palette is class-driven so the stored theme can override the OS preference. */
+@custom-variant dark (&:where(.dark, .dark *));
+
 :root {
     color-scheme: light;
     --paper: #f1ead8;
@@ -18,24 +21,22 @@
     --grain-opacity: 0.05;
 }
 
-@media (prefers-color-scheme: dark) {
-    :root {
-        color-scheme: dark;
-        --paper: #14110d;
-        --paper-2: #1c1813;
-        --paper-3: #25201a;
-        --ink: #ece2cd;
-        --ink-soft: #a89c87;
-        --ink-faint: #6b6356;
-        --rule: #ece2cd;
-        --rule-soft: #322c25;
-        --accent: #e26544;
-        --accent-deep: #c84e2f;
-        --accent-ink: #14110d;
-        --warn: #f0a3a3;
-        --good: #80c79b;
-        --grain-opacity: 0.09;
-    }
+.dark {
+    color-scheme: dark;
+    --paper: #14110d;
+    --paper-2: #1c1813;
+    --paper-3: #25201a;
+    --ink: #ece2cd;
+    --ink-soft: #a89c87;
+    --ink-faint: #6b6356;
+    --rule: #ece2cd;
+    --rule-soft: #322c25;
+    --accent: #e26544;
+    --accent-deep: #c84e2f;
+    --accent-ink: #14110d;
+    --warn: #f0a3a3;
+    --good: #80c79b;
+    --grain-opacity: 0.09;
 }
 
 @theme inline {

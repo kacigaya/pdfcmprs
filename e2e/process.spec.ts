@@ -330,11 +330,11 @@ test.describe("real processing", () => {
     const pdf = await makePdf("options.pdf", 2);
     const other = await makePdf("overlay.pdf", 1, true);
 
-    for (const level of ["lossless", "light", "aggressive"]) {
+    for (const label of ["Lossless rewrite", "Light", "Aggressive"]) {
       await runTool(page, testInfo, "compress-pdf", pdf, {
         runId: "run-compress",
         timeout: 180_000,
-        configure: async (current) => { await current.locator("select").selectOption(level); },
+        configure: async (current) => { await choose(current, "level", label); },
       });
     }
     for (const [value, label] of [["pdfa1", "PDF/A-1b"], ["pdfa3", "PDF/A-3b"]] as const) {
