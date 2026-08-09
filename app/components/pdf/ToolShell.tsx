@@ -35,7 +35,9 @@ export function ToolShell({ slug }: ToolShellProps) {
         {run.status.message}
       </span>
 
-      <div className="grid items-start gap-6 lg:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)]">
+      {/* minmax(0,…) on the single-column layout too: otherwise a long, nowrap
+          filename sizes the auto track and the whole page scrolls sideways. */}
+      <div className="grid items-start gap-6 grid-cols-[minmax(0,1fr)] lg:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)]">
         <Card className="animate-rise-in p-5 sm:p-7">
           <PanelHeader
             eyebrow={category?.label ?? "PDF tool"}

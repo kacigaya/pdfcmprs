@@ -3,7 +3,7 @@
   "private": true,
   "version": "1.0.0",
   "scripts": {
-    "dev": "bun run copy-assets && next dev",
+    "dev": "bun run copy-assets && NODE_OPTIONS=--max-old-space-size=512 next dev",
     "build": "bun run copy-assets && next build",
     "build:static": "bun run copy-assets && NEXT_STATIC_EXPORT=1 next build",
     "copy-assets": "bun run scripts/copy-assets.ts",
