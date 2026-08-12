@@ -34,7 +34,7 @@ export function PdfThumbnail({
         const doc = await loadPdfDocument(file);
         const url = await renderPageToDataUrl(doc, page, scale);
         if (active) setSrc(url);
-        await doc.destroy();
+        await doc.loadingTask.destroy();
       } catch {
         if (active) setError(true);
       }

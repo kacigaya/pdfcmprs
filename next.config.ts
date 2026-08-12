@@ -35,6 +35,13 @@ const nextConfig: NextConfig = {
           { key: "Cross-Origin-Opener-Policy", value: "same-origin" },
           { key: "Cross-Origin-Embedder-Policy", value: "require-corp" },
           { key: "X-Content-Type-Options", value: "nosniff" },
+          // 'unsafe-inline' is required for Next.js RSC payload scripts and the
+          // theme bootstrap; script execution via eval/new Function stays
+          // blocked (no 'unsafe-eval'), which also neuters pdf.js embedded
+          // JavaScript. 'wasm-unsafe-eval' keeps the WASM engines working.
+          { key: "Content-Security-Policy", value: "default-src 'self'; script-src 'self' 'unsafe-inline' 'wasm-unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; connect-src 'self' blob: data: https://rfc3161.ai.moda; worker-src 'self' blob:; child-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'" },
+          { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
+          { key: "Permissions-Policy", value: "camera=(), microphone=(), geolocation=(), payment=(), usb=()" },
         ],
       }];
     },

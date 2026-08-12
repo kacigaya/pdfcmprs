@@ -36,6 +36,6 @@ export async function extractPdfText(file: File) {
       blob: new Blob([text], { type: "text/plain;charset=utf-8" }),
     };
   } finally {
-    await doc.destroy();
+    await doc.loadingTask.destroy();
   }
 }

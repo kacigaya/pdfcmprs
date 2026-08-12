@@ -35,8 +35,8 @@ export interface OcrResult extends PdfSaveResult {
  * Tesseract emits a one-page PDF carrying the page image plus an invisible
  * text layer, so the pages are merged back into a single document here.
  *
- * Note: tesseract.js fetches its language data from a CDN on first use, so
- * this is the one tool that is not fully offline.
+ * Worker, core, and language data are served from /tesseract/ (see
+ * scripts/copy-assets.ts), so OCR stays air-gapped and CSP-clean.
  */
 export async function ocrPdf(
   file: File,
@@ -48,7 +48,11 @@ export async function ocrPdf(
 
   let worker: Awaited<ReturnType<typeof tesseract.createWorker>> | undefined;
   try {
-    worker = await tesseract.createWorker(language);
+    worker = await tesseract.createWorker(language, undefined, {
+      workerPath: "/tesseract/worker.min.js",
+      corePath: "/tesseract/core",
+      langPath: "/tesseract/lang",
+    });
     const out = await PDFDocument.create();
     const texts: string[] = [];
     const confidences: number[] = [];
@@ -100,6 +104,6 @@ export async function ocrPdf(
     };
   } finally {
     await worker?.terminate();
-    await doc.destroy();
+    await doc.loadingTask.destroy();
   }
 }

@@ -119,7 +119,7 @@ export async function comparePdfs(left: File, right: File, report?: ProgressRepo
       report?.((page / pages) * 95);
     }
   } finally {
-    await Promise.all([a.destroy(), b.destroy()]);
+    await Promise.all([a.loadingTask.destroy(), b.loadingTask.destroy()]);
   }
   const summary = new TextEncoder().encode(JSON.stringify({ left: left.name, right: right.name, changedPages: changed }, null, 2));
   entries.unshift({ filename: "comparison.json", bytes: summary });

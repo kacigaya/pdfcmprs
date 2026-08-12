@@ -61,7 +61,7 @@ export async function readPositionedText(
     }
     return pages;
   } finally {
-    await doc.destroy();
+    await doc.loadingTask.destroy();
   }
 }
 

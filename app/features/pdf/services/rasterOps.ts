@@ -121,7 +121,7 @@ export async function pdfToImages(
       zipped: !single,
     };
   } finally {
-    await doc.destroy();
+    await doc.loadingTask.destroy();
   }
 }
 
@@ -169,7 +169,7 @@ export async function rasterizePdf(
       pageCount: out.getPageCount(),
     };
   } finally {
-    await doc.destroy();
+    await doc.loadingTask.destroy();
   }
 }
 

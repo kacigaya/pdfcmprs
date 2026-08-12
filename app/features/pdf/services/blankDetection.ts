@@ -45,7 +45,7 @@ export async function findBlankPages(
       if (coverage <= threshold) blanks.push(pageNumber);
     }
   } finally {
-    await doc.destroy();
+    await doc.loadingTask.destroy();
   }
   return blanks;
 }

@@ -98,6 +98,6 @@ export async function inspectPdf(file: File) {
       items,
     };
   } finally {
-    await doc.destroy();
+    await doc.loadingTask.destroy();
   }
 }

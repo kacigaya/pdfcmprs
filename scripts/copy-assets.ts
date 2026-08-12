@@ -13,7 +13,7 @@ const MODULES = join(ROOT, "node_modules");
 const PUBLIC = join(ROOT, "public");
 
 /** [source relative to node_modules, destination relative to public] */
-const ASSETS: ReadonlyArray<[string, string]> = [
+const ASSETS: [string, string][] = [
   ["pdfjs-dist/legacy/build/pdf.worker.min.mjs", "pdf.worker.min.mjs"],
 
   ["@neslinesli93/qpdf-wasm/dist/qpdf.js", "wasm/qpdf/qpdf.js"],
@@ -40,7 +40,22 @@ const ASSETS: ReadonlyArray<[string, string]> = [
   ["@matbee/libreoffice-converter/wasm/soffice.data", "libreoffice-wasm/soffice.data"],
   ["@matbee/libreoffice-converter/wasm/soffice.worker.js", "libreoffice-wasm/soffice.worker.js"],
   ["@matbee/libreoffice-converter/dist/browser.worker.global.js", "libreoffice-wasm/browser.worker.global.js"],
+
+  ["tesseract.js/dist/worker.min.js", "tesseract/worker.min.js"],
+  ["tesseract.js-core/tesseract-core-lstm.wasm.js", "tesseract/core/tesseract-core-lstm.wasm.js"],
+  ["tesseract.js-core/tesseract-core-lstm.wasm", "tesseract/core/tesseract-core-lstm.wasm"],
+  ["tesseract.js-core/tesseract-core-simd-lstm.wasm.js", "tesseract/core/tesseract-core-simd-lstm.wasm.js"],
+  ["tesseract.js-core/tesseract-core-simd-lstm.wasm", "tesseract/core/tesseract-core-simd-lstm.wasm"],
+  ["tesseract.js-core/tesseract-core-relaxedsimd-lstm.wasm.js", "tesseract/core/tesseract-core-relaxedsimd-lstm.wasm.js"],
+  ["tesseract.js-core/tesseract-core-relaxedsimd-lstm.wasm", "tesseract/core/tesseract-core-relaxedsimd-lstm.wasm"],
 ];
+
+// OCR language packs: self-hosted so the OCR tool works air-gapped and under a
+// strict CSP (tesseract.js otherwise falls back to the jsdelivr CDN).
+const OCR_LANGS = ["eng", "fra", "deu", "spa", "ita", "por", "nld", "rus", "chi_sim", "jpn", "kor", "ara"];
+for (const lang of OCR_LANGS) {
+  ASSETS.push([`@tesseract.js-data/${lang}/4.0.0_best_int/${lang}.traineddata.gz`, `tesseract/lang/${lang}.traineddata.gz`]);
+}
 // coherentpdf, pdfkit, tesseract.js, utif2, heic-decode and the diff libraries
 // are plain JS — the bundler code-splits them, so they need no copy here.
 

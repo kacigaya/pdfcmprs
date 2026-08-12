@@ -38,7 +38,7 @@ async function textOf(blob: Blob): Promise<string> {
         .join(""),
     );
   }
-  await doc.destroy();
+  await doc.loadingTask.destroy();
   return pages.join("\n");
 }
 

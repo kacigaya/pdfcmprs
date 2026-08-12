@@ -51,7 +51,7 @@ export function PageGrid({
       try {
         const doc = await loadPdfDocument(file);
         if (!active) {
-          await doc.destroy();
+          await doc.loadingTask.destroy();
           return;
         }
         const totalPages = doc.numPages;
@@ -67,7 +67,7 @@ export function PageGrid({
           accumulated.push({ page: p, src });
           setPages([...accumulated]);
         }
-        await doc.destroy();
+        await doc.loadingTask.destroy();
       } catch (caught) {
         if (active) {
           setError(caught instanceof Error ? caught.message : "Unknown error.");
