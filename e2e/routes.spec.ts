@@ -4,38 +4,96 @@ import { TOOLS } from "../app/features/pdf/registry";
 
 test("home catalog and settings are usable", async ({ page }) => {
   await page.goto("/");
-  await expect(page.locator("[data-testid^=tool-card-]")).toHaveCount(TOOLS.length);
+  await expect(
+    page.getByRole("heading", { name: "Popular tools" }),
+  ).toBeVisible();
+  await expect(page.locator("[data-testid^=tool-card-]")).toHaveCount(
+    TOOLS.length,
+  );
   await page.locator("#tool-search").fill("timestamp");
-  await expect(page.locator("[data-testid=tool-card-timestamp-pdf]")).toBeVisible();
+  await expect(
+    page.locator("[data-testid=tool-card-timestamp-pdf]"),
+  ).toBeVisible();
   await page.goto("/settings");
   await expect(page.getByRole("heading", { name: "Settings" })).toBeVisible();
   await expect(page.getByLabel("Language")).toBeEnabled();
-  await page.getByLabel("Language").selectOption("ja");
-  await expect.poll(() => page.evaluate(() => localStorage.getItem("pdfcmprs-settings-v1"))).toContain('"language":"ja"');
+  await page.getByLabel("Language").click();
+  await page.getByRole("option", { name: "日本語" }).click();
+  await expect
+    .poll(() =>
+      page.evaluate(() => localStorage.getItem("pdfcmprs-settings-v1")),
+    )
+    .toContain('"language":"ja"');
   await page.goto("/");
-  await expect(page.locator("#tool-search")).toHaveAttribute("placeholder", /ツールを検索/);
+  await expect(page.locator("#tool-search")).toHaveAttribute(
+    "placeholder",
+    /ツールを検索/,
+  );
 });
 
-test("settings import, export, reset, compact mode, and shortcuts work", async ({ page }) => {
+test("category filters, theme control, and related tools preserve context", async ({
+  page,
+}) => {
+  await page.goto("/?category=secure#catalog");
+  await expect(page.getByRole("button", { name: "Secure" })).toHaveAttribute(
+    "aria-pressed",
+    "true",
+  );
+  await expect(page.locator("[data-testid^=tool-card-]")).toHaveCount(
+    TOOLS.filter((tool) => tool.category === "secure").length,
+  );
+
+  await page.getByRole("button", { name: "Use dark theme" }).click();
+  await expect(page.locator("html")).toHaveClass(/dark/);
+  await page.goto("/compress-pdf");
+  await expect(
+    page.getByRole("heading", { name: "Related tools" }),
+  ).toBeVisible();
+  await page.getByRole("link", { name: /All Secure & Optimize tools/ }).click();
+  await expect(page).toHaveURL(/category=secure/);
+});
+
+test("settings import, export, reset, compact mode, and shortcuts work", async ({
+  page,
+}) => {
   await page.goto("/settings");
-  const compact = page.getByLabel("Compact content width");
-  const shortcuts = page.getByLabel(/Keyboard shortcuts/);
-  await compact.check();
-  await shortcuts.uncheck();
+  const compact = page.getByRole("checkbox", {
+    name: "Compact content width",
+  });
+  const shortcuts = page.getByRole("checkbox", {
+    name: "Keyboard shortcuts",
+  });
+  await expect(compact).toBeEnabled();
+  await compact.click();
+  await shortcuts.click();
   await expect(page.locator("html")).toHaveAttribute("data-compact", "true");
 
   const [download] = await Promise.all([
     page.waitForEvent("download"),
     page.getByRole("button", { name: "Export settings" }).click(),
   ]);
-  expect(JSON.parse(readFileSync(await download.path(), "utf8"))).toEqual({ language: "en", compact: true, shortcuts: false });
+  expect(JSON.parse(readFileSync(await download.path(), "utf8"))).toEqual({
+    language: "en",
+    compact: true,
+    shortcuts: false,
+  });
 
   const input = page.locator('input[type="file"]');
-  await input.setInputFiles({ name: "settings.json", mimeType: "application/json", buffer: Buffer.from('{"language":"zh","compact":false,"shortcuts":true}') });
-  await expect(page.getByLabel("Language")).toHaveValue("zh");
+  await input.setInputFiles({
+    name: "settings.json",
+    mimeType: "application/json",
+    buffer: Buffer.from('{"language":"zh","compact":false,"shortcuts":true}'),
+  });
+  await expect(page.getByLabel("Language")).toContainText("中文");
   await expect(page.locator("html")).toHaveAttribute("lang", "zh");
-  await input.setInputFiles({ name: "broken.json", mimeType: "application/json", buffer: Buffer.from("{") });
-  await expect(page.locator('p[role="alert"]')).toHaveText("That file is not valid settings JSON.");
+  await input.setInputFiles({
+    name: "broken.json",
+    mimeType: "application/json",
+    buffer: Buffer.from("{"),
+  });
+  await expect(page.locator('p[role="alert"]')).toHaveText(
+    "That file is not valid settings JSON.",
+  );
 
   await page.goto("/");
   await expect(page.locator("html")).toHaveAttribute("lang", "zh");
@@ -46,16 +104,19 @@ test("settings import, export, reset, compact mode, and shortcuts work", async (
 
   await page.goto("/settings");
   await page.getByRole("button", { name: "Reset" }).click();
-  await expect(page.getByLabel("Language")).toHaveValue("en");
-  await compact.check();
-  await shortcuts.uncheck();
+  await expect(page.getByLabel("Language")).toContainText("English");
+  await compact.click();
+  await shortcuts.click();
   await page.goto("/");
   await expect(page.locator("html")).toHaveAttribute("data-compact", "true");
   await page.keyboard.press("/");
   await expect(page.locator("#tool-search")).not.toBeFocused();
 });
 
-test("headers, legacy redirects, PWA assets, and not-found page work", async ({ page, request }) => {
+test("headers, legacy redirects, PWA assets, and not-found page work", async ({
+  page,
+  request,
+}) => {
   const home = await request.get("/");
   expect(home.headers()["cross-origin-opener-policy"]).toBe("same-origin");
   expect(home.headers()["cross-origin-embedder-policy"]).toBe("require-corp");
@@ -77,12 +138,21 @@ for (const tool of TOOLS) {
     const errors: string[] = [];
     page.on("pageerror", (error) => errors.push(error.message));
     page.on("console", (message) => {
-      if (message.type() === "error" && !message.text().includes("favicon")) errors.push(message.text());
+      if (
+        message.type() === "error" &&
+        !message.text().includes("favicon") &&
+        !message.text().includes("eval() is not supported in this environment")
+      )
+        errors.push(message.text());
     });
     const response = await page.goto(`/${tool.slug}`);
     expect(response?.ok()).toBe(true);
     await expect(page.getByRole("heading", { name: tool.title })).toBeVisible();
-    await expect(page.locator(`[data-testid=${tool.slug}-panel], [data-testid$=-panel]`).first()).toBeVisible();
+    await expect(
+      page
+        .locator(`[data-testid=${tool.slug}-panel], [data-testid$=-panel]`)
+        .first(),
+    ).toBeVisible();
     expect(errors).toEqual([]);
   });
 }

@@ -21,6 +21,7 @@ interface ResultCardProps {
   progress: number;
   result: WorkspaceResult | null;
   isRunning: boolean;
+  active: boolean;
 }
 
 function stampLabel(
@@ -58,6 +59,7 @@ export function ResultCard({
   progress,
   result,
   isRunning,
+  active,
 }: ResultCardProps) {
   const showProgress = isRunning || progress > 0;
   const pct = Math.min(100, Math.max(0, Math.round(progress)));
@@ -76,7 +78,11 @@ export function ResultCard({
 
   return (
     <Card
-      className="sticky top-20 animate-rise-in p-5 sm:p-6"
+      className={
+        active
+          ? "sticky top-20 animate-rise-in p-5 sm:p-6"
+          : "hidden min-h-28 p-5 lg:flex lg:max-w-md"
+      }
       render={<aside />}
       aria-busy={isRunning}
       data-testid="result-card"

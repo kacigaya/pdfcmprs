@@ -79,7 +79,9 @@ export function ToolForm({ run, tool, config }: ToolFormProps) {
   const binding = isMultiple ? list : slot;
   const files = binding.files;
 
-  const [selection, setSelection] = useState(config.pageSelection?.initial ?? "");
+  const [selection, setSelection] = useState(
+    config.pageSelection?.initial ?? "",
+  );
   const fields = config.fields ?? NO_FIELDS;
   const options = useOptions(fields);
 
@@ -139,7 +141,9 @@ export function ToolForm({ run, tool, config }: ToolFormProps) {
           filename: outcome.filename,
           bytes: outcome.blob
             ? new Uint8Array(await outcome.blob.arrayBuffer())
-            : new TextEncoder().encode(outcome.text ?? outcome.description ?? ""),
+            : new TextEncoder().encode(
+                outcome.text ?? outcome.description ?? "",
+              ),
         })),
       );
       return {
@@ -168,7 +172,15 @@ export function ToolForm({ run, tool, config }: ToolFormProps) {
         onMove={isMultiple ? list.onMove : undefined}
       />
 
-      {config.pageSelection?.grid !== false && config.pageSelection && files[0] ? (
+      {config.pageSelection || visibleFields.length > 0 ? (
+        <p className="mt-6 mb-2 font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
+          2. Choose options
+        </p>
+      ) : null}
+
+      {config.pageSelection?.grid !== false &&
+      config.pageSelection &&
+      files[0] ? (
         <PageGrid
           file={files[0]}
           selection={selection}
@@ -207,24 +219,31 @@ export function ToolForm({ run, tool, config }: ToolFormProps) {
         disabled={run.isRunning}
       />
 
-      <div className="mt-6 flex flex-wrap items-center gap-2 border-t border-border pt-4">
-        <Button
-          disabled={blocked || run.isRunning}
-          loading={run.isRunning}
-          onClick={handleRun}
-          data-testid={`run-${tool.slug}`}
-        >
-          {run.isRunning ? config.runningLabel : config.actionLabel}
-        </Button>
-        {files.length > 0 ? (
+      <div className="mt-6 border-t border-border pt-4">
+        <p className="mb-2 font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
+          {config.pageSelection || visibleFields.length > 0 ? "3" : "2"}.
+          Process
+        </p>
+        <div className="flex flex-wrap items-center gap-2">
           <Button
-            variant="outline"
-            onClick={binding.onClear}
-            disabled={run.isRunning}
+            className="min-w-40 flex-1 sm:flex-none"
+            disabled={blocked || run.isRunning}
+            loading={run.isRunning}
+            onClick={handleRun}
+            data-testid={`run-${tool.slug}`}
           >
-            Clear
+            {run.isRunning ? config.runningLabel : config.actionLabel}
           </Button>
-        ) : null}
+          {files.length > 0 ? (
+            <Button
+              variant="outline"
+              onClick={binding.onClear}
+              disabled={run.isRunning}
+            >
+              Clear
+            </Button>
+          ) : null}
+        </div>
       </div>
     </section>
   );

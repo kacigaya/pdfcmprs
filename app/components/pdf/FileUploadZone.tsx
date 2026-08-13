@@ -48,6 +48,7 @@ export function FileUploadZone({
   const [dragging, setDragging] = useState(false);
   const isImageZone = accept.includes("image");
   const EmptyIcon = isImageZone ? ImageIcon : FileText;
+  const acceptedLabel = isImageZone ? "images" : "PDF files";
 
   const handleSelect = useCallback(
     (list: FileList | null) => {
@@ -73,7 +74,7 @@ export function FileUploadZone({
   return (
     <div
       className={cn(
-        "relative flex min-h-52 flex-col items-center overflow-hidden rounded-xl border border-dashed border-input p-4 transition-colors",
+        "relative flex min-h-52 flex-col items-center overflow-hidden rounded-xl border border-dashed border-input px-4 pb-4 pt-10 transition-colors",
         files.length === 0 && "stripes justify-center",
         dragging && "stripes-accent border-primary bg-accent/50",
       )}
@@ -89,6 +90,9 @@ export function FileUploadZone({
       onDragLeave={() => setDragging(false)}
       onDrop={handleDrop}
     >
+      <p className="absolute left-4 top-3 font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
+        1. Add {multiple ? "files" : "file"}
+      </p>
       <input
         ref={inputRef}
         type="file"
@@ -107,7 +111,11 @@ export function FileUploadZone({
             </h3>
             <div className="flex gap-2">
               <Button variant="outline" size="sm" onClick={openFileDialog}>
-                <Upload data-icon="inline-start" className="-ms-0.5 size-3.5 opacity-60" aria-hidden />
+                <Upload
+                  data-icon="inline-start"
+                  className="-ms-0.5 size-3.5 opacity-60"
+                  aria-hidden
+                />
                 {multiple ? "Add files" : "Replace"}
               </Button>
               {onClear ? (
@@ -132,7 +140,10 @@ export function FileUploadZone({
                 <div className="flex items-center gap-3 overflow-hidden">
                   <div className="flex aspect-square size-10 shrink-0 items-center justify-center overflow-hidden rounded border border-border">
                     {previews ? (
-                      <PdfThumbnail file={file} className="w-7 rounded-none border-0" />
+                      <PdfThumbnail
+                        file={file}
+                        className="w-7 rounded-none border-0"
+                      />
                     ) : (
                       <FileText className="size-4 opacity-60" aria-hidden />
                     )}
@@ -187,21 +198,34 @@ export function FileUploadZone({
           </div>
         </div>
       ) : (
-        <div className="flex flex-col items-center justify-center px-4 py-3 text-center">
-          <EmptyIcon className="mb-2 size-4 shrink-0 opacity-60" aria-hidden />
+        <button
+          type="button"
+          className="flex min-h-44 w-full cursor-pointer flex-col items-center justify-center rounded-lg px-4 py-3 text-center outline-none transition-colors hover:bg-accent/30 focus-visible:ring-2 focus-visible:ring-ring"
+          onClick={openFileDialog}
+        >
+          <EmptyIcon
+            className="mb-3 size-7 shrink-0 text-primary"
+            aria-hidden
+          />
           <p className="mb-1.5 font-heading italic text-base leading-snug">
             {label}
           </p>
           {hint ? (
-            <p className="font-mono text-[10px] uppercase tracking-[0.16em] text-muted-foreground/80">
-              {hint}
-            </p>
+            <p className="max-w-md text-sm text-muted-foreground">{hint}</p>
           ) : null}
-          <Button variant="outline" className="mt-4" onClick={openFileDialog}>
-            <Upload data-icon="inline-start" className="-ms-1 opacity-60" aria-hidden />
+          <span className="mt-2 text-xs text-muted-foreground">
+            Accepts {acceptedLabel}. No app-enforced size limit; browser memory
+            limits apply.
+          </span>
+          <span className="mt-4 inline-flex h-9 items-center justify-center gap-2 rounded-lg border border-input bg-popover px-3 font-medium shadow-xs/5">
+            <Upload
+              data-icon="inline-start"
+              className="-ms-1 opacity-60"
+              aria-hidden
+            />
             {chooseLabel ?? `Select PDF${multiple ? "s" : ""}`}
-          </Button>
-        </div>
+          </span>
+        </button>
       )}
     </div>
   );

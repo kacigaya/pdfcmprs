@@ -3,7 +3,10 @@
 import { Button } from "@/components/ui/button";
 import { useFileList } from "../../../features/pdf/hooks/useFiles";
 import type { ToolPanelProps } from "../../../features/pdf/registry";
-import { compressPdf, type CompressionLevel } from "../../../features/pdf/services/compress";
+import {
+  compressPdf,
+  type CompressionLevel,
+} from "../../../features/pdf/services/compress";
 import { FileUploadZone } from "../FileUploadZone";
 import { OptionsForm, useOptions, type OptionField } from "../OptionsForm";
 import { createStoredZip } from "../../../lib/zip";
@@ -48,7 +51,14 @@ export default function CompressPanel({ run }: ToolPanelProps) {
       }
       if (outputs.length > 1) {
         return {
-          blob: createStoredZip(await Promise.all(outputs.map(async (out) => ({ filename: out.filename, bytes: new Uint8Array(await out.blob.arrayBuffer()) })))),
+          blob: createStoredZip(
+            await Promise.all(
+              outputs.map(async (out) => ({
+                filename: out.filename,
+                bytes: new Uint8Array(await out.blob.arrayBuffer()),
+              })),
+            ),
+          ),
           filename: "compressed-pdfs.zip",
           description: `${outputs.length} PDFs compressed and packaged as ZIP.`,
           message: `Compressed ${outputs.length} PDFs.`,
@@ -79,31 +89,41 @@ export default function CompressPanel({ run }: ToolPanelProps) {
         onRemove={slot.onRemove}
       />
 
+      <p className="mt-6 font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
+        2. Choose options
+      </p>
       <OptionsForm
+        className="mt-2"
         fields={COMPRESSION_FIELDS}
         values={options.values}
         onChange={options.setValue}
         disabled={run.isRunning}
       />
 
-      <div className="mt-6 flex flex-wrap items-center gap-2 border-t border-border pt-4">
-        <Button
-          disabled={slot.files.length === 0 || run.isRunning}
-          loading={run.isRunning}
-          onClick={handleRun}
-          data-testid="run-compress"
-        >
-          {run.isRunning ? "Compressing…" : "Compress"}
-        </Button>
-        {slot.files.length > 0 ? (
+      <div className="mt-6 border-t border-border pt-4">
+        <p className="mb-2 font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
+          3. Process
+        </p>
+        <div className="flex flex-wrap items-center gap-2">
           <Button
-            variant="outline"
-            onClick={slot.onClear}
-            disabled={run.isRunning}
+            className="min-w-40 flex-1 sm:flex-none"
+            disabled={slot.files.length === 0 || run.isRunning}
+            loading={run.isRunning}
+            onClick={handleRun}
+            data-testid="run-compress"
           >
-            Clear
+            {run.isRunning ? "Compressing…" : "Compress"}
           </Button>
-        ) : null}
+          {slot.files.length > 0 ? (
+            <Button
+              variant="outline"
+              onClick={slot.onClear}
+              disabled={run.isRunning}
+            >
+              Clear
+            </Button>
+          ) : null}
+        </div>
       </div>
     </section>
   );
