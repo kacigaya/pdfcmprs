@@ -1,7 +1,7 @@
 /**
  * Copies engine glue + WASM binaries out of node_modules into public/ so they
  * are served from our own origin. Keeps the app air-gapped (no CDN at runtime)
- * and sidesteps bundler WASM handling entirely — loaders fetch these by URL.
+ * and sidesteps bundler WASM handling entirely. Loaders fetch these by URL.
  *
  * Run by the `dev` and `build` scripts.
  */
@@ -57,7 +57,7 @@ for (const lang of OCR_LANGS) {
   ASSETS.push([`@tesseract.js-data/${lang}/4.0.0_best_int/${lang}.traineddata.gz`, `tesseract/lang/${lang}.traineddata.gz`]);
 }
 // coherentpdf, pdfkit, tesseract.js, utif2, heic-decode and the diff libraries
-// are plain JS — the bundler code-splits them, so they need no copy here.
+// are plain JS. The bundler code-splits them, so they need no copy here.
 
 let copied = 0;
 for (const [from, to] of ASSETS) {

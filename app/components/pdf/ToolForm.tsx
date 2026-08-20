@@ -249,7 +249,7 @@ export function ToolForm({ run, tool, config }: ToolFormProps) {
   );
 }
 
-/** Builds a panel component from a static config — the common case. */
+/** Builds a panel component from a static config. */
 export function createToolPanel(config: ToolFormConfig) {
   return function GeneratedToolPanel({
     run,

@@ -101,7 +101,7 @@ export const CATEGORIES: ReadonlyArray<CategoryDefinition> = [
   },
 ];
 
-/** Panels grouped by batch share a chunk — one lazy load covers the group. */
+/** Panels in each batch share a chunk, so one lazy load covers the group. */
 const organizePanel = (
   name: keyof typeof import("../../components/pdf/panels/organizePanels"),
 ) => {
@@ -454,7 +454,7 @@ export const TOOLS: ReadonlyArray<ToolDefinition> = [
     title: "PDF to SVG",
     category: "from-pdf",
     summary:
-      "Export each page as true vector SVG — paths and text stay scalable, not traced.",
+      "Export each page as vector SVG with scalable paths and text.",
     keywords: ["svg", "vector", "scalable", "illustrator", "convert", "export"],
     engine: "mupdf",
     load: dataPanel("PdfToSvgPanel"),
@@ -553,7 +553,7 @@ export const TOOLS: ReadonlyArray<ToolDefinition> = [
     title: "Alternate & Mix",
     category: "organize",
     summary:
-      "Interleave two PDFs page by page — ideal for pairing front and back scans.",
+      "Interleave two PDFs to pair the front and back of scanned pages.",
     keywords: ["alternate", "mix", "interleave", "zip", "collate", "scan"],
     engine: "pdf-lib",
     load: organizePanel("AlternateMixPanel"),
@@ -572,7 +572,7 @@ export const TOOLS: ReadonlyArray<ToolDefinition> = [
     title: "Divide Pages",
     category: "organize",
     summary:
-      "Split each page into a grid of smaller pages — two-up scans back into singles.",
+      "Split each page into a grid, such as two-up scans into separate pages.",
     keywords: ["divide", "split", "grid", "cut", "halve", "two up"],
     engine: "pdf-lib",
     load: organizePanel("DividePagesPanel"),
@@ -591,7 +591,7 @@ export const TOOLS: ReadonlyArray<ToolDefinition> = [
     title: "N-Up PDF",
     category: "organize",
     summary:
-      "Place several pages on each sheet in a grid — saves paper when printing.",
+      "Place several pages in a grid on each sheet to use less paper.",
     keywords: ["n-up", "nup", "2up", "grid", "impose", "print", "paper"],
     engine: "pdf-lib",
     load: organizePanel("NUpPanel"),
@@ -807,7 +807,7 @@ export const TOOLS: ReadonlyArray<ToolDefinition> = [
     title: "Remove Blank Pages",
     category: "edit",
     summary:
-      "Detect and drop pages with almost no ink — tuned for scanner speckle.",
+      "Remove nearly blank pages while ignoring scanner speckles.",
     keywords: ["blank", "empty", "remove", "scan", "clean"],
     engine: "pdfjs",
     load: editPanel("RemoveBlankPagesPanel"),

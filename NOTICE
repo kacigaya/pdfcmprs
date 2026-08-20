@@ -16,7 +16,7 @@ same terms. AGPL-3.0 section 13 additionally requires that users interacting
 with the software over a network be offered the corresponding source; the
 "Source" link in the site footer serves that purpose.
 
-Note that all processing happens locally in the visitor's browser — no document
+All processing happens in the visitor's browser. No document
 is uploaded to a server. The network clause applies to the software itself, not
 to any document handling.
 

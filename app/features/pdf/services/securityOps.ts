@@ -93,7 +93,7 @@ export async function changePermissions(
 ): Promise<PdfSaveResult> {
   if (!ownerPassword) {
     throw new Error(
-      "An owner password is required — without one the restrictions can be removed by anyone.",
+      "Set an owner password. Without one, anyone can remove the restrictions.",
     );
   }
   return qpdf(
@@ -119,7 +119,7 @@ export async function changePermissions(
  *
  * mupdf rather than qpdf: qpdf gives up with "can't find startxref" when the
  * cross-reference table is unreadable, while mupdf reconstructs it by scanning
- * for objects — which is the whole point of a repair tool.
+ * for objects. That fallback is the purpose of a repair tool.
  */
 export async function repairPdf(file: File): Promise<PdfSaveResult> {
   const mupdf = await loadMupdf();
@@ -164,7 +164,7 @@ export async function removeRestrictions(
     "-unrestricted",
     () =>
       new Error(
-        "Could not remove restrictions — this PDF is password-encrypted, so use Decrypt PDF with the password instead.",
+        "Could not remove restrictions because this PDF is encrypted. Use Decrypt PDF with its password instead.",
       ),
   );
 }
@@ -241,7 +241,7 @@ export async function sanitizePdf(
     }
   }
 
-  // Unlinking alone leaves the payload recoverable in the output bytes —
+  // Unlinking alone leaves the payload recoverable in the output bytes.
   // sweep the now-unreachable objects so they are genuinely gone.
   collectGarbage(doc);
 

@@ -8,7 +8,7 @@ import {
 import { createToolPanel, type ToolInputSpec } from "../ToolForm";
 import type { OptionField } from "../OptionsForm";
 
-/** Accept anything — these formats are all plain text under the hood. */
+/** Accept any file because these formats are plain text. */
 const TEXT_INPUT: ToolInputSpec = {
   kind: "single",
   batch: true,

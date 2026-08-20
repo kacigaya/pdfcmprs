@@ -9,7 +9,7 @@
 /** Convert RGBA in place to luminance-weighted grey. Returns the same buffer. */
 export function toGreyscale(rgba: Uint8ClampedArray | Uint8Array) {
   for (let i = 0; i < rgba.length; i += 4) {
-    // Rec. 601 luma — matches how humans weight the channels.
+    // Rec. 601 luma matches how humans weight the channels.
     const grey = Math.round(
       rgba[i] * 0.299 + rgba[i + 1] * 0.587 + rgba[i + 2] * 0.114,
     );

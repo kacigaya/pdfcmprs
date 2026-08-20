@@ -99,7 +99,7 @@ export const DecryptPanel = createToolPanel({
     return {
       blob: out.blob,
       filename: out.filename,
-      description: "Password removed — the file opens without one now.",
+      description: "Password removed. The file now opens without one.",
       message: "Decryption complete.",
     };
   },
@@ -170,7 +170,7 @@ export const PermissionsPanel = createToolPanel({
   validate: ({ values }) =>
     String(values.ownerPassword)
       ? null
-      : "An owner password is required — without one the restrictions can be removed by anyone.",
+      : "Set an owner password. Without one, anyone can remove the restrictions.",
   execute: async ({ files, values, report }) => {
     report(40);
     const permissions: PermissionSettings = {
@@ -261,7 +261,7 @@ export const SanitizePanel = createToolPanel({
       filename: out.filename,
       description:
         total === 0
-          ? "No active content found — the file was already clean."
+          ? "No active content found. The file was already clean."
           : `Removed ${removed.javascript} JavaScript, ${removed.launchActions} launch/submit, ${removed.embeddedFiles} attachment, and ${removed.openActions} auto-run entries.`,
       message: total === 0 ? "Nothing to remove." : `Removed ${total} items.`,
     };

@@ -21,7 +21,7 @@ export interface ToolRun {
   run: (task: ToolTask) => Promise<void>;
   /** Surface a validation error without starting a run. */
   fail: (message: string) => void;
-  /** Clear status/progress/result — called whenever inputs change. */
+  /** Clear status, progress, and result whenever inputs change. */
   reset: () => void;
 }
 

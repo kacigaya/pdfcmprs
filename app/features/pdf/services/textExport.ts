@@ -56,7 +56,7 @@ export async function readPositionedText(
     }
     if (pages.every((page) => page.items.length === 0)) {
       throw new Error(
-        "No selectable text found. This looks like a scan — run OCR PDF first.",
+        "No selectable text found. This looks like a scan. Run OCR PDF first.",
       );
     }
     return pages;
@@ -189,8 +189,8 @@ export interface SheetData {
  * Build a minimal .xlsx.
  *
  * An xlsx is a ZIP of OOXML parts. Values are written as inline strings, which
- * skips the shared-string table entirely — larger on disk, far less code, and
- * Excel, Numbers, and LibreOffice all accept it.
+ * skips the shared-string table entirely. Files are larger, but the code is
+ * shorter, and Excel, Numbers, and LibreOffice all accept the result.
  */
 export function buildXlsx(sheets: ReadonlyArray<SheetData>): Blob {
   const encoder = new TextEncoder();

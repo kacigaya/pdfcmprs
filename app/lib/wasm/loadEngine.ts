@@ -22,7 +22,7 @@ function memo<T>(key: string, factory: () => Promise<T>): Promise<T> {
   const existing = CACHE.get(key);
   if (existing) return existing as Promise<T>;
   const created = factory().catch((error) => {
-    // Don't cache failures — a transient network error should be retryable.
+    // Do not cache failures, so transient network errors remain retryable.
     CACHE.delete(key);
     throw error;
   });
@@ -61,7 +61,7 @@ export type EmscriptenFactory = (
 
 /**
  * Emscripten glue built as a classic script assigns a global `Module`, and
- * qpdf and ghostscript both use that same name — so script loads are
+ * qpdf and ghostscript both use that name, so script loads are
  * serialized and the global is captured immediately after each one.
  */
 let scriptQueue: Promise<unknown> = Promise.resolve();

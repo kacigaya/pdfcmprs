@@ -59,7 +59,7 @@ class ByteWriter {
 }
 
 /**
- * Minimal ZIP writer using the STORE method (no compression) — enough for
+ * Minimal ZIP writer using the STORE method (no compression). Supports
  * bundling already-compressed output like PNG/JPG pages or a set of PDFs.
  *
  * Writes into a preallocated buffer rather than a number[]: entries here are

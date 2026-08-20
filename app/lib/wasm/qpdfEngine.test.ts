@@ -6,7 +6,7 @@ import { PDFDocument } from "pdf-lib";
  *
  * The app loads qpdf through loadEngine(), which injects a <script> tag and so
  * needs a browser. Here the Emscripten factory is required straight out of
- * node_modules instead — the point is to prove the qpdf commands the security
+ * node_modules instead. The test proves the qpdf commands the security
  * tools depend on actually work, not to exercise the browser loader.
  */
 const QPDF_DIR = `${import.meta.dir}/../../../node_modules/@neslinesli93/qpdf-wasm/dist`;

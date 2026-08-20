@@ -32,7 +32,7 @@ const QUALITY_FIELD: OptionField = {
   ],
 };
 
-/** Rasterising replaces text with pixels — say so rather than surprise anyone. */
+/** Warn users that rasterising replaces text with pixels. */
 const RASTER_WARNING =
   "Pages are rasterised, so the output is no longer searchable text.";
 
@@ -128,7 +128,7 @@ export const InvertColorsPanel = createToolPanel({
     return {
       blob: out.blob,
       filename: out.filename,
-      description: `${out.pageCount} pages inverted — handy for dark-mode reading. ${RASTER_WARNING}`,
+      description: `${out.pageCount} pages inverted for dark-mode reading. ${RASTER_WARNING}`,
       message: "Colours inverted.",
     };
   },

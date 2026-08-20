@@ -329,7 +329,7 @@ export const BookletPanel = createToolPanel({
       description:
         `${out.sheets} sheets in saddle-stitch order. Print double-sided, flip on the short edge, then fold.` +
         (out.padded > 0 ? ` ${out.padded} blank pages added as padding.` : ""),
-      message: `Booklet ready — ${out.sheets} sheets.`,
+      message: `Booklet ready: ${out.sheets} sheets.`,
     };
   },
 });

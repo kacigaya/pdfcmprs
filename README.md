@@ -12,8 +12,8 @@ and the app keeps working offline once loaded.
 
 ## Tools
 
-Each tool has its own route (`/compress-pdf`, `/rotate-pdf`, …) and the home page
-is a searchable catalog. Tools are declared once in
+Each tool has its own route, such as `/compress-pdf` or `/rotate-pdf`, and the
+home page is a searchable catalog. Tools are declared once in
 [`app/features/pdf/registry.ts`](app/features/pdf/registry.ts), which drives the
 routes, the catalog, the metadata, and the sitemap.
 
@@ -145,7 +145,7 @@ public/wasm/             # Engine binaries (generated, git-ignored)
 
 1. Write the operation as a plain async function in `app/features/pdf/services/`.
 2. Add a panel to the matching `app/components/pdf/panels/*Panels.tsx`. Most
-   tools are pure configuration via `createToolPanel` — an upload spec, option
+   tools are pure configuration via `createToolPanel`: an upload spec, option
    fields, and an `execute` function.
 3. Add one entry to `TOOLS` in `app/features/pdf/registry.ts`. The route,
    catalog card, page metadata, and sitemap entry follow automatically.

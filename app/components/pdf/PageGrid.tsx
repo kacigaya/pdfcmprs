@@ -12,7 +12,7 @@ interface PageGridProps {
   onChange: (selection: string) => void;
   /** Reported so panels can validate against the real page count. */
   onTotalChange?: (total: number) => void;
-  /** Small overlay in the page corner — used by rotate/delete tools. */
+  /** Small overlay in the page corner for rotate and delete tools. */
   renderBadge?: (page: number) => React.ReactNode;
 }
 

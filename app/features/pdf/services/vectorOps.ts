@@ -11,7 +11,7 @@ function padPage(page: number, total: number): string {
 }
 
 /**
- * Export each page as real SVG — vector paths and text, not a raster trace.
+ * Export each page as SVG with vector paths and text, not a raster trace.
  *
  * mupdf renders the page through a DocumentWriter set to the svg format, so
  * shapes stay scalable and text stays selectable.

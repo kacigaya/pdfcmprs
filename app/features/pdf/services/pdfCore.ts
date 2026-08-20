@@ -41,7 +41,7 @@ export async function loadPdf(file: File): Promise<PDFDocument> {
         throw new Error("The password is incorrect or the PDF cannot be decrypted.");
       }
     }
-    throw new Error("Could not read this PDF — it may be damaged.");
+    throw new Error("Could not read this PDF. It may be damaged.");
   }
 }
 

@@ -32,7 +32,7 @@ export interface CropOptions {
 
 /**
  * Trim page edges by setting the crop box. The underlying content is kept, so
- * the crop is reversible — use Redact to remove content outright.
+ * the crop is reversible. Use Redact to remove content outright.
  */
 export async function cropPdf(
   file: File,
@@ -132,7 +132,7 @@ export async function flattenPdf(
       throw error;
     }
     throw new Error(
-      "Could not flatten this form — some fields use features pdf-lib cannot bake in.",
+      "Could not flatten this form. Some fields use features that pdf-lib cannot bake in.",
     );
   }
   const saved = await savePdf(doc, file.name, "-flattened");

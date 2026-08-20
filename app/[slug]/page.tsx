@@ -28,12 +28,12 @@ export async function generateMetadata({
     description: tool.summary,
     alternates: { canonical: `/${tool.slug}` },
     openGraph: {
-      title: `${tool.title} — pdfcmprs`,
+      title: `${tool.title} | pdfcmprs`,
       description: tool.summary,
       url: `/${tool.slug}`,
     },
     twitter: {
-      title: `${tool.title} — pdfcmprs`,
+      title: `${tool.title} | pdfcmprs`,
       description: tool.summary,
     },
   };

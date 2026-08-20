@@ -288,7 +288,7 @@ export async function removeBlankPages(
   const total = source.getPageCount();
   const keep = allPages(total).filter((page) => !blanks.includes(page));
   if (keep.length === 0) {
-    throw new Error("Every page looks blank — nothing would be left.");
+    throw new Error("Every page looks blank. Nothing would be left.");
   }
   const out = await PDFDocument.create();
   await copyPagesInto(out, source, keep);

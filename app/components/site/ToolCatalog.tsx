@@ -167,7 +167,7 @@ export function ToolCatalog() {
             type="search"
             value={query}
             onValueChange={setQuery}
-            placeholder={`${words.search} — rotate, watermark, ocr…`}
+            placeholder={`${words.search}: rotate, watermark, OCR`}
             className="ps-9"
             data-testid="tool-search"
           />

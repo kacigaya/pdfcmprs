@@ -19,7 +19,7 @@ interface FieldBase {
   name: string;
   label: string;
   hint?: string;
-  /** Hide this field unless the predicate passes — used for dependent options. */
+  /** Hide this field unless the predicate passes. Used for dependent options. */
   visibleWhen?: (values: OptionValues) => boolean;
 }
 
