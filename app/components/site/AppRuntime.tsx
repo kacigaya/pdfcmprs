@@ -10,7 +10,13 @@ export function AppRuntime() {
     document.documentElement.dataset.compact = String(settings.compact);
   }, [settings]);
   useEffect(() => {
-    if ("serviceWorker" in navigator && process.env.NODE_ENV === "production") navigator.serviceWorker.register("/sw.js");
+    if ("serviceWorker" in navigator && process.env.NODE_ENV === "production") {
+      navigator.serviceWorker
+        .register("/sw.js", { updateViaCache: "none" })
+        .catch((error: unknown) =>
+          console.error("Service worker registration failed", error),
+        );
+    }
   }, []);
   useEffect(() => {
     const handler = (event: KeyboardEvent) => {
