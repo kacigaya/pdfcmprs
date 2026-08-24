@@ -1,10 +1,19 @@
 <p align="center">
-  <img src="public/icon.svg" alt="Logo" width="200">
+  <img src="public/icon.svg" alt="pdfcmprs logo" width="140">
 </p>
+
+<h1 align="center">pdfcmprs</h1>
 
 <p align="center">
    <strong>Browser PDF toolkit built with Next.js.</strong><br>
    <em>Compress, merge, split, convert, and secure PDFs without uploading them anywhere.</em>
+</p>
+
+<p align="center">
+  <a href="https://nextjs.org"><img alt="Next.js 16.3.0" src="https://shieldcn.dev/badge/Next.js-16.3.0-171717.svg?variant=secondary&amp;logo=nextdotjs"></a>
+  <a href="https://bun.sh"><img alt="Bun 1.3.11" src="https://shieldcn.dev/badge/Bun-1.3.11-fbf0df.svg?variant=secondary&amp;logo=bun&amp;logoColor=171717"></a>
+  <a href="https://tailwindcss.com"><img alt="Tailwind CSS 4.3.2" src="https://shieldcn.dev/badge/Tailwind_CSS-4.3.2-06b6d4.svg?variant=secondary&amp;logo=tailwindcss"></a>
+  <a href="https://github.com/kacigaya/pdfcmprs/blob/main/LICENSE"><img alt="AGPL-3.0 License" src="https://shieldcn.dev/github/license/kacigaya/pdfcmprs.svg?variant=secondary"></a>
 </p>
 
 Every tool runs entirely in your browser. No document is ever sent to a server,
