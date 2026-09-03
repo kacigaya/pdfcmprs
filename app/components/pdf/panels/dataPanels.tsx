@@ -67,7 +67,7 @@ export const PdfToExcelPanel = createToolPanel({
 
 export const ExtractTablesPanel = createToolPanel({
   input: SINGLE_PDF,
-  actionLabel: "Extract tables",
+  actionLabel: "Extract Tables",
   runningLabel: "Scanning…",
   execute: async ({ files, report }) => {
     const out = await extractTables(files[0], report);

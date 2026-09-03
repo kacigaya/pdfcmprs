@@ -57,7 +57,7 @@ export const EncryptPanel = createToolPanel({
       ],
     },
   ],
-  actionLabel: "Encrypt",
+  actionLabel: "Encrypt PDF",
   runningLabel: "Encrypting…",
   validate: ({ values }) =>
     !String(values.userPassword) && !String(values.ownerPassword)
@@ -91,7 +91,7 @@ export const DecryptPanel = createToolPanel({
       placeholder: "The password that opens this PDF…",
     },
   ],
-  actionLabel: "Decrypt",
+  actionLabel: "Decrypt PDF",
   runningLabel: "Decrypting…",
   execute: async ({ files, values, report }) => {
     report(40);
@@ -165,7 +165,7 @@ export const PermissionsPanel = createToolPanel({
       default: true,
     },
   ],
-  actionLabel: "Apply permissions",
+  actionLabel: "Apply Permissions",
   runningLabel: "Applying…",
   validate: ({ values }) =>
     String(values.ownerPassword)
@@ -197,7 +197,7 @@ export const PermissionsPanel = createToolPanel({
 
 export const RepairPanel = createToolPanel({
   input: ENCRYPTED_PDF,
-  actionLabel: "Repair",
+  actionLabel: "Repair PDF",
   runningLabel: "Repairing…",
   execute: async ({ files, report }) => {
     report(40);
@@ -213,7 +213,7 @@ export const RepairPanel = createToolPanel({
 
 export const LinearizePanel = createToolPanel({
   input: SINGLE_PDF,
-  actionLabel: "Linearize",
+  actionLabel: "Linearize PDF",
   runningLabel: "Linearizing…",
   execute: async ({ files, report }) => {
     report(40);
@@ -229,7 +229,7 @@ export const LinearizePanel = createToolPanel({
 
 export const RemoveRestrictionsPanel = createToolPanel({
   input: SINGLE_PDF,
-  actionLabel: "Remove restrictions",
+  actionLabel: "Remove Restrictions",
   runningLabel: "Removing…",
   execute: async ({ files, report }) => {
     report(40);
@@ -245,7 +245,7 @@ export const RemoveRestrictionsPanel = createToolPanel({
 
 export const SanitizePanel = createToolPanel({
   input: SINGLE_PDF,
-  actionLabel: "Sanitize",
+  actionLabel: "Sanitize PDF",
   runningLabel: "Sanitizing…",
   execute: async ({ files, report }) => {
     report(40);

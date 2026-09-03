@@ -82,7 +82,7 @@ export const PageNumbersPanel = createToolPanel({
     { kind: "number", name: "marginX", label: "Side margin (pt)", default: 36, min: 0 },
     { kind: "number", name: "marginY", label: "Edge margin (pt)", default: 28, min: 0 },
   ],
-  actionLabel: "Add page numbers",
+  actionLabel: "Add Page Numbers",
   runningLabel: "Numbering…",
   execute: async ({ files, selection, values, report }) => {
     report(40);
@@ -186,7 +186,7 @@ export const WatermarkPanel = createToolPanel({
       options: ANCHORS,
     },
   ],
-  actionLabel: "Add watermark",
+  actionLabel: "Add Watermark",
   runningLabel: "Watermarking…",
   validate: ({ values }) =>
     String(values.text).trim() ? null : "Enter the watermark text.",
@@ -247,7 +247,7 @@ export const HeaderFooterPanel = createToolPanel({
     { kind: "number", name: "marginX", label: "Side margin (pt)", default: 36, min: 0 },
     { kind: "number", name: "marginY", label: "Edge margin (pt)", default: 24, min: 0 },
   ],
-  actionLabel: "Add header & footer",
+  actionLabel: "Add Header & Footer",
   runningLabel: "Applying…",
   validate: ({ values }) =>
     String(values.headerText).trim() || String(values.footerText).trim()
@@ -303,7 +303,7 @@ export const StampsPanel = createToolPanel({
     { kind: "number", name: "marginX", label: "Side margin (pt)", default: 32, min: 0 },
     { kind: "number", name: "marginY", label: "Edge margin (pt)", default: 32, min: 0 },
   ],
-  actionLabel: "Add stamp",
+  actionLabel: "Add Stamp",
   runningLabel: "Stamping…",
   validate: ({ values }) =>
     String(values.text).trim() ? null : "Enter the stamp text.",
@@ -339,7 +339,7 @@ export const CropPanel = createToolPanel({
     { kind: "number", name: "bottom", label: "Trim bottom (pt)", default: 0, min: 0 },
     { kind: "number", name: "left", label: "Trim left (pt)", default: 0, min: 0 },
   ],
-  actionLabel: "Crop",
+  actionLabel: "Crop Pages",
   runningLabel: "Cropping…",
   validate: ({ values }) =>
     Number(values.top) + Number(values.right) + Number(values.bottom) + Number(values.left) > 0
@@ -392,7 +392,7 @@ export const FixPageSizePanel = createToolPanel({
     },
     { kind: "checkbox", name: "landscape", label: "Landscape orientation", default: false },
   ],
-  actionLabel: "Resize pages",
+  actionLabel: "Resize Pages",
   runningLabel: "Resizing…",
   execute: async ({ files, values, report }) => {
     report(40);
@@ -413,7 +413,7 @@ export const FixPageSizePanel = createToolPanel({
 
 export const PageDimensionsPanel = createToolPanel({
   input: SINGLE_PDF,
-  actionLabel: "Measure pages",
+  actionLabel: "Measure Pages",
   runningLabel: "Measuring…",
   execute: async ({ files, report }) => {
     report(50);
@@ -429,7 +429,7 @@ export const PageDimensionsPanel = createToolPanel({
 
 export const FlattenPanel = createToolPanel({
   input: SINGLE_PDF,
-  actionLabel: "Flatten",
+  actionLabel: "Flatten PDF",
   runningLabel: "Flattening…",
   execute: async ({ files, report }) => {
     report(40);
@@ -446,7 +446,7 @@ export const FlattenPanel = createToolPanel({
 export const RemoveAnnotationsPanel = createToolPanel({
   input: SINGLE_PDF,
   pageSelection: { label: "Pages", hint: "Leave empty for every page." },
-  actionLabel: "Remove annotations",
+  actionLabel: "Remove Annotations",
   runningLabel: "Removing…",
   execute: async ({ files, selection, report }) => {
     report(40);
@@ -472,7 +472,7 @@ export const ChangeBackgroundPanel = createToolPanel({
   fields: [
     { kind: "color", name: "color", label: "Background colour", default: "#fffdf7" },
   ],
-  actionLabel: "Change background",
+  actionLabel: "Change Background",
   runningLabel: "Painting…",
   execute: async ({ files, selection, values, report }) => {
     report(40);
@@ -500,7 +500,7 @@ export const RemoveBlankPagesPanel = createToolPanel({
       hint: "Percent of non-white pixels below which a page counts as blank.",
     },
   ],
-  actionLabel: "Remove blank pages",
+  actionLabel: "Remove Blank Pages",
   runningLabel: "Scanning…",
   execute: async ({ files, values, report }) => {
     report(30);
@@ -536,7 +536,7 @@ export const EditMetadataPanel = createToolPanel({
     { kind: "text", name: "creator", label: "Creator", default: "" },
     { kind: "text", name: "producer", label: "Producer", default: "" },
   ],
-  actionLabel: "Save metadata",
+  actionLabel: "Save Metadata",
   runningLabel: "Saving…",
   validate: ({ values }) =>
     Object.values(values).some((value) => String(value).trim())
@@ -564,7 +564,7 @@ export const EditMetadataPanel = createToolPanel({
 
 export const RemoveMetadataPanel = createToolPanel({
   input: SINGLE_PDF,
-  actionLabel: "Remove metadata",
+  actionLabel: "Remove Metadata",
   runningLabel: "Removing…",
   execute: async ({ files, report }) => {
     report(40);
@@ -588,7 +588,7 @@ export const TableOfContentsPanel = createToolPanel({
     { kind: "number", name: "titleSize", label: "Heading size", default: 22, min: 8, max: 72 },
     { kind: "number", name: "entrySize", label: "Entry size", default: 11, min: 6, max: 32 },
   ],
-  actionLabel: "Build contents page",
+  actionLabel: "Build Contents Page",
   runningLabel: "Building…",
   execute: async ({ files, values, report }) => {
     report(40);

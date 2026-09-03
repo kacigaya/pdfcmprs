@@ -64,7 +64,7 @@ export const RotatePanel = createToolPanel({
       ],
     },
   ],
-  actionLabel: "Rotate",
+  actionLabel: "Rotate Pages",
   runningLabel: "Rotating…",
   execute: async ({ files, selection, values, report }) => {
     report(40);
@@ -81,7 +81,7 @@ export const RotatePanel = createToolPanel({
 export const DeletePagesPanel = createToolPanel({
   input: SINGLE_PDF,
   pageSelection: { label: "Pages to delete", required: true },
-  actionLabel: "Delete pages",
+  actionLabel: "Delete Pages",
   runningLabel: "Deleting…",
   execute: async ({ files, selection, report }) => {
     report(40);
@@ -98,7 +98,7 @@ export const DeletePagesPanel = createToolPanel({
 export const ExtractPagesPanel = createToolPanel({
   input: SINGLE_PDF,
   pageSelection: { label: "Pages to extract", required: true },
-  actionLabel: "Extract pages",
+  actionLabel: "Extract Pages",
   runningLabel: "Extracting…",
   execute: async ({ files, selection, report }) => {
     report(40);
@@ -114,7 +114,7 @@ export const ExtractPagesPanel = createToolPanel({
 
 export const ReversePagesPanel = createToolPanel({
   input: SINGLE_PDF,
-  actionLabel: "Reverse order",
+  actionLabel: "Reverse Order",
   runningLabel: "Reversing…",
   execute: async ({ files, report }) => {
     report(40);
@@ -167,7 +167,7 @@ export const AddBlankPagePanel = createToolPanel({
       options: PAGE_SIZE_OPTIONS,
     },
   ],
-  actionLabel: "Add blank pages",
+  actionLabel: "Add Blank Pages",
   runningLabel: "Adding…",
   execute: async ({ files, values, report }) => {
     report(40);
@@ -202,7 +202,7 @@ export const AlternateMixPanel = createToolPanel({
       default: false,
     },
   ],
-  actionLabel: "Alternate & mix",
+  actionLabel: "Alternate & Mix",
   runningLabel: "Mixing…",
   execute: async ({ files, values, report }) => {
     report(40);
@@ -238,7 +238,7 @@ export const CombineToSinglePagePanel = createToolPanel({
       max: 200,
     },
   ],
-  actionLabel: "Combine",
+  actionLabel: "Combine Pages",
   runningLabel: "Combining…",
   execute: async ({ files, values, report }) => {
     report(40);
@@ -262,7 +262,7 @@ export const DividePagesPanel = createToolPanel({
     { kind: "number", name: "columns", label: "Columns", default: 2, min: 1, max: 10 },
     { kind: "number", name: "rows", label: "Rows", default: 1, min: 1, max: 10 },
   ],
-  actionLabel: "Divide pages",
+  actionLabel: "Divide Pages",
   runningLabel: "Dividing…",
   execute: async ({ files, values, report }) => {
     report(40);
@@ -289,7 +289,7 @@ export const NUpPanel = createToolPanel({
     { kind: "number", name: "spacing", label: "Gap between pages (pt)", default: 8, min: 0 },
     { kind: "checkbox", name: "landscape", label: "Landscape sheets", default: false },
   ],
-  actionLabel: "Combine N-up",
+  actionLabel: "Combine N-Up",
   runningLabel: "Imposing…",
   execute: async ({ files, values, report }) => {
     report(40);
@@ -315,7 +315,7 @@ export const BookletPanel = createToolPanel({
     { kind: "number", name: "margin", label: "Sheet margin (pt)", default: 12, min: 0 },
     { kind: "number", name: "spacing", label: "Centre gutter (pt)", default: 0, min: 0 },
   ],
-  actionLabel: "Build booklet",
+  actionLabel: "Build Booklet",
   runningLabel: "Imposing…",
   execute: async ({ files, values, report }) => {
     report(40);
@@ -348,7 +348,7 @@ export const PosterizePanel = createToolPanel({
       hint: "Repeats a strip on adjacent tiles so sheets can be trimmed and taped.",
     },
   ],
-  actionLabel: "Build poster",
+  actionLabel: "Build Poster",
   runningLabel: "Tiling…",
   execute: async ({ files, values, report }) => {
     report(40);

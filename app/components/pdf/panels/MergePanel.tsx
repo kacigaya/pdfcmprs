@@ -47,7 +47,7 @@ export default function MergePanel({ run }: ToolPanelProps) {
           onClick={handleRun}
           data-testid="run-merge"
         >
-          {run.isRunning ? "Merging…" : "Merge"}
+          {run.isRunning ? "Merging…" : "Merge PDFs"}
         </Button>
         {list.files.length > 0 ? (
           <Button

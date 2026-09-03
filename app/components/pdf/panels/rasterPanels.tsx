@@ -54,7 +54,7 @@ export const PdfToImagePanel = createToolPanel({
     },
     QUALITY_FIELD,
   ],
-  actionLabel: "Render images",
+  actionLabel: "Render Images",
   runningLabel: "Rendering…",
   execute: async ({ files, values, report }) => {
     const out = await pdfToImages(files[0], {
@@ -97,7 +97,7 @@ export const PdfToCbzPanel = createToolPanel({
 export const PdfToGreyscalePanel = createToolPanel({
   input: SINGLE_PDF,
   fields: [QUALITY_FIELD],
-  actionLabel: "Convert to greyscale",
+  actionLabel: "Convert to Greyscale",
   runningLabel: "Converting…",
   execute: async ({ files, values, report }) => {
     const out = await pdfToGreyscale(
@@ -117,7 +117,7 @@ export const PdfToGreyscalePanel = createToolPanel({
 export const InvertColorsPanel = createToolPanel({
   input: SINGLE_PDF,
   fields: [QUALITY_FIELD],
-  actionLabel: "Invert colours",
+  actionLabel: "Invert Colours",
   runningLabel: "Inverting…",
   execute: async ({ files, values, report }) => {
     const out = await invertPdfColors(
@@ -168,7 +168,7 @@ export const AdjustColorsPanel = createToolPanel({
     },
     QUALITY_FIELD,
   ],
-  actionLabel: "Adjust colours",
+  actionLabel: "Adjust Colours",
   runningLabel: "Adjusting…",
   validate: ({ values }) =>
     Number(values.brightness) === 1 &&
@@ -211,7 +211,7 @@ export const ScannerEffectPanel = createToolPanel({
     },
     QUALITY_FIELD,
   ],
-  actionLabel: "Apply scanner effect",
+  actionLabel: "Apply Scanner Effect",
   runningLabel: "Scanning…",
   execute: async ({ files, values, report }) => {
     const out = await scannerEffect(

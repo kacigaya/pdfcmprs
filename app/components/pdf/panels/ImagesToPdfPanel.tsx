@@ -35,7 +35,7 @@ export default function ImagesToPdfPanel({ run }: ToolPanelProps) {
         label="Drop your images here"
         hint="JPG, PNG, WebP, BMP, HEIC, TIFF, PSD, and SVG supported"
         accept="image/*,.jpg,.jpeg,.png,.webp,.bmp,.heic,.heif,.tif,.tiff,.psd,.svg"
-        chooseLabel="Select images"
+        chooseLabel="Select Images"
         filterFiles={filterImageFiles}
         onFiles={list.onFiles}
         onRemove={list.onRemove}

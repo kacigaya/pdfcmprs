@@ -45,7 +45,7 @@ export default function InspectPanel({ run }: ToolPanelProps) {
           onClick={handleRun}
           data-testid="run-inspect"
         >
-          {run.isRunning ? "Inspecting…" : "Inspect"}
+          {run.isRunning ? "Inspecting…" : "Inspect PDF"}
         </Button>
       </div>
     </section>

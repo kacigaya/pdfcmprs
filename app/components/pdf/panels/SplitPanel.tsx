@@ -81,7 +81,7 @@ export default function SplitPanel({ run }: ToolPanelProps) {
           onClick={handleRun}
           data-testid="run-split"
         >
-          {run.isRunning ? "Extracting…" : "Extract"}
+          {run.isRunning ? "Extracting…" : "Extract Pages"}
         </Button>
       </div>
     </section>

@@ -90,7 +90,7 @@ export default function CompressPanel({ run }: ToolPanelProps) {
       />
 
       <p className="mt-6 font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
-        2. Choose options
+        2. Choose Options
       </p>
       <OptionsForm
         className="mt-2"
@@ -112,7 +112,7 @@ export default function CompressPanel({ run }: ToolPanelProps) {
             onClick={handleRun}
             data-testid="run-compress"
           >
-            {run.isRunning ? "Compressing…" : "Compress"}
+            {run.isRunning ? "Compressing…" : "Compress PDF"}
           </Button>
           {slot.files.length > 0 ? (
             <Button
