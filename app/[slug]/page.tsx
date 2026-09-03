@@ -48,13 +48,13 @@ export default async function ToolPage({ params }: ToolPageProps) {
   return (
     <div className="relative z-10">
       <Navbar />
-      <main className="mx-auto w-full max-w-6xl px-4 pt-10 pb-16 sm:px-6">
+      <main id="main-content" className="mx-auto w-full max-w-6xl px-4 pt-10 pb-16 sm:px-6">
         <Link
           href={`/?category=${tool.category}#catalog`}
           className="mb-6 inline-flex items-center gap-2 font-mono text-[11px] uppercase tracking-[0.2em] text-muted-foreground transition-colors hover:text-foreground"
         >
-          <ArrowLeft className="size-3.5" aria-hidden />
-          All tools <span aria-hidden>/</span> {category?.label}
+          <ArrowLeft className="size-3.5" aria-hidden="true" />
+          All Tools <span aria-hidden="true">/</span> {category?.label}
         </Link>
         <ToolShell slug={tool.slug} />
       </main>

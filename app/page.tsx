@@ -6,7 +6,7 @@ export default function HomePage() {
   return (
     <div className="relative z-10">
       <Navbar />
-      <main className="mx-auto w-full max-w-6xl px-4 pt-10 pb-16 sm:px-6">
+      <main id="main-content" className="mx-auto w-full max-w-6xl px-4 pt-10 pb-16 sm:px-6">
         <section className="mb-8 animate-rise-in">
           <p className="font-mono text-[11px] uppercase tracking-[0.24em] text-muted-foreground">
             Browser PDF toolkit

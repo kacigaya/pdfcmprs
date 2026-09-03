@@ -1,7 +1,7 @@
 "use client";
 
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
-import { useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
@@ -13,6 +13,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Navbar } from "@/components/site/navbar";
+import { SiteFooter } from "../components/site/SiteFooter";
 import {
   DEFAULT_SETTINGS,
   LANGUAGES,
@@ -21,30 +22,41 @@ import {
   type AppSettings,
   type Language,
 } from "../lib/settings";
-import { SiteFooter } from "../components/site/SiteFooter";
 
 export default function SettingsPage() {
   const [settings, setSettings, ready] = useSettings();
-  const [importError, setImportError] = useState("");
-  const [saved, setSaved] = useState("Saved automatically");
-  const importRef = useRef<HTMLInputElement>(null);
-  const update = (patch: Partial<AppSettings>) => {
-    setSaved("Saving…");
-    setSettings({ ...settings, ...patch });
-    window.setTimeout(() => setSaved("Saved automatically"), 200);
-  };
-  const exportSettings = () => {
-    const url = URL.createObjectURL(
-      new Blob([JSON.stringify(settings, null, 2)], {
-        type: "application/json",
-      }),
+  const [saved, setSaved] = useState<string>("");
+  const [importError, setImportError] = useState<string>("");
+  const importRef = useRef<HTMLInputElement | null>(null);
+
+  useEffect(() => {
+    if (!ready) return;
+    document.documentElement.lang = settings.language;
+    document.documentElement.setAttribute(
+      "data-compact",
+      settings.compact ? "true" : "false",
     );
+  }, [settings, ready]);
+
+  const update = (patch: Partial<AppSettings>) => {
+    const next = { ...settings, ...patch };
+    setSettings(next);
+    setSaved("Saved");
+    window.setTimeout(() => setSaved(""), 1600);
+  };
+
+  const exportSettings = () => {
+    const blob = new Blob([JSON.stringify(settings, null, 2)], {
+      type: "application/json",
+    });
+    const url = URL.createObjectURL(blob);
     const anchor = document.createElement("a");
     anchor.href = url;
     anchor.download = "pdfcmprs-settings.json";
     anchor.click();
     URL.revokeObjectURL(url);
   };
+
   const importSettings = async (file?: File) => {
     if (!file) return;
     try {
@@ -54,21 +66,22 @@ export default function SettingsPage() {
       setImportError("That file is not valid settings JSON.");
     }
   };
+
   return (
     <div className="relative z-10">
       <Navbar />
-      <main className="mx-auto w-full max-w-3xl px-4 py-10 sm:px-6">
+      <main id="main-content" className="mx-auto w-full max-w-3xl px-4 py-10 sm:px-6">
         <Link
           href="/"
           className="font-mono text-xs uppercase tracking-widest text-muted-foreground"
         >
-          ← All tools
+          ← All Tools
         </Link>
         <div className="mt-5 flex items-end justify-between gap-4 border-b border-border pb-4">
           <div>
-            <h1 className="font-heading text-4xl">Settings</h1>
+            <h1 className="text-balance font-heading text-4xl">Settings</h1>
             <p className="mt-2 text-sm text-muted-foreground">
-              Tune pdfcmprs for this browser.
+              Tune <span translate="no">pdfcmprs</span> for this browser.
             </p>
           </div>
           <p
@@ -84,7 +97,7 @@ export default function SettingsPage() {
         >
           <section aria-labelledby="display-settings" className="grid gap-5">
             <div>
-              <h2 id="display-settings" className="font-heading text-2xl">
+              <h2 id="display-settings" className="text-balance font-heading text-2xl scroll-mt-20">
                 Display
               </h2>
               <p className="text-sm text-muted-foreground">
@@ -137,7 +150,7 @@ export default function SettingsPage() {
             className="grid gap-4 border-t border-border pt-6"
           >
             <div>
-              <h2 id="interaction-settings" className="font-heading text-2xl">
+              <h2 id="interaction-settings" className="text-balance font-heading text-2xl scroll-mt-20">
                 Interaction
               </h2>
               <p className="text-sm text-muted-foreground">
@@ -162,14 +175,14 @@ export default function SettingsPage() {
 
           <div className="flex flex-wrap gap-2 border-t border-border pt-5">
             <Button disabled={!ready} onClick={exportSettings}>
-              Export settings
+              Export Settings
             </Button>
             <Button
               disabled={!ready}
               variant="outline"
               onClick={() => importRef.current?.click()}
             >
-              Import settings
+              Import Settings
             </Button>
             <Button
               disabled={!ready}
@@ -180,6 +193,10 @@ export default function SettingsPage() {
             </Button>
             <input
               ref={importRef}
+              id="import-settings-input"
+              name="settingsFile"
+              autoComplete="off"
+              aria-label="Import settings file"
               type="file"
               accept="application/json,.json"
               className="hidden"
