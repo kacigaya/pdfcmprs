@@ -1,6 +1,45 @@
 @import "tailwindcss";
 
-@theme {
+/* Palette is class-driven so the stored theme can override the OS preference. */
+@custom-variant dark (&:where(.dark, .dark *));
+
+:root {
+    color-scheme: light;
+    --paper: #f1ead8;
+    --paper-2: #fbf6e9;
+    --paper-3: #e7decb;
+    --ink: #181410;
+    --ink-soft: #5e544b;
+    --ink-faint: #8f8579;
+    --rule: #181410;
+    --rule-soft: #c4b9a3;
+    --accent: #c83c1d;
+    --accent-deep: #952a14;
+    --accent-ink: #fbf6e9;
+    --warn: #b21f1f;
+    --good: #2c5e3f;
+    --grain-opacity: 0.05;
+}
+
+.dark {
+    color-scheme: dark;
+    --paper: #14110d;
+    --paper-2: #1c1813;
+    --paper-3: #25201a;
+    --ink: #ece2cd;
+    --ink-soft: #a89c87;
+    --ink-faint: #6b6356;
+    --rule: #ece2cd;
+    --rule-soft: #322c25;
+    --accent: #e26544;
+    --accent-deep: #c84e2f;
+    --accent-ink: #14110d;
+    --warn: #f0a3a3;
+    --good: #80c79b;
+    --grain-opacity: 0.09;
+}
+
+@theme inline {
     --color-background: var(--paper);
     --color-foreground: var(--ink);
     --color-card: var(--paper-2);
@@ -8,16 +47,16 @@
     --color-popover: var(--paper-2);
     --color-popover-foreground: var(--ink);
     --color-primary: var(--accent);
-    --color-primary-foreground: #ffffff;
+    --color-primary-foreground: var(--accent-ink);
     --color-secondary: var(--paper-3);
     --color-secondary-foreground: var(--ink);
     --color-muted: var(--paper-3);
     --color-muted-foreground: var(--ink-soft);
-    --color-accent: var(--accent-wash);
-    --color-accent-foreground: var(--accent);
+    --color-accent: var(--paper-3);
+    --color-accent-foreground: var(--ink);
     --color-destructive: var(--warn);
-    --color-destructive-foreground: #ffffff;
-    --color-border: var(--rule);
+    --color-destructive-foreground: var(--warn);
+    --color-border: var(--rule-soft);
     --color-input: var(--rule-soft);
     --color-ring: var(--accent);
     --color-info: var(--ink-soft);
@@ -54,44 +93,10 @@
     }
 }
 
-:root {
-    --paper: #f6f1e7;
-    --paper-2: #fffdf9;
-    --paper-3: #ede6d8;
-    --ink: #181410;
-    --ink-soft: #5e574f;
-    --rule: #ded6c5;
-    --rule-soft: #e9e2d3;
-    --accent: #c83c1d;
-    --accent-wash: #fbeae5;
-    --good: #2b7442;
-    --warn: #a63116;
-    --grain-opacity: 0.035;
-}
-
-.dark {
-    --paper: #14110d;
-    --paper-2: #1c1813;
-    --paper-3: #26211a;
-    --ink: #f4eee2;
-    --ink-soft: #aba294;
-    --rule: #332c23;
-    --rule-soft: #27221b;
-    --accent: #e45736;
-    --accent-wash: #2e1a14;
-    --good: #4fa86b;
-    --warn: #e45736;
-    --grain-opacity: 0.055;
-}
-
 html {
     background: var(--paper);
     touch-action: manipulation;
     -webkit-tap-highlight-color: transparent;
-}
-
-html.dark {
-    color-scheme: dark;
 }
 
 html[data-compact="true"] .max-w-6xl { max-width: 56rem; }
