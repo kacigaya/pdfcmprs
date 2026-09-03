@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Link from "next/link";
 import { Moon, Sun } from "lucide-react";
 import { buttonVariants } from "@/components/ui/button";
 import { Button } from "@/components/ui/button";
@@ -25,13 +26,15 @@ export function Navbar() {
   return (
     <header className="sticky top-3 z-40 px-4 sm:px-6">
       <div className="mx-auto flex h-14 w-full max-w-6xl items-center justify-between gap-4 rounded-2xl border border-border bg-card/85 px-4 shadow-xs backdrop-blur sm:px-5">
-        <a
+        <Link
           href="/"
           className="font-heading text-2xl leading-none tracking-tight text-foreground"
         >
-          pdf
-          <em className="-ml-[0.04em] italic text-primary">cmprs</em>
-        </a>
+          <span translate="no">
+            pdf
+            <em className="-ml-[0.04em] italic text-primary">cmprs</em>
+          </span>
+        </Link>
         <div className="flex items-center gap-3">
           <Button
             variant="ghost"
@@ -42,12 +45,12 @@ export function Navbar() {
           >
             {dark ? <Sun aria-hidden="true" /> : <Moon aria-hidden="true" />}
           </Button>
-          <a
+          <Link
             className={buttonVariants({ variant: "ghost", size: "sm" })}
             href="/settings"
           >
             {copy(settings.language).settings}
-          </a>
+          </Link>
           <a
             className={buttonVariants({ variant: "outline", size: "sm" })}
             href="https://github.com/kacigaya/pdfcmprs"

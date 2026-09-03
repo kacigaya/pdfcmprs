@@ -9,15 +9,17 @@ export function SiteFooter() {
         <a
           href={SOURCE_URL}
           target="_blank"
-          rel="noreferrer"
+          rel="noopener noreferrer"
           className="transition-colors hover:text-foreground"
         >
           Source (AGPL-3.0)
         </a>
         {" · "}
-        <em className="font-heading normal-case italic tracking-normal">
-          pdfcmprs
-        </em>{" "}
+        <span translate="no">
+          <em className="font-heading normal-case italic tracking-normal">
+            pdfcmprs
+          </em>
+        </span>{" "}
         · {new Date().getFullYear()}
       </span>
     </footer>
