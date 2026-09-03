@@ -16,8 +16,8 @@ interface ToolShellProps {
 function PanelFallback() {
   return (
     <div
-      className="min-h-52 animate-pulse rounded-xl border border-dashed border-input"
-      aria-hidden
+      className="min-h-52 animate-pulse motion-reduce:animate-none rounded-xl border border-dashed border-input"
+      aria-hidden="true"
     />
   );
 }
@@ -86,15 +86,15 @@ export function ToolShell({ slug }: ToolShellProps) {
           <div className="flex items-baseline justify-between gap-4">
             <h2
               id="related-tools"
-              className="font-heading text-2xl tracking-tight"
+              className="font-heading text-2xl tracking-tight text-balance"
             >
-              Related tools
+              Related Tools
             </h2>
             <Link
               href={`/?category=${tool.category}#catalog`}
               className="font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground hover:text-foreground"
             >
-              All {category?.label ?? "PDF"} tools
+              All {category?.label ?? "PDF"} Tools
             </Link>
           </div>
           <ul className="mt-3 grid gap-2 sm:grid-cols-3">

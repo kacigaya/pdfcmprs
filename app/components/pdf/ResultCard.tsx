@@ -99,13 +99,14 @@ export function ResultCard({
 
       {result ? (
         <>
-          <h3 className="break-words font-heading italic text-xl leading-tight">
+          <h3 className="break-words font-heading italic text-xl leading-tight text-balance">
             {result.filename}
           </h3>
           {result.description ? (
             <p
               className="mt-2 text-pretty font-heading italic leading-normal"
               data-testid="status-message"
+              aria-live="polite"
             >
               {result.description}
             </p>
@@ -142,6 +143,7 @@ export function ResultCard({
               : "text-pretty font-heading italic leading-normal"
           }
           data-testid="status-message"
+          aria-live="polite"
         >
           {status.message}
         </p>
@@ -160,7 +162,7 @@ export function ResultCard({
           </Progress>
           <div className="mt-1.5 flex justify-between font-mono text-[10px] uppercase tracking-[0.22em] text-muted-foreground">
             <span>Processing</span>
-            <span>{pct.toString().padStart(3, "0")}%</span>
+            <span className="tabular-nums">{pct.toString().padStart(3, "0")}%</span>
           </div>
         </div>
       ) : null}
@@ -183,7 +185,7 @@ export function ResultCard({
               }}
               data-testid="download-button"
             >
-              Download
+              Download File
             </Button>
           ) : null}
         </div>

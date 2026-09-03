@@ -49,29 +49,29 @@ describe("filterImageFiles", () => {
 
 describe("formatFileSize", () => {
   test("formats bytes without a decimal", () => {
-    expect(formatFileSize(0)).toBe("0 B");
-    expect(formatFileSize(999)).toBe("999 B");
+    expect(formatFileSize(0)).toBe("0\u00A0B");
+    expect(formatFileSize(999)).toBe("999\u00A0B");
   });
 
   test("steps up units at 1024", () => {
-    expect(formatFileSize(1024)).toBe("1.0 KB");
-    expect(formatFileSize(1024 * 1024)).toBe("1.0 MB");
-    expect(formatFileSize(1024 * 1024 * 1024)).toBe("1.0 GB");
+    expect(formatFileSize(1024)).toBe("1.0\u00A0KB");
+    expect(formatFileSize(1024 * 1024)).toBe("1.0\u00A0MB");
+    expect(formatFileSize(1024 * 1024 * 1024)).toBe("1.0\u00A0GB");
   });
 
   test("drops the decimal at 10 units and above", () => {
-    expect(formatFileSize(1024 * 10)).toBe("10 KB");
-    expect(formatFileSize(1024 * 1536)).toBe("1.5 MB");
+    expect(formatFileSize(1024 * 10)).toBe("10\u00A0KB");
+    expect(formatFileSize(1024 * 1536)).toBe("1.5\u00A0MB");
   });
 
   test("clamps invalid input", () => {
-    expect(formatFileSize(-5)).toBe("0 B");
-    expect(formatFileSize(Number.NaN)).toBe("0 B");
-    expect(formatFileSize(Number.POSITIVE_INFINITY)).toBe("0 B");
+    expect(formatFileSize(-5)).toBe("0\u00A0B");
+    expect(formatFileSize(Number.NaN)).toBe("0\u00A0B");
+    expect(formatFileSize(Number.POSITIVE_INFINITY)).toBe("0\u00A0B");
   });
 
   test("caps at the largest known unit", () => {
-    expect(formatFileSize(1024 ** 4)).toBe("1024 GB");
+    expect(formatFileSize(1024 ** 4)).toBe("1024\u00A0GB");
   });
 });
 

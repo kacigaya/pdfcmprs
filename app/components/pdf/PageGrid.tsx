@@ -120,7 +120,7 @@ export function PageGrid({
   return (
     <div className="mt-6">
       <div className="mb-3 flex items-center justify-between gap-2 border-y border-border py-2">
-        <span className="font-mono text-[11px] uppercase tracking-[0.2em] text-muted-foreground">
+        <span className="font-mono text-[11px] uppercase tracking-[0.2em] text-muted-foreground tabular-nums">
           {total > 0
             ? `${selectedSet.size} / ${total} pages selected`
             : "Loading document…"}
@@ -160,7 +160,7 @@ export function PageGrid({
               {active ? (
                 <span
                   className="absolute right-1.5 top-1 font-heading italic text-primary"
-                  aria-hidden
+                  aria-hidden="true"
                 >
                   ✓
                 </span>
@@ -170,10 +170,12 @@ export function PageGrid({
               <img
                 src={src}
                 alt=""
+                width={86}
+                height={121}
                 className="block aspect-[0.71] w-full rounded-xs border border-border bg-muted object-cover"
                 loading="lazy"
               />
-              <span className="text-center font-mono text-[10px] tracking-[0.18em] text-muted-foreground">
+              <span className="text-center font-mono text-[10px] tracking-[0.18em] text-muted-foreground tabular-nums">
                 {String(page).padStart(2, "0")}
               </span>
             </button>
@@ -184,9 +186,9 @@ export function PageGrid({
               <div
                 key={`skeleton-${i}`}
                 className="grid gap-1.5 rounded-md border border-dashed border-border bg-background p-1.5 pb-2"
-                aria-hidden
+                aria-hidden="true"
               >
-                <span className="block aspect-[0.71] w-full animate-pulse rounded-xs border border-border bg-muted" />
+                <span className="block aspect-[0.71] w-full animate-pulse motion-reduce:animate-none rounded-xs border border-border bg-muted" />
               </div>
             ))
           : null}

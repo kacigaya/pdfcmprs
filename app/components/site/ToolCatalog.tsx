@@ -133,9 +133,9 @@ export function ToolCatalog() {
         <div className="mb-4 border-b border-border pb-2">
           <h2
             id="popular-tools"
-            className="font-heading text-2xl leading-tight tracking-tight"
+            className="font-heading text-2xl leading-tight tracking-tight text-balance"
           >
-            Popular tools
+            Popular Tools
           </h2>
           <p className="mt-1 font-mono text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
             Common jobs, one click away.
@@ -204,7 +204,7 @@ export function ToolCatalog() {
           className="mt-2 font-mono text-[10px] uppercase tracking-[0.22em] text-muted-foreground"
           aria-live="polite"
         >
-          {total} {words.tools} {query ? words.matched : words.available}
+          <span className="tabular-nums">{total}</span> {words.tools} {query ? words.matched : words.available}
         </p>
       </div>
 
@@ -223,7 +223,7 @@ export function ToolCatalog() {
             <div className="mb-4 border-b border-border pb-2">
               <h2
                 id={`category-${category.id}`}
-                className="font-heading text-2xl leading-tight tracking-tight"
+                className="font-heading text-2xl leading-tight tracking-tight text-balance"
               >
                 {category.label}
               </h2>

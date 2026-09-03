@@ -52,7 +52,7 @@ export function PdfThumbnail({
           "flex items-center justify-center font-heading italic text-muted-foreground",
           className,
         )}
-        aria-hidden
+        aria-hidden="true"
       >
         ?
       </span>
@@ -60,8 +60,8 @@ export function PdfThumbnail({
   if (!src)
     return (
       <span
-        className={cn(baseClassName, "animate-pulse", className)}
-        aria-hidden
+        className={cn(baseClassName, "animate-pulse motion-reduce:animate-none", className)}
+        aria-hidden="true"
       />
     );
   // eslint-disable-next-line @next/next/no-img-element
@@ -70,6 +70,8 @@ export function PdfThumbnail({
       className={cn(baseClassName, className)}
       src={src}
       alt={alt}
+      width={48}
+      height={68}
       loading="lazy"
     />
   );

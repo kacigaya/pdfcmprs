@@ -17,7 +17,7 @@ export function filterImageFiles(files: Iterable<File>): File[] {
 }
 
 export function formatFileSize(bytes: number): string {
-  if (!Number.isFinite(bytes) || bytes < 0) return "0 B";
+  if (!Number.isFinite(bytes) || bytes < 0) return "0\u00A0B";
   const units = ["B", "KB", "MB", "GB"];
   let value = bytes;
   let unit = 0;
@@ -26,7 +26,7 @@ export function formatFileSize(bytes: number): string {
     unit += 1;
   }
   const formatted = value >= 10 || unit === 0 ? value.toFixed(0) : value.toFixed(1);
-  return `${formatted} ${units[unit]}`;
+  return `${formatted}\u00A0${units[unit]}`;
 }
 
 export function withPdfExtension(name: string, suffix: string): string {
