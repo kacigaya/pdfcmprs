@@ -96,6 +96,8 @@ export function FileUploadZone({
       <input
         ref={inputRef}
         type="file"
+        name="files"
+        autoComplete="off"
         className="sr-only"
         accept={accept}
         multiple={multiple}
@@ -114,18 +116,18 @@ export function FileUploadZone({
                 <Upload
                   data-icon="inline-start"
                   className="-ms-0.5 size-3.5 opacity-60"
-                  aria-hidden
+                  aria-hidden="true"
                 />
-                {multiple ? "Add files" : "Replace"}
+                {multiple ? "Add Files" : "Replace"}
               </Button>
               {onClear ? (
                 <Button variant="outline" size="sm" onClick={onClear}>
                   <Trash2
                     data-icon="inline-start"
                     className="-ms-0.5 size-3.5 opacity-60"
-                    aria-hidden
+                    aria-hidden="true"
                   />
-                  Remove all
+                  Remove All
                 </Button>
               ) : null}
             </div>
@@ -145,7 +147,7 @@ export function FileUploadZone({
                         className="w-7 rounded-none border-0"
                       />
                     ) : (
-                      <FileText className="size-4 opacity-60" aria-hidden />
+                      <FileText className="size-4 opacity-60" aria-hidden="true" />
                     )}
                   </div>
                   <div className="flex min-w-0 flex-col gap-0.5">
@@ -155,7 +157,7 @@ export function FileUploadZone({
                     >
                       {file.name}
                     </p>
-                    <p className="font-mono text-xs text-muted-foreground">
+                    <p className="font-mono text-xs text-muted-foreground tabular-nums">
                       {formatFileSize(file.size)}
                     </p>
                   </div>
@@ -169,7 +171,7 @@ export function FileUploadZone({
                       onClick={() => onMove(index, -1)}
                       aria-label="Move up"
                     >
-                      <ArrowUp aria-hidden />
+                      <ArrowUp aria-hidden="true" />
                     </Button>
                   ) : null}
                   {onMove && index < files.length - 1 ? (
@@ -180,7 +182,7 @@ export function FileUploadZone({
                       onClick={() => onMove(index, 1)}
                       aria-label="Move down"
                     >
-                      <ArrowDown aria-hidden />
+                      <ArrowDown aria-hidden="true" />
                     </Button>
                   ) : null}
                   <Button
@@ -190,7 +192,7 @@ export function FileUploadZone({
                     onClick={() => onRemove(index)}
                     aria-label="Remove file"
                   >
-                    <X aria-hidden />
+                    <X aria-hidden="true" />
                   </Button>
                 </div>
               </div>
@@ -205,13 +207,13 @@ export function FileUploadZone({
         >
           <EmptyIcon
             className="mb-3 size-7 shrink-0 text-primary"
-            aria-hidden
+            aria-hidden="true"
           />
-          <p className="mb-1.5 font-heading italic text-base leading-snug">
+          <p className="mb-1.5 font-heading italic text-balance text-base leading-snug">
             {label}
           </p>
           {hint ? (
-            <p className="max-w-md text-sm text-muted-foreground">{hint}</p>
+            <p className="max-w-md text-pretty text-sm text-muted-foreground">{hint}</p>
           ) : null}
           <span className="mt-2 text-xs text-muted-foreground">
             Accepts {acceptedLabel}. No app-enforced size limit; browser memory
@@ -221,7 +223,7 @@ export function FileUploadZone({
             <Upload
               data-icon="inline-start"
               className="-ms-1 opacity-60"
-              aria-hidden
+              aria-hidden="true"
             />
             {chooseLabel ?? `Select PDF${multiple ? "s" : ""}`}
           </span>

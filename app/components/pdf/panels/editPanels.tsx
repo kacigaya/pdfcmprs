@@ -64,7 +64,7 @@ export const PageNumbersPanel = createToolPanel({
       name: "format",
       label: "Format",
       default: "{n}",
-      placeholder: "{n} of {total}",
+      placeholder: "e.g. {n} of {total}…",
       hint: "{n} counter · {total} count · {page} real page · {filename}",
       mono: true,
     },
@@ -110,7 +110,7 @@ export const BatesPanel = createToolPanel({
   input: SINGLE_PDF,
   pageSelection: { label: "Pages to stamp", hint: "Leave empty for every page." },
   fields: [
-    { kind: "text", name: "prefix", label: "Prefix", default: "", placeholder: "ABC-" },
+    { kind: "text", name: "prefix", label: "Prefix", default: "", placeholder: "e.g. ABC-…" },
     { kind: "text", name: "suffix", label: "Suffix", default: "" },
     { kind: "number", name: "startAt", label: "Start at", default: 1, min: 0 },
     { kind: "number", name: "digits", label: "Digits", default: 6, min: 1, max: 12 },
@@ -220,7 +220,7 @@ export const HeaderFooterPanel = createToolPanel({
       name: "headerText",
       label: "Header",
       default: "",
-      placeholder: "{filename}",
+      placeholder: "e.g. {filename}…",
       mono: true,
     },
     {

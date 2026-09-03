@@ -15,53 +15,89 @@ import { cn } from "@/lib/utils";
 export type OptionValue = string | number | boolean;
 export type OptionValues = Record<string, OptionValue>;
 
-interface FieldBase {
-  name: string;
+export interface SelectChoice {
+  value: string;
   label: string;
-  hint?: string;
-  /** Hide this field unless the predicate passes. Used for dependent options. */
-  visibleWhen?: (values: OptionValues) => boolean;
 }
 
 export type OptionField =
-  | (FieldBase & {
-      kind: "select";
-      options: ReadonlyArray<{ label: string; value: string }>;
+  | {
+      name: string;
+      label: string;
+      kind: "text";
       default: string;
-    })
-  | (FieldBase & {
+      placeholder?: string;
+      hint?: string;
+      mono?: boolean;
+      visibleWhen?: (values: OptionValues) => boolean;
+    }
+  | {
+      name: string;
+      label: string;
       kind: "number";
       default: number;
       min?: number;
       max?: number;
       step?: number;
-    })
-  | (FieldBase & {
-      kind: "text";
+      hint?: string;
+      visibleWhen?: (values: OptionValues) => boolean;
+    }
+  | {
+      name: string;
+      label: string;
+      kind: "checkbox";
+      default: boolean;
+      hint?: string;
+      visibleWhen?: (values: OptionValues) => boolean;
+    }
+  | {
+      name: string;
+      label: string;
+      kind: "select";
+      options: ReadonlyArray<SelectChoice>;
       default: string;
-      placeholder?: string;
-      mono?: boolean;
-    })
-  | (FieldBase & {
-      kind: "password";
-      default: string;
-      placeholder?: string;
-    })
-  | (FieldBase & {
+      hint?: string;
+      visibleWhen?: (values: OptionValues) => boolean;
+    }
+  | {
+      name: string;
+      label: string;
       kind: "textarea";
       default: string;
       placeholder?: string;
+      hint?: string;
       mono?: boolean;
       rows?: number;
-    })
-  | (FieldBase & { kind: "checkbox"; default: boolean })
-  | (FieldBase & { kind: "color"; default: string });
+      visibleWhen?: (values: OptionValues) => boolean;
+    }
+  | {
+      name: string;
+      label: string;
+      kind: "password";
+      default: string;
+      placeholder?: string;
+      hint?: string;
+      visibleWhen?: (values: OptionValues) => boolean;
+    }
+  | {
+      name: string;
+      label: string;
+      kind: "color";
+      default: string;
+      hint?: string;
+      visibleWhen?: (values: OptionValues) => boolean;
+    };
 
 const LABEL_CLASS_NAME =
   "font-mono text-[11px] uppercase tracking-[0.22em] text-muted-foreground";
 
 const HINT_CLASS_NAME =
   "font-mono text-[10px] uppercase tracking-[0.16em] text-muted-foreground/80";
+
+function formatPlaceholder(placeholder?: string): string | undefined {
+  if (!placeholder) return undefined;
+  return placeholder.endsWith("…") ? placeholder : `${placeholder}…`;
+}
 
 export function defaultOptionValues(
   fields: ReadonlyArray<OptionField>,
@@ -109,6 +145,10 @@ export function OptionsForm({
     <div className={cn("mt-6 grid gap-4 sm:grid-cols-2", className)}>
       {visible.map((field) => {
         const id = `option-${field.name}`;
+        const placeholder = formatPlaceholder(
+          "placeholder" in field ? field.placeholder : undefined,
+        );
+
         return (
           <div
             key={field.name}
@@ -125,6 +165,7 @@ export function OptionsForm({
               >
                 <input
                   id={id}
+                  name={field.name}
                   type="checkbox"
                   disabled={disabled}
                   checked={Boolean(values[field.name])}
@@ -150,7 +191,7 @@ export function OptionsForm({
                       value !== null && onChange(field.name, value)
                     }
                   >
-                    <SelectTrigger id={id} data-testid={id}>
+                    <SelectTrigger id={id} aria-label={field.label} data-testid={id}>
                       <SelectValue />
                     </SelectTrigger>
                     <SelectPopup>
@@ -165,13 +206,15 @@ export function OptionsForm({
                 {field.kind === "number" ? (
                   <Input
                     id={id}
+                    name={field.name}
                     type="number"
+                    inputMode="numeric"
                     nativeInput
                     disabled={disabled}
                     min={field.min}
                     max={field.max}
                     step={field.step}
-                    className="font-mono"
+                    className="font-mono tabular-nums"
                     value={String(values[field.name])}
                     onChange={(event) => {
                       const parsed = Number(event.target.value);
@@ -186,9 +229,12 @@ export function OptionsForm({
                 {field.kind === "text" ? (
                   <Input
                     id={id}
+                    name={field.name}
                     type="text"
                     disabled={disabled}
-                    placeholder={field.placeholder}
+                    autoComplete="off"
+                    spellCheck={field.mono ? false : undefined}
+                    placeholder={placeholder}
                     className={field.mono ? "font-mono" : undefined}
                     value={String(values[field.name])}
                     onValueChange={(value) => onChange(field.name, value)}
@@ -198,21 +244,26 @@ export function OptionsForm({
                 {field.kind === "password" ? (
                   <Input
                     id={id}
+                    name={field.name}
                     type="password"
                     nativeInput
                     disabled={disabled}
-                    placeholder={field.placeholder}
+                    placeholder={placeholder}
                     value={String(values[field.name])}
                     onChange={(event) => onChange(field.name, event.target.value)}
                     autoComplete="current-password"
+                    spellCheck={false}
                     data-testid={id}
                   />
                 ) : null}
                 {field.kind === "textarea" ? (
                   <textarea
                     id={id}
+                    name={field.name}
                     disabled={disabled}
-                    placeholder={field.placeholder}
+                    autoComplete="off"
+                    spellCheck={field.mono ? false : undefined}
+                    placeholder={placeholder}
                     rows={field.rows ?? 6}
                     className={cn(
                       "w-full resize-y rounded-md border border-input bg-background px-3 py-2 text-sm outline-none transition-colors placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-2 focus-visible:ring-ring/30 disabled:cursor-not-allowed disabled:opacity-50",
@@ -228,6 +279,7 @@ export function OptionsForm({
                 {field.kind === "color" ? (
                   <Input
                     id={id}
+                    name={field.name}
                     type="color"
                     nativeInput
                     disabled={disabled}

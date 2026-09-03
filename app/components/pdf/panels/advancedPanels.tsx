@@ -118,7 +118,7 @@ export const PdfToDocxPanel = createToolPanel({ input: PDF, actionLabel: "Export
 
 export const OrganizeDuplicatePanel = createToolPanel({
   input: PDF,
-  fields: [{ kind: "text", name: "order", label: "Page order", default: "1,2,2,3", placeholder: "1,2,2,3" }],
+  fields: [{ kind: "text", name: "order", label: "Page order", default: "1,2,2,3", placeholder: "e.g. 1, 2, 2, 3…" }],
   actionLabel: "Apply page order",
   runningLabel: "Organizing…",
   execute: async ({ files, values }) => {

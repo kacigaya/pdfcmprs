@@ -194,14 +194,17 @@ export function ToolForm({ run, tool, config }: ToolFormProps) {
             htmlFor="page-selection"
             className="font-mono text-[11px] uppercase tracking-[0.22em] text-muted-foreground"
           >
-            {config.pageSelection.label ?? "Page selection"}
+            {config.pageSelection.label ?? "Page Selection"}
           </Label>
           <Input
             id="page-selection"
+            name="pageSelection"
             type="text"
+            autoComplete="off"
+            spellCheck={false}
             className="font-mono"
             value={selection}
-            placeholder="1, 3, 5-7"
+            placeholder="e.g. 1, 3, 5-7…"
             onValueChange={setSelection}
             data-testid="page-selection-input"
           />

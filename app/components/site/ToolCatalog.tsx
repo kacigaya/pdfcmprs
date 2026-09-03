@@ -160,14 +160,17 @@ export function ToolCatalog() {
         <div className="relative">
           <Search
             className="pointer-events-none absolute left-3 top-1/2 z-10 size-4 -translate-y-1/2 text-muted-foreground"
-            aria-hidden
+            aria-hidden="true"
           />
           <Input
             id="tool-search"
+            name="toolSearch"
             type="search"
+            autoComplete="off"
+            spellCheck={false}
             value={query}
             onValueChange={setQuery}
-            placeholder={`${words.search}: rotate, watermark, OCR`}
+            placeholder={`${words.search}: e.g. rotate, watermark, OCR…`}
             className="ps-9"
             data-testid="tool-search"
           />

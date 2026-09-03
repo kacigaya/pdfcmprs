@@ -59,10 +59,13 @@ export default function SplitPanel({ run }: ToolPanelProps) {
         </Label>
         <Input
           id="split-pages"
+          name="splitPages"
           type="text"
+          autoComplete="off"
+          spellCheck={false}
           className="font-mono"
           value={selection}
-          placeholder="1, 3, 5-7"
+          placeholder="e.g. 1, 3, 5-7…"
           onValueChange={setSelection}
           data-testid="split-selection-input"
         />
