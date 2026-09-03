@@ -19,9 +19,9 @@ export function Checkbox({
     >
       <CheckboxPrimitive.Indicator>
         {props.indeterminate ? (
-          <Minus className="size-3.5" />
+          <Minus className="size-3.5" aria-hidden="true" />
         ) : (
-          <Check className="size-3.5" />
+          <Check className="size-3.5" aria-hidden="true" />
         )}
       </CheckboxPrimitive.Indicator>
     </CheckboxPrimitive.Root>
