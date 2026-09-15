@@ -1,8 +1,14 @@
+import Link from "next/link";
+
 const SOURCE_URL = "https://github.com/kacigaya/pdfcmprs";
 
 export function SiteFooter() {
   return (
     <footer className="mx-auto flex w-full max-w-6xl flex-wrap justify-between gap-3 border-t border-border px-4 py-6 font-mono text-[11px] uppercase tracking-[0.2em] text-muted-foreground sm:px-6">
+      <nav aria-label="Legal" className="flex flex-wrap gap-4">
+        <Link href="/privacy">Privacy</Link>
+        <Link href="/cookies">Cookies</Link>
+      </nav>
       <span>Processed client-side · No server upload</span>
       <span>
         {/* AGPL-3.0 section 13: users interacting over a network are offered the source. */}

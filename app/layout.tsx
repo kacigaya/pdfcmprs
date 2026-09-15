@@ -26,7 +26,7 @@ const jetbrainsMono = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://pdfcmprs.netlify.app"),
+  metadataBase: new URL("https://pdfcmprs.duckdns.org"),
   title: "pdfcmprs: Browser PDF tools",
   description:
     "Compress, merge, split, inspect, extract text from, and convert PDFs in your browser.",
@@ -96,7 +96,10 @@ export default function RootLayout({
         >
           Skip to main content
         </a>
-        <ThemeProvider><AppRuntime />{children}</ThemeProvider>
+        <ThemeProvider>
+          <AppRuntime />
+          {children}
+        </ThemeProvider>
       </body>
     </html>
   );
