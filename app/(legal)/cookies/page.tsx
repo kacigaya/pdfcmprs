@@ -1,18 +1,19 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { pageUrl } from "../../lib/assets";
 import { LEGAL_UPDATED } from "../updated";
 
 export const metadata: Metadata = {
   title: "Cookies policy",
   description:
     "How pdfcmprs handles cookies, browser storage, and preferences.",
-  alternates: { canonical: "https://pdfcmprs.duckdns.org/cookies" },
+  alternates: { canonical: pageUrl("/cookies") },
   openGraph: {
     title: "Cookies policy | pdfcmprs",
     description:
       "How pdfcmprs handles cookies, browser storage, and preferences.",
     type: "website",
-    url: "https://pdfcmprs.duckdns.org/cookies",
+    url: pageUrl("/cookies"),
   },
   twitter: {
     card: "summary",
@@ -27,7 +28,7 @@ export default function PolicyPage() {
     <>
       <h1>Cookies policy</h1>
       <p className="text-xs text-muted-foreground tabular-nums">
-        Last updated <time dateTime={LEGAL_UPDATED}>15 September 2026</time>
+        Last updated <time dateTime={LEGAL_UPDATED}>16 September 2026</time>
       </p>
       <h2>Cookies</h2>
       <p>
@@ -82,8 +83,9 @@ export default function PolicyPage() {
       <p>
         Links to external sites are governed by their policies once you follow
         them. The timestamp tool makes a request to the selected timestamp
-        authority only when you use it. Server request logs are separate from
-        browser storage and are covered by the{" "}
+        authority only when you use it. Hosting request logs, including GitHub
+        Pages logs for the Pages version, are separate from browser storage and
+        are covered by the{" "}
         <Link href="/privacy">privacy policy</Link>.
       </p>
       <h2>Questions and changes</h2>

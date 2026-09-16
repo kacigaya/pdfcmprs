@@ -16,7 +16,7 @@ function navigationRequest(url: string) {
   return request;
 }
 
-function createHarness() {
+function createHarness(path = "/") {
   const listeners = new Map<string, FetchListener>();
   const entries = new Map<string, Response>();
   const cacheKey = (request: RequestInfo | URL) =>
@@ -50,6 +50,7 @@ function createHarness() {
       listeners.set(type, listener);
     },
     clients: { async claim() {} },
+    registration: { scope: `https://pdfcmprs.test${path}` },
     async skipWaiting() {},
   };
   let networkCalls = 0;
@@ -156,6 +157,28 @@ describe("service worker caching", () => {
     const response = await harness.dispatch(new Request(url));
     expect(await response.text()).toBe("cached");
     expect(await harness.entries.get(url)?.text()).toBe("updated");
+  });
+
+  test("adds cross-origin isolation headers to responses", async () => {
+    const harness = createHarness();
+    harness.setNetworkResponse("page");
+
+    const response = await harness.dispatch(
+      navigationRequest("https://pdfcmprs.test/compress-pdf"),
+    );
+    expect(response.headers.get("Cross-Origin-Embedder-Policy")).toBe("require-corp");
+    expect(response.headers.get("Cross-Origin-Opener-Policy")).toBe("same-origin");
+    expect(await response.text()).toBe("page");
+  });
+
+  test("caches assets under the Pages project path", async () => {
+    const harness = createHarness("/pdfcmprs/");
+    const url = "https://pdfcmprs.test/pdfcmprs/_next/static/chunks/app.js";
+    harness.entries.set(url, new Response("cached"));
+
+    const response = await harness.dispatch(new Request(url));
+    expect(await response.text()).toBe("cached");
+    expect(harness.networkCalls).toBe(0);
   });
 
   test("leaves byte-range requests to the network", () => {

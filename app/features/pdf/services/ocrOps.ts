@@ -1,4 +1,5 @@
 import { PDFDocument } from "pdf-lib";
+import { assetUrl } from "../../../lib/assets";
 import { bytesToPdfBlob } from "../../../lib/blob";
 import { withPdfExtension } from "../../../lib/files";
 import { loadPdfDocument, pixelsToBlob, renderPageToPixels } from "../../../lib/pdfPreview";
@@ -49,9 +50,9 @@ export async function ocrPdf(
   let worker: Awaited<ReturnType<typeof tesseract.createWorker>> | undefined;
   try {
     worker = await tesseract.createWorker(language, undefined, {
-      workerPath: "/tesseract/worker.min.js",
-      corePath: "/tesseract/core",
-      langPath: "/tesseract/lang",
+      workerPath: assetUrl("/tesseract/worker.min.js"),
+      corePath: assetUrl("/tesseract/core"),
+      langPath: assetUrl("/tesseract/lang"),
     });
     const out = await PDFDocument.create();
     const texts: string[] = [];

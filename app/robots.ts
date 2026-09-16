@@ -1,10 +1,11 @@
 import type { MetadataRoute } from "next";
+import { pageUrl } from "./lib/assets";
 
 export const dynamic = "force-static";
 
 export default function robots(): MetadataRoute.Robots {
   return {
     rules: { userAgent: "*", allow: "/" },
-    sitemap: "https://pdfcmprs.duckdns.org/sitemap.xml",
+    sitemap: pageUrl("/sitemap.xml"),
   };
 }

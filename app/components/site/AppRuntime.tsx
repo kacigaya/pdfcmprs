@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
+import { assetUrl } from "../../lib/assets";
 import { useSettings } from "../../lib/settings";
 
 export function AppRuntime() {
@@ -11,8 +12,17 @@ export function AppRuntime() {
   }, [settings]);
   useEffect(() => {
     if ("serviceWorker" in navigator && process.env.NODE_ENV === "production") {
+      // Static hosts rely on the worker to add COOP/COEP (see public/sw.js).
+      // Reload when it takes control so threaded engines get SharedArrayBuffer.
+      if (!window.crossOriginIsolated) {
+        navigator.serviceWorker.addEventListener(
+          "controllerchange",
+          () => window.location.reload(),
+          { once: true },
+        );
+      }
       navigator.serviceWorker
-        .register("/sw.js", { updateViaCache: "none" })
+        .register(assetUrl("/sw.js"), { updateViaCache: "none" })
         .catch((error: unknown) =>
           console.error("Service worker registration failed", error),
         );

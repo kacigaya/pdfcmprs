@@ -1,17 +1,18 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { pageUrl } from "../../lib/assets";
 import { LEGAL_UPDATED } from "../updated";
 
 export const metadata: Metadata = {
   title: "Privacy policy",
   description: "How pdfcmprs handles data, hosting requests, and your privacy.",
-  alternates: { canonical: "https://pdfcmprs.duckdns.org/privacy" },
+  alternates: { canonical: pageUrl("/privacy") },
   openGraph: {
     title: "Privacy policy | pdfcmprs",
     description:
       "How pdfcmprs handles data, hosting requests, and your privacy.",
     type: "website",
-    url: "https://pdfcmprs.duckdns.org/privacy",
+    url: pageUrl("/privacy"),
   },
   twitter: {
     card: "summary",
@@ -26,7 +27,7 @@ export default function PolicyPage() {
     <>
       <h1>Privacy policy</h1>
       <p className="text-xs text-muted-foreground tabular-nums">
-        Last updated <time dateTime={LEGAL_UPDATED}>15 September 2026</time>
+        Last updated <time dateTime={LEGAL_UPDATED}>16 September 2026</time>
       </p>
       <h2>About this site</h2>
       <p>
@@ -55,27 +56,47 @@ export default function PolicyPage() {
         request.
       </p>
       <h2>Hosting and request logs</h2>
-      <p>
-        This site is hosted on a VPS administered by Gaya KACI, on Oracle Cloud
-        Infrastructure in its Paris region. Serving a page requires processing
-        your IP address and request details. Oracle provides the infrastructure
-        that carries this traffic and holds the server’s data.
-      </p>
-      <p>
-        The VPS web server records request times, IP addresses, requested URLs,
-        response status and size, duration, and browser headers such as
-        User-Agent and Referer. IP masking is not enabled for this site. Request
-        bodies are not included in these access logs. Logs are used to
-        investigate errors and abuse, not to profile visitors or measure
-        audiences.
-      </p>
-      <p>
-        Access logs use size-based rotation. Rotated files are subject to the
-        server’s default limit of 10 files and 90-day age cleanup when rotation
-        runs. This is not a maximum age for every entry: the active log can
-        remain longer when traffic is low. There is no fixed 30-day deletion
-        guarantee.
-      </p>
+      {process.env.NEXT_STATIC_EXPORT === "1" ? (
+        <>
+          <p>
+            This version is hosted on GitHub Pages. GitHub processes requests
+            for pages and assets and records visitor IP addresses and request
+            details to deliver and secure its services.
+            GitHub describes its handling of this data in its{" "}
+            <a href="https://docs.github.com/en/site-policy/privacy-policies/github-general-privacy-statement">
+              privacy statement
+            </a>. We do not control GitHub’s log retention.
+          </p>
+          <p>
+            The app does not send your documents to GitHub. Your browser requests
+            site assets and PDF engines when needed.
+          </p>
+        </>
+      ) : (
+        <>
+          <p>
+            This site is hosted on a VPS administered by Gaya KACI, on Oracle
+            Cloud Infrastructure in its Paris region. Serving a page requires
+            processing your IP address and request details. Oracle provides the
+            infrastructure that carries this traffic and holds the server’s data.
+          </p>
+          <p>
+            The VPS web server records request times, IP addresses, requested
+            URLs, response status and size, duration, and browser headers such
+            as User-Agent and Referer. IP masking is not enabled for this site.
+            Request bodies are not included in these access logs. Logs are used
+            to investigate errors and abuse, not to profile visitors or measure
+            audiences.
+          </p>
+          <p>
+            Access logs use size-based rotation. Rotated files are subject to
+            the server’s default limit of 10 files and 90-day age cleanup when
+            rotation runs. This is not a maximum age for every entry: the active
+            log can remain longer when traffic is low. There is no fixed 30-day
+            deletion guarantee.
+          </p>
+        </>
+      )}
       <h2>Browser storage</h2>
       <p>
         The site remembers its theme in local storage. This is a browser

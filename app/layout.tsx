@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { DM_Sans, Fraunces, JetBrains_Mono } from "next/font/google";
 import { ThemeProvider } from "@/components/theme-provider";
 import { AppRuntime } from "./components/site/AppRuntime";
+import { assetUrl, pageUrl, SITE_URL } from "./lib/assets";
 import "./globals.css";
 
 const fraunces = Fraunces({
@@ -26,25 +27,26 @@ const jetbrainsMono = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://pdfcmprs.duckdns.org"),
+  metadataBase: new URL(SITE_URL),
   title: "pdfcmprs: Browser PDF tools",
   description:
     "Compress, merge, split, inspect, extract text from, and convert PDFs in your browser.",
-  manifest: "/manifest.webmanifest",
+  // Next does not apply basePath to the manifest link.
+  manifest: assetUrl("/manifest.webmanifest"),
   alternates: {
-    canonical: "/",
+    canonical: pageUrl("/"),
   },
   openGraph: {
     type: "website",
     locale: "en_US",
-    url: "/",
+    url: pageUrl("/"),
     title: "pdfcmprs: Browser PDF tools",
     description:
       "Compress, merge, split, inspect, extract text from, and convert PDFs in your browser.",
     siteName: "pdfcmprs",
     images: [
       {
-        url: "/pdfcmprs-banner.png",
+        url: pageUrl("/pdfcmprs-banner.png"),
         width: 1200,
         height: 630,
         alt: "pdfcmprs preview banner",
@@ -58,7 +60,7 @@ export const metadata: Metadata = {
       "Compress, merge, split, inspect, extract text from, and convert PDFs in your browser.",
     images: [
       {
-        url: "/pdfcmprs-banner.png",
+        url: pageUrl("/pdfcmprs-banner.png"),
         alt: "pdfcmprs preview banner",
       },
     ],

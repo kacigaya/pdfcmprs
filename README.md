@@ -125,9 +125,21 @@ bun run build:static # export a fully static build to out/
 ```
 
 The production server sends COOP/COEP headers so threaded WASM engines can use
-their fastest path. Static hosts should configure the same headers when
-possible. The installable PWA caches same-origin routes and engine assets after
-first use, so tools remain available offline.
+their fastest path. On static hosts that cannot set headers, the service worker
+adds them itself and reloads the page when it takes control. The
+installable PWA caches same-origin routes and engine assets after first use, so
+tools remain available offline.
+
+### GitHub Pages
+
+`.github/workflows/pages.yml` builds the static export and publishes it through
+the Pages Actions artifact on every push to `main`. Enable it once under
+Settings → Pages → Source → GitHub Actions. Project sites are served under
+`/<repo>/`; the workflow passes that prefix as `NEXT_PUBLIC_BASE_PATH`, which
+sets `basePath` and prefixes engine asset URLs. It also sets
+`NEXT_PUBLIC_SITE_URL` for canonical tags and the sitemap. Pages cannot send
+headers or run redirects, so CSP and the legacy `/tools/*` redirects only apply
+to the Node or Docker deployment.
 
 ### Docker
 

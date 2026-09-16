@@ -2,6 +2,8 @@
 
 import type { PDFDocumentProxy } from "pdfjs-dist";
 
+import { assetUrl } from "./assets";
+
 type PdfJsModule = typeof import("pdfjs-dist/legacy/build/pdf.mjs");
 
 let modulePromise: Promise<PdfJsModule> | null = null;
@@ -13,7 +15,7 @@ async function getPdfJs(): Promise<PdfJsModule> {
   }
   const pdfjs = await modulePromise;
   if (!workerConfigured) {
-    pdfjs.GlobalWorkerOptions.workerSrc = "/pdf.worker.min.mjs";
+    pdfjs.GlobalWorkerOptions.workerSrc = assetUrl("/pdf.worker.min.mjs");
     workerConfigured = true;
   }
   return pdfjs;

@@ -1,5 +1,7 @@
-const CACHE = "pdfcmprs-v2";
-const PRECACHE = ["/", "/manifest.webmanifest", "/icon.svg"];
+const CACHE = "pdfcmprs-v3";
+// "/" on the VPS, "/<repo>/" on a GitHub Pages project site.
+const SCOPE = new URL(self.registration.scope).pathname;
+const PRECACHE = [SCOPE, `${SCOPE}manifest.webmanifest`, `${SCOPE}icon.svg`];
 
 self.addEventListener("install", (event) => {
   event.waitUntil(
@@ -42,7 +44,7 @@ function networkFirst(event, navigation) {
     const cached = await cache.match(event.request);
     if (cached) return cached;
     if (navigation) {
-      const shell = await cache.match("/");
+      const shell = await cache.match(SCOPE);
       if (shell) return shell;
     }
     throw error;
@@ -73,6 +75,26 @@ function staleWhileRevalidate(event) {
     .then((cached) => cached || response);
 }
 
+/**
+ * Static hosts such as GitHub Pages cannot send COOP/COEP, and LibreOffice's
+ * pthread build refuses to start without SharedArrayBuffer. Re-issue responses
+ * with the headers so the page is cross-origin isolated on every load this
+ * worker controls. Redirects and errors (status 0) cannot be rebuilt.
+ */
+function isolate(response) {
+  if ([0, 204, 205, 304].includes(response.status)) {
+    return response;
+  }
+  const headers = new Headers(response.headers);
+  headers.set("Cross-Origin-Embedder-Policy", "require-corp");
+  headers.set("Cross-Origin-Opener-Policy", "same-origin");
+  return new Response(response.body, {
+    status: response.status,
+    statusText: response.statusText,
+    headers,
+  });
+}
+
 self.addEventListener("fetch", (event) => {
   const { request } = event;
   const url = new URL(request.url);
@@ -88,11 +110,13 @@ self.addEventListener("fetch", (event) => {
   const nextData =
     request.headers.has("RSC") || url.searchParams.has("_rsc");
 
+  let response;
   if (navigation || nextData) {
-    event.respondWith(networkFirst(event, navigation));
-  } else if (url.pathname.startsWith("/_next/static/")) {
-    event.respondWith(cacheFirst(event));
+    response = networkFirst(event, navigation);
+  } else if (url.pathname.startsWith(`${SCOPE}_next/static/`)) {
+    response = cacheFirst(event);
   } else {
-    event.respondWith(staleWhileRevalidate(event));
+    response = staleWhileRevalidate(event);
   }
+  event.respondWith(response.then(isolate));
 });

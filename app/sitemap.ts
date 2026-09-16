@@ -1,26 +1,26 @@
 import type { MetadataRoute } from "next";
 import { TOOLS } from "./features/pdf/registry";
+import { pageUrl } from "./lib/assets";
+import { LEGAL_UPDATED } from "./(legal)/updated";
 
 export const dynamic = "force-static";
-
-const BASE_URL = "https://pdfcmprs.duckdns.org";
 
 export default function sitemap(): MetadataRoute.Sitemap {
   const lastModified = new Date();
   return [
     {
-      url: "https://pdfcmprs.duckdns.org/privacy",
-      lastModified: "2026-09-15",
+      url: pageUrl("/privacy"),
+      lastModified: LEGAL_UPDATED,
       priority: 0.3,
     },
     {
-      url: "https://pdfcmprs.duckdns.org/cookies",
-      lastModified: "2026-09-15",
+      url: pageUrl("/cookies"),
+      lastModified: LEGAL_UPDATED,
       priority: 0.3,
     },
-    { url: BASE_URL, lastModified, priority: 1 },
+    { url: pageUrl("/"), lastModified, priority: 1 },
     ...TOOLS.map((tool) => ({
-      url: `${BASE_URL}/${tool.slug}`,
+      url: pageUrl(`/${tool.slug}`),
       lastModified,
       priority: 0.8,
     })),

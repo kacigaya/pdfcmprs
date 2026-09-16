@@ -6,6 +6,7 @@ import { Navbar } from "@/components/site/navbar";
 import { ToolShell } from "../components/pdf/ToolShell";
 import { SiteFooter } from "../components/site/SiteFooter";
 import { CATEGORIES, getTool, TOOLS } from "../features/pdf/registry";
+import { pageUrl } from "../lib/assets";
 
 export const dynamicParams = false;
 
@@ -26,11 +27,11 @@ export async function generateMetadata({
   return {
     title: tool.title,
     description: tool.summary,
-    alternates: { canonical: `/${tool.slug}` },
+    alternates: { canonical: pageUrl(`/${tool.slug}`) },
     openGraph: {
       title: `${tool.title} | pdfcmprs`,
       description: tool.summary,
-      url: `/${tool.slug}`,
+      url: pageUrl(`/${tool.slug}`),
     },
     twitter: {
       title: `${tool.title} | pdfcmprs`,

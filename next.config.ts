@@ -12,12 +12,14 @@ const LEGACY_TAB_REDIRECTS: ReadonlyArray<[string, string]> = [
 ];
 
 const staticExport = process.env.NEXT_STATIC_EXPORT === "1";
+// Sub-path for GitHub Pages project sites; app/lib/assets.ts reads the same variable.
+const basePath = process.env.NEXT_PUBLIC_BASE_PATH || "";
 
 const nextConfig: NextConfig = {
   reactStrictMode: true,
   poweredByHeader: false,
   allowedDevOrigins: ["127.0.0.1"],
-  ...(staticExport ? { output: "export", trailingSlash: true, images: { unoptimized: true } } : {}),
+  ...(staticExport ? { output: "export", trailingSlash: true, images: { unoptimized: true }, basePath } : {}),
   turbopack: {
     resolveAlias: {
       // coherentpdf's js_of_ocaml output references Node's fs in a code path

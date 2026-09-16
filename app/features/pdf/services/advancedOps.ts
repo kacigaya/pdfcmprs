@@ -1,4 +1,5 @@
 import { degrees, PDFDocument, rgb, StandardFonts } from "pdf-lib";
+import { assetUrl } from "../../../lib/assets";
 import { bytesToPdfBlob } from "../../../lib/blob";
 import { withPdfExtension } from "../../../lib/files";
 import { loadMupdf, runGhostscript } from "../../../lib/wasm/loadEngine";
@@ -20,9 +21,9 @@ function stopOfficeConverter(converter: OfficeConverter) {
 
 async function getFullMupdf() {
   if (!fullMupdfPromise) {
-    const moduleUrl = "/wasm/pymupdf/index.js";
+    const moduleUrl = assetUrl("/wasm/pymupdf/index.js");
     fullMupdfPromise = import(/* webpackIgnore: true */ moduleUrl).then(async ({ PyMuPDF }: typeof import("@bentopdf/pymupdf-wasm")) => {
-      const engine = new PyMuPDF({ assetPath: "/wasm/pymupdf/" });
+      const engine = new PyMuPDF({ assetPath: assetUrl("/wasm/pymupdf/") });
       await engine.load();
       return engine;
     }).catch((error) => {
@@ -37,11 +38,11 @@ async function getOfficeConverter() {
   if (officeConverterPromise) return officeConverterPromise;
   const { WorkerBrowserConverter } = await import("@matbee/libreoffice-converter/browser");
   const converter = new WorkerBrowserConverter({
-    sofficeJs: "/libreoffice-wasm/soffice.js",
-    sofficeWasm: "/libreoffice-wasm/soffice.wasm",
-    sofficeData: "/libreoffice-wasm/soffice.data",
-    sofficeWorkerJs: "/libreoffice-wasm/soffice.worker.js",
-    browserWorkerJs: "/libreoffice-wasm/browser.worker.global.js",
+    sofficeJs: assetUrl("/libreoffice-wasm/soffice.js"),
+    sofficeWasm: assetUrl("/libreoffice-wasm/soffice.wasm"),
+    sofficeData: assetUrl("/libreoffice-wasm/soffice.data"),
+    sofficeWorkerJs: assetUrl("/libreoffice-wasm/soffice.worker.js"),
+    browserWorkerJs: assetUrl("/libreoffice-wasm/browser.worker.global.js"),
   });
   officeConverterPromise = new Promise<OfficeConverter>((resolve, reject) => {
     const timeout = window.setTimeout(
@@ -68,7 +69,7 @@ export async function ghostscriptPdf(
   if (mode === "outlines") {
     args.push("-dNoOutputFonts", "-dCompatibilityLevel=1.7");
   } else {
-    const icc = new Uint8Array(await (await fetch("/wasm/ghostscript/srgb.icc")).arrayBuffer());
+    const icc = new Uint8Array(await (await fetch(assetUrl("/wasm/ghostscript/srgb.icc"))).arrayBuffer());
     const hex = Array.from(icc, (byte) => byte.toString(16).padStart(2, "0")).join("");
     const subtype = mode === "pdfa1" ? "/GTS_PDFA1" : "/GTS_PDFA";
     inputs["pdfa.ps"] = new TextEncoder().encode(`%!

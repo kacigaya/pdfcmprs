@@ -7,6 +7,8 @@
  * stays air-gapped.
  */
 
+import { assetUrl } from "../assets";
+
 const CACHE = new Map<string, Promise<unknown>>();
 
 /**
@@ -161,7 +163,7 @@ export async function runCliTool(
 /* ------------------------------------------------------------------ qpdf */
 
 export function loadQpdf(): Promise<EmscriptenFactory> {
-  return memo("qpdf", () => loadGlobalScript("/wasm/qpdf/qpdf.js"));
+  return memo("qpdf", () => loadGlobalScript(assetUrl("/wasm/qpdf/qpdf.js")));
 }
 
 export async function runQpdf(
@@ -174,7 +176,7 @@ export async function runQpdf(
     args,
     inputs,
     output,
-    locateFile: () => "/wasm/qpdf/qpdf.wasm",
+    locateFile: () => assetUrl("/wasm/qpdf/qpdf.wasm"),
   });
 }
 
@@ -182,7 +184,7 @@ export async function runQpdf(
 
 export function loadGhostscript(): Promise<EmscriptenFactory> {
   return memo("ghostscript", () =>
-    loadGlobalScript("/wasm/ghostscript/gs.js"),
+    loadGlobalScript(assetUrl("/wasm/ghostscript/gs.js")),
   );
 }
 
@@ -196,7 +198,7 @@ export async function runGhostscript(
     args,
     inputs,
     output,
-    locateFile: () => "/wasm/ghostscript/gs.wasm",
+    locateFile: () => assetUrl("/wasm/ghostscript/gs.wasm"),
   });
 }
 
@@ -205,7 +207,7 @@ export async function runGhostscript(
 export type MupdfModule = typeof import("mupdf");
 
 export function loadMupdf(): Promise<MupdfModule> {
-  return memo("mupdf", () => importByUrl<MupdfModule>("/wasm/mupdf/mupdf.js"));
+  return memo("mupdf", () => importByUrl<MupdfModule>(assetUrl("/wasm/mupdf/mupdf.js")));
 }
 
 /* ------------------------------------------------------------------ vips */
@@ -230,11 +232,11 @@ type VipsFactory = (options: Record<string, unknown>) => Promise<VipsInstance>;
 export function loadVips(): Promise<VipsInstance> {
   return memo("vips", async () => {
     const module = await importByUrl<{ default: VipsFactory }>(
-      "/wasm/vips/vips-es6.js",
+      assetUrl("/wasm/vips/vips-es6.js"),
     );
     return module.default({
       dynamicLibraries: ["vips-heif.wasm"],
-      locateFile: (path: string) => `/wasm/vips/${path}`,
+      locateFile: (path: string) => assetUrl(`/wasm/vips/${path}`),
       // wasm-vips spawns pthreads; without cross-origin isolation it falls
       // back to a single-threaded path, which is fine for one-shot conversions.
       preRun: () => undefined,
@@ -254,7 +256,7 @@ export function loadOpenCv(): Promise<OpenCvModule> {
     const scope = globalThis as unknown as { cv?: OpenCvModule };
     await new Promise<void>((resolve, reject) => {
       const script = document.createElement("script");
-      script.src = "/wasm/opencv/opencv.js";
+      script.src = assetUrl("/wasm/opencv/opencv.js");
       script.async = true;
       script.onload = () => resolve();
       script.onerror = () => reject(new Error("Failed to load OpenCV."));
