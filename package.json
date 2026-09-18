@@ -18,7 +18,7 @@
     "@base-ui/react": "^1.6.0",
     "@bentopdf/pymupdf-wasm": "0.11.16",
     "@jspawn/ghostscript-wasm": "0.0.2",
-    "@matbee/libreoffice-converter": "2.3.1",
+    "@matbee/libreoffice-converter": "2.7.2",
     "@neslinesli93/qpdf-wasm": "0.3.0",
     "@tailwindcss/postcss": "^4.3.3",
     "@techstark/opencv-js": "5.0.0-release.1",
