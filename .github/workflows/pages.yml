@@ -37,7 +37,7 @@ jobs:
           # "" for user/org sites and custom domains, "/<repo>" for project sites.
           NEXT_PUBLIC_BASE_PATH: ${{ steps.pages.outputs.base_path }}
           NEXT_PUBLIC_SITE_URL: ${{ steps.pages.outputs.base_url }}
-      - uses: actions/upload-pages-artifact@v3
+      - uses: actions/upload-pages-artifact@v5
         with:
           path: out
 
