@@ -31,7 +31,7 @@
     "heic-decode": "2.1.0",
     "lucide-react": "^1.23.0",
     "microdiff": "1.5.0",
-    "mupdf": "1.28.0",
+    "mupdf": "1.28.1",
     "next": "16.3.3",
     "pdf-lib": "1.17.1",
     "pdfjs-dist": "6.2.108",
