@@ -48,7 +48,7 @@
     "zgapdfsigner": "2.7.6"
   },
   "devDependencies": {
-    "@happy-dom/global-registrator": "20.11.1",
+    "@happy-dom/global-registrator": "20.14.5",
     "@playwright/test": "1.62.1",
     "@tesseract.js-data/ara": "^1.0.0",
     "@tesseract.js-data/chi_sim": "^1.0.0",
