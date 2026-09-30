@@ -18,6 +18,8 @@ export default function sitemap(): MetadataRoute.Sitemap {
       lastModified: LEGAL_UPDATED,
       priority: 0.3,
     },
+    { url: pageUrl("/terms"), lastModified: "2026-09-30", priority: 0.3 },
+    { url: pageUrl("/legal-notice"), lastModified: "2026-09-30", priority: 0.3 },
     { url: pageUrl("/"), lastModified, priority: 1 },
     ...TOOLS.map((tool) => ({
       url: pageUrl(`/${tool.slug}`),

@@ -8,6 +8,8 @@ export function SiteFooter() {
       <nav aria-label="Legal" className="flex flex-wrap gap-4">
         <Link href="/privacy">Privacy</Link>
         <Link href="/cookies">Cookies</Link>
+        <Link href="/terms">Terms</Link>
+        <Link href="/legal-notice">Legal notice</Link>
       </nav>
       <span>Processed client-side · No server upload</span>
       <span>
