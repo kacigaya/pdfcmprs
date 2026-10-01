@@ -15,7 +15,7 @@
     "copy-pdf-worker": "mkdir -p public && cp node_modules/pdfjs-dist/build/pdf.worker.min.mjs public/pdf.worker.min.mjs"
   },
   "dependencies": {
-    "@base-ui/react": "^1.6.0",
+    "@base-ui/react": "^1.8.0",
     "@bentopdf/pymupdf-wasm": "0.11.16",
     "@jspawn/ghostscript-wasm": "0.0.2",
     "@matbee/libreoffice-converter": "2.7.2",
