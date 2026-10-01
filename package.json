@@ -38,7 +38,7 @@
     "pdfkit": "0.19.1",
     "pixelmatch": "7.2.0",
     "react": "19.2.0",
-    "react-dom": "19.2.0",
+    "react-dom": "19.3.0",
     "tailwind-merge": "^3.6.0",
     "tailwindcss": "^4.3.2",
     "tesseract.js": "7.0.0",
@@ -67,7 +67,7 @@
     "@types/node": "24.10.1",
     "@types/pdfkit": "0.17.6",
     "@types/react": "19.2.2",
-    "@types/react-dom": "19.2.2",
+    "@types/react-dom": "19.3.0",
     "happy-dom": "20.14.5",
     "sharp": "0.35.4",
     "typescript": "5.9.3"
