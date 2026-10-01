@@ -103,6 +103,8 @@ export async function runCliTool(
     inputs: Record<string, Uint8Array>;
     output: string;
     locateFile: (path: string) => string;
+    /** Exit codes that mean the output is usable. qpdf uses 3 for warnings. */
+    successCodes?: ReadonlyArray<number>;
   },
 ): Promise<Uint8Array> {
   const instance = await factory({
@@ -144,8 +146,14 @@ export async function runCliTool(
     console.error = original.error;
   }
 
-  const produced = fileExists(instance.FS, options.output);
-  if (!produced) {
+  // Both engines create the output file before they fail (qpdf leaves it
+  // empty, Ghostscript leaves a truncated PDF), so its presence alone does not
+  // mean success. The exit code decides.
+  const succeeded = (options.successCodes ?? [0]).includes(code);
+  const result = succeeded && fileExists(instance.FS, options.output)
+    ? instance.FS.readFile(options.output)
+    : null;
+  if (!result || result.length === 0) {
     const detail = captured
       .map((line) => line.replace(/^[^:]*\.(mjs|js):\s*/, "").trim())
       .filter(Boolean)
@@ -155,7 +163,6 @@ export async function runCliTool(
     throw new Error(`Engine exited with code ${code} and produced no output.`);
   }
 
-  const result = instance.FS.readFile(options.output);
   // Copy out of the WASM heap before the instance is dropped.
   return new Uint8Array(result);
 }
@@ -177,6 +184,7 @@ export async function runQpdf(
     inputs,
     output,
     locateFile: () => assetUrl("/wasm/qpdf/qpdf.wasm"),
+    successCodes: [0, 3],
   });
 }
 

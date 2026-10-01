@@ -76,6 +76,8 @@ export type OptionField =
       kind: "password";
       default: string;
       placeholder?: string;
+      /** "new-password" keeps browsers from autofilling a saved password. */
+      autoComplete?: "current-password" | "new-password";
       hint?: string;
       visibleWhen?: (values: OptionValues) => boolean;
     }
@@ -251,7 +253,7 @@ export function OptionsForm({
                     placeholder={placeholder}
                     value={String(values[field.name])}
                     onChange={(event) => onChange(field.name, event.target.value)}
-                    autoComplete="current-password"
+                    autoComplete={field.autoComplete ?? "current-password"}
                     spellCheck={false}
                     data-testid={id}
                   />

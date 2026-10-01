@@ -6,8 +6,8 @@ import { loadMupdf, runGhostscript } from "../../../lib/wasm/loadEngine";
 import { createStoredZip } from "../../../lib/zip";
 import type { ProgressReporter } from "../types";
 import { rasterizePdf, type RasterQuality } from "./rasterOps";
-import { loadPdf, savePdf } from "./pdfCore";
-import { readPositionedText } from "./textExport";
+import { ensurePageContents, loadPdf, savePdf } from "./pdfCore";
+import { escapeXml, readPositionedText } from "./textExport";
 
 type OfficeConverter = import("@matbee/libreoffice-converter/browser").WorkerBrowserConverter;
 let officeConverterPromise: Promise<OfficeConverter> | null = null;
@@ -60,26 +60,16 @@ async function getOfficeConverter() {
   return officeConverterPromise;
 }
 
-export async function ghostscriptPdf(
-  file: File,
-  mode: "pdfa1" | "pdfa2" | "pdfa3" | "outlines",
-) {
-  const args = ["-q", "-dNOPAUSE", "-dBATCH", "-dNOSAFER", "-sDEVICE=pdfwrite"];
-  const inputs: Record<string, Uint8Array> = { "in.pdf": new Uint8Array(await file.arrayBuffer()) };
+type GhostscriptMode = "pdfa1" | "pdfa2" | "pdfa3" | "outlines";
+
+/** Ghostscript arguments for PDF/A and outline conversion; PDF/A also reads pdfa.ps. */
+export function ghostscriptPdfArgs(mode: GhostscriptMode): string[] {
+  // -dSAFER is safe here: the ICC profile is inlined into pdfa.ps rather than
+  // read from disk, and files named on the command line stay readable.
+  const args = ["-q", "-dNOPAUSE", "-dBATCH", "-dSAFER", "-sDEVICE=pdfwrite"];
   if (mode === "outlines") {
     args.push("-dNoOutputFonts", "-dCompatibilityLevel=1.7");
   } else {
-    const icc = new Uint8Array(await (await fetch(assetUrl("/wasm/ghostscript/srgb.icc"))).arrayBuffer());
-    const hex = Array.from(icc, (byte) => byte.toString(16).padStart(2, "0")).join("");
-    const subtype = mode === "pdfa1" ? "/GTS_PDFA1" : "/GTS_PDFA";
-    inputs["pdfa.ps"] = new TextEncoder().encode(`%!
-[/_objdef {icc_PDFA} /type /stream /OBJ pdfmark
-[{icc_PDFA} << /N 3 >> /PUT pdfmark
-[{icc_PDFA} <${hex}> /PUT pdfmark
-[/_objdef {OutputIntent_PDFA} /type /dict /OBJ pdfmark
-[{OutputIntent_PDFA} << /Type /OutputIntent /S ${subtype} /DestOutputProfile {icc_PDFA} /OutputConditionIdentifier (sRGB IEC61966-2.1) /Info (sRGB IEC61966-2.1) /RegistryName (http://www.color.org) >> /PUT pdfmark
-[{Catalog} << /OutputIntents [ {OutputIntent_PDFA} ] >> /PUT pdfmark
-`);
     args.push(
       `-dPDFA=${mode.slice(-1)}`,
       "-dPDFACompatibilityPolicy=1",
@@ -92,7 +82,30 @@ export async function ghostscriptPdf(
     );
   }
   args.push("-dAutoRotatePages=/None", "-sOutputFile=out.pdf", ...(mode === "outlines" ? [] : ["pdfa.ps"]), "in.pdf");
-  const bytes = await runGhostscript(args, inputs, "out.pdf");
+  return args;
+}
+
+/** PostScript prologue that attaches the sRGB OutputIntent PDF/A requires. */
+export function pdfaDefinition(mode: Exclude<GhostscriptMode, "outlines">, icc: Uint8Array): string {
+  const hex = Array.from(icc, (byte) => byte.toString(16).padStart(2, "0")).join("");
+  const subtype = mode === "pdfa1" ? "/GTS_PDFA1" : "/GTS_PDFA";
+  return `%!
+[/_objdef {icc_PDFA} /type /stream /OBJ pdfmark
+[{icc_PDFA} << /N 3 >> /PUT pdfmark
+[{icc_PDFA} <${hex}> /PUT pdfmark
+[/_objdef {OutputIntent_PDFA} /type /dict /OBJ pdfmark
+[{OutputIntent_PDFA} << /Type /OutputIntent /S ${subtype} /DestOutputProfile {icc_PDFA} /OutputConditionIdentifier (sRGB IEC61966-2.1) /Info (sRGB IEC61966-2.1) /RegistryName (http://www.color.org) >> /PUT pdfmark
+[{Catalog} << /OutputIntents [ {OutputIntent_PDFA} ] >> /PUT pdfmark
+`;
+}
+
+export async function ghostscriptPdf(file: File, mode: GhostscriptMode) {
+  const inputs: Record<string, Uint8Array> = { "in.pdf": new Uint8Array(await file.arrayBuffer()) };
+  if (mode !== "outlines") {
+    const icc = new Uint8Array(await (await fetch(assetUrl("/wasm/ghostscript/srgb.icc"))).arrayBuffer());
+    inputs["pdfa.ps"] = new TextEncoder().encode(pdfaDefinition(mode, icc));
+  }
+  const bytes = await runGhostscript(ghostscriptPdfArgs(mode), inputs, "out.pdf");
   return {
     blob: bytesToPdfBlob(bytes),
     filename: withPdfExtension(file.name, mode === "outlines" ? "-outlined" : `-${mode}`),
@@ -173,20 +186,38 @@ export function deskewPdf(file: File, quality: RasterQuality, report?: ProgressR
   );
 }
 
+/**
+ * Where to place a w x h page so that, rotated by `angle` degrees about the
+ * placement origin (how pdf-lib's drawPage rotates), it sits centred on a
+ * sheet sized to its rotated bounding box.
+ */
+export function rotatedPlacement(w: number, h: number, angle: number) {
+  const radians = (angle * Math.PI) / 180;
+  const cos = Math.cos(radians);
+  const sin = Math.sin(radians);
+  const width = Math.abs(w * cos) + Math.abs(h * sin);
+  const height = Math.abs(w * sin) + Math.abs(h * cos);
+  return {
+    width,
+    height,
+    x: width / 2 - (w / 2) * cos + (h / 2) * sin,
+    y: height / 2 - (w / 2) * sin - (h / 2) * cos,
+  };
+}
+
 export async function rotateCustom(file: File, angle: number) {
   const source = await loadPdf(file);
+  ensurePageContents(source);
   const out = await PDFDocument.create();
-  const radians = (angle * Math.PI) / 180;
   for (const sourcePage of source.getPages()) {
     const embedded = await out.embedPage(sourcePage);
-    const w = sourcePage.getWidth();
-    const h = sourcePage.getHeight();
-    const width = Math.abs(w * Math.cos(radians)) + Math.abs(h * Math.sin(radians));
-    const height = Math.abs(w * Math.sin(radians)) + Math.abs(h * Math.cos(radians));
+    const w = embedded.width;
+    const h = embedded.height;
+    const { width, height, x, y } = rotatedPlacement(w, h, angle);
     const page = out.addPage([width, height]);
     page.drawPage(embedded, {
-      x: width / 2 - w / 2,
-      y: height / 2 - h / 2,
+      x,
+      y,
       width: w,
       height: h,
       rotate: degrees(angle),
@@ -207,14 +238,26 @@ export async function extractImages(file: File, report?: ProgressReporter) {
       const device = new mupdf.Device({
         fillImage(image) {
           imageIndex += 1;
-          entries.push({
-            filename: `page-${pageIndex + 1}-image-${imageIndex}.png`,
-            bytes: new Uint8Array(image.toPixmap().asPNG()),
-          });
+          // asPNG converts CMYK and other colour spaces to RGB itself.
+          const pixmap = image.toPixmap();
+          try {
+            entries.push({
+              filename: `page-${pageIndex + 1}-image-${imageIndex}.png`,
+              bytes: new Uint8Array(pixmap.asPNG()),
+            });
+          } finally {
+            pixmap.destroy();
+          }
         },
       });
-      doc.loadPage(pageIndex).run(device, [1, 0, 0, 1, 0, 0]);
-      device.close();
+      const page = doc.loadPage(pageIndex);
+      try {
+        page.run(device, [1, 0, 0, 1, 0, 0]);
+        device.close();
+      } finally {
+        device.destroy();
+        page.destroy();
+      }
       report?.(((pageIndex + 1) / doc.countPages()) * 95);
     }
   } finally {
@@ -224,10 +267,15 @@ export async function extractImages(file: File, report?: ProgressReporter) {
   return { blob: createStoredZip(entries), filename: `${file.name.replace(/\.pdf$/i, "")}-images.zip`, count: entries.length };
 }
 
+/** Converted by LibreOffice. */
+const OFFICE_EXTENSIONS = ["doc", "docx", "xls", "xlsx", "ppt", "pptx", "odt", "ods", "odp", "odg", "rtf", "pub", "wpd", "wps", "vsd", "pages"];
+/** Converted by PyMuPDF. */
+const EBOOK_EXTENSIONS = ["xps", "oxps", "epub", "mobi", "fb2", "cbz"];
+export const DOCUMENT_EXTENSIONS: ReadonlyArray<string> = [...OFFICE_EXTENSIONS, ...EBOOK_EXTENSIONS];
+
 export async function documentToPdf(file: File) {
   const extension = file.name.split(".").pop()?.toLowerCase() || "document";
-  const office = new Set(["doc", "docx", "xls", "xlsx", "ppt", "pptx", "odt", "ods", "odp", "odg", "rtf", "pub", "wpd", "wps", "vsd", "pages"]);
-  if (office.has(extension)) {
+  if (OFFICE_EXTENSIONS.includes(extension)) {
     const converter = await getOfficeConverter();
     const input = new Uint8Array(await file.arrayBuffer());
     const result = await new Promise<Awaited<ReturnType<OfficeConverter["convert"]>>>((resolve, reject) => {
@@ -251,10 +299,6 @@ export async function documentToPdf(file: File) {
     blob: await engine.convertToPdf(file, { filetype: extension }),
     filename: `${file.name.replace(/\.[^.]+$/, "")}.pdf`,
   };
-}
-
-function escapeXml(value: string) {
-  return value.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 }
 
 export async function pdfToMarkdown(file: File, report?: ProgressReporter) {

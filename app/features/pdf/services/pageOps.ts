@@ -2,6 +2,7 @@ import { degrees, PDFDocument } from "pdf-lib";
 import { withPdfExtension } from "../../../lib/files";
 import { allPages, parsePageSelection } from "../../../lib/pages";
 import { createStoredZip } from "../../../lib/zip";
+import { collectGarbage } from "./gc";
 import {
   copyPagesInto,
   ensurePageContents,
@@ -52,6 +53,9 @@ export async function deletePages(
   for (let pageNumber = total; pageNumber >= 1; pageNumber -= 1) {
     if (remove.has(pageNumber)) doc.removePage(pageNumber - 1);
   }
+  // removePage only unlinks the page; without a sweep its content would
+  // still ship in the output and stay recoverable.
+  collectGarbage(doc);
   const saved = await savePdf(doc, file.name, "-pages-removed");
   return { ...saved, removed: remove.size };
 }

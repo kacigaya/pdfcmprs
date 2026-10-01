@@ -623,7 +623,7 @@ export const TOOLS: ReadonlyArray<ToolDefinition> = [
     title: "Encrypt PDF",
     category: "secure",
     summary:
-      "Lock a PDF with a password using AES-256, AES-128, or legacy RC4-40.",
+      "Lock a PDF with a password using AES-256 or AES-128.",
     keywords: ["encrypt", "password", "protect", "lock", "secure", "aes"],
     engine: "qpdf",
     load: securePanel("EncryptPanel"),
@@ -672,7 +672,7 @@ export const TOOLS: ReadonlyArray<ToolDefinition> = [
     title: "Remove Restrictions",
     category: "secure",
     summary:
-      "Lift printing, copying, and editing limits from a PDF that is not password-encrypted.",
+      "Lift printing, copying, and editing limits from a PDF that opens without a password.",
     keywords: ["restrictions", "unlock", "permissions", "remove", "owner"],
     engine: "qpdf",
     load: securePanel("RemoveRestrictionsPanel"),
@@ -701,7 +701,7 @@ export const TOOLS: ReadonlyArray<ToolDefinition> = [
     title: "Remove Metadata",
     category: "secure",
     summary:
-      "Clear the document info dictionary and the XMP packet that readers prefer.",
+      "Remove the document info dictionary and the XMP packet that readers prefer.",
     keywords: ["metadata", "strip", "privacy", "anonymize", "xmp", "clean"],
     engine: "pdf-lib",
     load: editPanel("RemoveMetadataPanel"),
