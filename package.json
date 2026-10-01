@@ -26,7 +26,7 @@
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "coherentpdf": "2.5.5",
-    "cropperjs": "2.1.1",
+    "cropperjs": "2.2.0",
     "diff": "9.0.0",
     "heic-decode": "2.1.0",
     "lucide-react": "^1.23.0",
