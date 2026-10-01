@@ -573,8 +573,8 @@ export const RemoveMetadataPanel = createToolPanel({
       blob: out.blob,
       filename: out.filename,
       description: out.removedXmp
-        ? "Info dictionary cleared and the XMP metadata packet removed."
-        : "Info dictionary cleared. This file had no XMP packet.",
+        ? "Info dictionary and the XMP metadata packet removed."
+        : "Info dictionary removed. This file had no XMP packet.",
       message: "Metadata removed.",
     };
   },

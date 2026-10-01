@@ -48,12 +48,12 @@ routes, the catalog, the metadata, and the sitemap.
 | Tool | What it does |
 | --- | --- |
 | Compress PDF | Rewrite with object streams, leaving images and layout untouched |
-| Encrypt PDF | Password-protect with AES-256, AES-128, or legacy RC4-40 |
+| Encrypt PDF | Password-protect with AES-256 or AES-128 |
 | Decrypt PDF | Remove a known password |
 | Change Permissions | Control printing, copying, editing, screen-reader access |
 | Repair PDF | Rebuild a damaged cross-reference table |
 | Linearize PDF | Reorder for fast web view |
-| Remove Restrictions | Lift limits from a PDF that is not password-encrypted |
+| Remove Restrictions | Lift limits from a PDF that opens without a password |
 | Sanitize PDF | Strip JavaScript, auto-run actions, launch actions, attachments |
 
 ### Convert

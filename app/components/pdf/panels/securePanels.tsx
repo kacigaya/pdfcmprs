@@ -32,15 +32,17 @@ export const EncryptPanel = createToolPanel({
   input: SINGLE_PDF,
   fields: [
     {
-      kind: "text",
+      kind: "password",
       name: "userPassword",
+      autoComplete: "new-password",
       label: "User password (to open)",
       default: "",
       placeholder: "Leave empty for no open password…",
     },
     {
-      kind: "text",
+      kind: "password",
       name: "ownerPassword",
+      autoComplete: "new-password",
       label: "Owner password (to change)",
       default: "",
       placeholder: "Defaults to the user password…",
@@ -52,8 +54,7 @@ export const EncryptPanel = createToolPanel({
       default: "256",
       options: [
         { label: "AES-256 (recommended)", value: "256" },
-        { label: "AES-128", value: "128" },
-        { label: "RC4-40 (legacy readers)", value: "40" },
+        { label: "AES-128 (older readers)", value: "128" },
       ],
     },
   ],
@@ -84,7 +85,7 @@ export const DecryptPanel = createToolPanel({
   input: ENCRYPTED_PDF,
   fields: [
     {
-      kind: "text",
+      kind: "password",
       name: "password",
       label: "Password",
       default: "",
@@ -109,15 +110,17 @@ export const PermissionsPanel = createToolPanel({
   input: SINGLE_PDF,
   fields: [
     {
-      kind: "text",
+      kind: "password",
       name: "ownerPassword",
+      autoComplete: "new-password",
       label: "Owner password (required)",
       default: "",
       placeholder: "Needed to enforce restrictions…",
     },
     {
-      kind: "text",
+      kind: "password",
       name: "userPassword",
+      autoComplete: "new-password",
       label: "User password (optional)",
       default: "",
       placeholder: "Leave empty so anyone can open it…",

@@ -2,6 +2,7 @@ import {
   PDFArray,
   PDFDict,
   PDFDocument,
+  PDFHexString,
   PDFName,
   PDFString,
   type PDFObject,
@@ -231,42 +232,19 @@ export async function editMetadata(
 /**
  * Clear document metadata, including the XMP packet.
  *
- * Setting the Info fields to empty is not enough: readers prefer the XMP
- * metadata stream, so a stale author or title would survive there.
+ * The whole Info dictionary goes, not just the standard fields: dates,
+ * Trapped, and custom keys such as Office's Company would otherwise survive.
+ * Readers also prefer the XMP stream, so that is removed as well.
  */
 export async function removeMetadata(
   file: File,
 ): Promise<PdfSaveResult & { removedXmp: boolean }> {
   const doc = await loadPdf(file);
 
-  doc.setTitle("");
-  doc.setAuthor("");
-  doc.setSubject("");
-  doc.setKeywords([]);
-  doc.setCreator("");
-  doc.setProducer("");
-
   const catalog = doc.catalog;
   const removedXmp = catalog.has(PDFName.of("Metadata"));
   if (removedXmp) catalog.delete(PDFName.of("Metadata"));
-
-  // Strip the Info dictionary entries outright rather than blanking them.
-  const info = doc.context.lookupMaybe(
-    doc.context.trailerInfo.Info,
-    PDFDict,
-  );
-  if (info) {
-    for (const key of [
-      "Title",
-      "Author",
-      "Subject",
-      "Keywords",
-      "Creator",
-      "Producer",
-    ]) {
-      info.delete(PDFName.of(key));
-    }
-  }
+  doc.context.trailerInfo.Info = undefined;
 
   collectGarbage(doc);
   const saved = await savePdf(doc, file.name, "-no-metadata");
@@ -316,9 +294,11 @@ export async function readOutline(file: File): Promise<OutlineEntry[]> {
       if (!node) return;
 
       const title = context.lookup(node.get(PDFName.of("Title")));
-      if (title instanceof PDFString) {
+      // Non-ASCII titles are usually UTF-16 hex strings; decodeText handles
+      // both string forms and the byte-order mark.
+      if (title instanceof PDFString || title instanceof PDFHexString) {
         entries.push({
-          title: title.asString(),
+          title: title.decodeText(),
           page: resolvePage(node),
           depth,
         });
