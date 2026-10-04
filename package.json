@@ -40,7 +40,7 @@
     "react": "19.2.0",
     "react-dom": "19.2.0",
     "tailwind-merge": "^3.7.0",
-    "tailwindcss": "^4.3.2",
+    "tailwindcss": "^4.3.3",
     "tesseract.js": "7.0.0",
     "utif2": "4.1.0",
     "wasm-vips": "0.0.18",
