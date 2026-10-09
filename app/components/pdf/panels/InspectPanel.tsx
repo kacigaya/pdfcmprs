@@ -30,6 +30,7 @@ export default function InspectPanel({ run }: ToolPanelProps) {
   return (
     <section data-testid="inspect-panel">
       <FileUploadZone
+        disabled={run.isRunning}
         previews
         files={slot.files}
         label="Drop your PDF here"

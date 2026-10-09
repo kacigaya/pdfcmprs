@@ -75,6 +75,7 @@ export type OptionField =
       label: string;
       kind: "password";
       default: string;
+      autoComplete?: "current-password" | "new-password";
       placeholder?: string;
       hint?: string;
       visibleWhen?: (values: OptionValues) => boolean;
@@ -127,6 +128,21 @@ interface OptionsFormProps {
   onChange: (name: string, value: OptionValue) => void;
   disabled?: boolean;
   className?: string;
+}
+
+export function validateOptionValues(fields: ReadonlyArray<OptionField>, values: OptionValues): string | null {
+  for (const field of fields) {
+    if (field.kind !== "number" || (field.visibleWhen && !field.visibleWhen(values))) continue;
+    const value = Number(values[field.name]);
+    if (!Number.isFinite(value)) return `${field.label} must be a finite number.`;
+    if (field.min !== undefined && value < field.min) return `${field.label} must be at least ${field.min}.`;
+    if (field.max !== undefined && value > field.max) return `${field.label} must be at most ${field.max}.`;
+    if (field.step !== undefined) {
+      const steps = (value - (field.min ?? 0)) / field.step;
+      if (Math.abs(steps - Math.round(steps)) > 1e-7) return `${field.label} must use increments of ${field.step}.`;
+    }
+  }
+  return null;
 }
 
 export function OptionsForm({
@@ -213,7 +229,7 @@ export function OptionsForm({
                     disabled={disabled}
                     min={field.min}
                     max={field.max}
-                    step={field.step}
+                    step={field.step ?? "any"}
                     className="font-mono tabular-nums"
                     value={String(values[field.name])}
                     onChange={(event) => {
@@ -251,7 +267,7 @@ export function OptionsForm({
                     placeholder={placeholder}
                     value={String(values[field.name])}
                     onChange={(event) => onChange(field.name, event.target.value)}
-                    autoComplete="current-password"
+                    autoComplete={field.autoComplete ?? "current-password"}
                     spellCheck={false}
                     data-testid={id}
                   />

@@ -37,10 +37,13 @@ export async function extractAttachments(file: File) {
     try {
       const count = cpdf.numberGetAttachments();
       if (!count) throw new Error("This PDF has no attachments.");
-      const entries = Array.from({ length: count }, (_, index) => ({
-        filename: cpdf.getAttachmentName(index) || `attachment-${index + 1}`,
-        bytes: new Uint8Array(cpdf.getAttachmentData(index)),
-      }));
+      const entries = Array.from({ length: count }, (_, index) => {
+        const name = cpdf.getAttachmentName(index);
+        return {
+          filename: (typeof name === "string" ? name : name.toUtf16()) || `attachment-${index + 1}`,
+          bytes: new Uint8Array(cpdf.getAttachmentData(index)),
+        };
+      });
       return { blob: createStoredZip(entries), filename: `${file.name.replace(/\.pdf$/i, "")}-attachments.zip`, count };
     } finally {
       cpdf.endGetAttachments();
@@ -61,6 +64,7 @@ export async function editBookmarks(file: File, json?: string) {
 }
 
 export async function addPageLabels(file: File, styleName: string, prefix: string, start: number) {
+  if (!Number.isInteger(start) || start < 1) throw new Error("Page labels must start at a positive integer.");
   return withCpdf(file, (cpdf, pdf) => {
     const styles: Record<string, number> = {
       decimal: cpdf.decimalArabic,
@@ -69,7 +73,7 @@ export async function addPageLabels(file: File, styleName: string, prefix: strin
       lettersUpper: cpdf.uppercaseLetters,
       lettersLower: cpdf.lowercaseLetters,
     };
-    cpdf.addPageLabels(pdf, styles[styleName] ?? cpdf.decimalArabic, prefix, start - 1, cpdf.all(pdf), true);
+    cpdf.addPageLabels(pdf, styles[styleName] ?? cpdf.decimalArabic, prefix, start, cpdf.all(pdf), true);
     return output(cpdf, pdf, file.name, "-page-labels");
   });
 }

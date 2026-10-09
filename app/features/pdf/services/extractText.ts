@@ -18,15 +18,17 @@ export async function extractPdfText(file: File) {
   const doc = await loadPdfDocument(file);
   try {
     const pages: string[] = [];
+    let foundText = false;
     for (let pageNumber = 1; pageNumber <= doc.numPages; pageNumber += 1) {
       const page = await doc.getPage(pageNumber);
       const content = await page.getTextContent();
       const text = joinTextItems(content.items);
+      if (text) foundText = true;
       pages.push(`Page ${pageNumber}\n${text}`);
       page.cleanup();
     }
     const text = pages.join("\n\n").trim();
-    if (!text) {
+    if (!foundText) {
       throw new Error("No selectable text found in this PDF.");
     }
     return {

@@ -15,6 +15,7 @@ import { PageGrid } from "./PageGrid";
 import {
   OptionsForm,
   useOptions,
+  validateOptionValues,
   type OptionField,
   type OptionValues,
 } from "./OptionsForm";
@@ -115,7 +116,7 @@ export function ToolForm({ run, tool, config }: ToolFormProps) {
       return;
     }
     const context = { files, selection, values: effectiveValues };
-    const problem = config.validate?.(context);
+    const problem = validateOptionValues(fields, effectiveValues) ?? config.validate?.(context);
     if (problem) {
       run.fail(problem);
       return;
@@ -158,6 +159,7 @@ export function ToolForm({ run, tool, config }: ToolFormProps) {
   return (
     <section data-testid={`${tool.slug}-panel`}>
       <FileUploadZone
+        disabled={run.isRunning}
         multiple={isMultiple}
         previews={config.input.previews}
         files={files}

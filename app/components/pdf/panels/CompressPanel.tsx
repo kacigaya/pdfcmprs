@@ -81,6 +81,7 @@ export default function CompressPanel({ run }: ToolPanelProps) {
   return (
     <section data-testid="compress-panel">
       <FileUploadZone
+        disabled={run.isRunning}
         multiple
         files={slot.files}
         label="Drop your PDF here"

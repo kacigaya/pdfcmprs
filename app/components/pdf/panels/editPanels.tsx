@@ -68,7 +68,7 @@ export const PageNumbersPanel = createToolPanel({
       hint: "{n} counter · {total} count · {page} real page · {filename}",
       mono: true,
     },
-    { kind: "number", name: "startAt", label: "Start at", default: 1, min: 0 },
+    { kind: "number", name: "startAt", label: "Start at", default: 1, min: 0, step: 1 },
     {
       kind: "select",
       name: "anchor",
@@ -112,9 +112,9 @@ export const BatesPanel = createToolPanel({
   fields: [
     { kind: "text", name: "prefix", label: "Prefix", default: "", placeholder: "e.g. ABC-…" },
     { kind: "text", name: "suffix", label: "Suffix", default: "" },
-    { kind: "number", name: "startAt", label: "Start at", default: 1, min: 0 },
-    { kind: "number", name: "digits", label: "Digits", default: 6, min: 1, max: 12 },
-    { kind: "number", name: "step", label: "Increment", default: 1, min: 1 },
+    { kind: "number", name: "startAt", label: "Start at", default: 1, min: 0, step: 1 },
+    { kind: "number", name: "digits", label: "Digits", default: 6, min: 1, max: 12, step: 1 },
+    { kind: "number", name: "step", label: "Increment", default: 1, min: 1, step: 1 },
     {
       kind: "select",
       name: "anchor",
@@ -175,7 +175,7 @@ export const WatermarkPanel = createToolPanel({
       default: 0.2,
       min: 0.01,
       max: 1,
-      step: 0.05,
+      step: 0.01,
     },
     { kind: "number", name: "rotate", label: "Rotation (°)", default: 45, min: -180, max: 180 },
     {
@@ -297,7 +297,7 @@ export const StampsPanel = createToolPanel({
       default: 0.85,
       min: 0.01,
       max: 1,
-      step: 0.05,
+      step: 0.01,
     },
     { kind: "number", name: "rotate", label: "Rotation (°)", default: 0, min: -180, max: 180 },
     { kind: "number", name: "marginX", label: "Side margin (pt)", default: 32, min: 0 },

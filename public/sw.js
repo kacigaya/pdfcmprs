@@ -1,4 +1,4 @@
-const CACHE = "pdfcmprs-v3";
+const CACHE = "pdfcmprs-v4";
 // "/" on the VPS, "/<repo>/" on a GitHub Pages project site.
 const SCOPE = new URL(self.registration.scope).pathname;
 const PRECACHE = [SCOPE, `${SCOPE}manifest.webmanifest`, `${SCOPE}icon.svg`];

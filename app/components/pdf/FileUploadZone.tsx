@@ -28,6 +28,7 @@ interface FileUploadZoneProps {
   onClear?: () => void;
   onMove?: (index: number, delta: -1 | 1) => void;
   previews?: boolean;
+  disabled?: boolean;
 }
 
 export function FileUploadZone({
@@ -43,25 +44,26 @@ export function FileUploadZone({
   onClear,
   onMove,
   previews = false,
+  disabled = false,
 }: FileUploadZoneProps) {
   const inputRef = useRef<HTMLInputElement | null>(null);
   const [dragging, setDragging] = useState(false);
   const isImageZone = accept.includes("image");
   const EmptyIcon = isImageZone ? ImageIcon : FileText;
-  const acceptedLabel = isImageZone ? "images" : "PDF files";
+  const acceptedLabel = isImageZone ? "images" : accept === "application/pdf,.pdf" ? "PDF files" : accept || "all file types";
 
   const handleSelect = useCallback(
     (list: FileList | null) => {
-      if (!list) return;
+      if (!list || disabled) return;
       const valid = filterFiles(list);
       if (valid.length > 0) onFiles(multiple ? valid : valid.slice(0, 1));
       if (inputRef.current) inputRef.current.value = "";
     },
-    [filterFiles, multiple, onFiles],
+    [filterFiles, multiple, onFiles, disabled],
   );
 
   const handleDrop = useCallback(
-    (event: DragEvent<HTMLDivElement>) => {
+    (event: DragEvent<HTMLElement>) => {
       event.preventDefault();
       setDragging(false);
       handleSelect(event.dataTransfer.files);
@@ -72,20 +74,21 @@ export function FileUploadZone({
   const openFileDialog = () => inputRef.current?.click();
 
   return (
-    <div
+    <fieldset
+      disabled={disabled}
       className={cn(
-        "relative flex min-h-52 flex-col items-center overflow-hidden rounded-xl border border-dashed border-input px-4 pb-4 pt-10 transition-colors",
+        "relative flex min-h-52 min-w-0 flex-col items-center overflow-hidden rounded-xl border border-dashed border-input px-4 pb-4 pt-10 transition-colors",
         files.length === 0 && "stripes justify-center",
         dragging && "stripes-accent border-primary bg-accent/50",
       )}
       data-dragging={dragging || undefined}
       onDragEnter={(event) => {
         event.preventDefault();
-        setDragging(true);
+        if (!disabled) setDragging(true);
       }}
       onDragOver={(event) => {
         event.preventDefault();
-        setDragging(true);
+        if (!disabled) setDragging(true);
       }}
       onDragLeave={() => setDragging(false)}
       onDrop={handleDrop}
@@ -229,6 +232,6 @@ export function FileUploadZone({
           </span>
         </button>
       )}
-    </div>
+    </fieldset>
   );
 }

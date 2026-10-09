@@ -121,6 +121,9 @@ test("headers, legacy redirects, PWA assets, and not-found page work", async ({
   expect(home.headers()["cross-origin-opener-policy"]).toBe("same-origin");
   expect(home.headers()["cross-origin-embedder-policy"]).toBe("require-corp");
   expect(home.headers()["x-content-type-options"]).toBe("nosniff");
+  expect(home.headers()["content-security-policy"]).not.toContain("'unsafe-eval'");
+  const officeWorker = await request.get("/libreoffice-wasm/browser.worker.global.js");
+  expect(officeWorker.headers()["content-security-policy"]).toContain("'unsafe-eval'");
 
   await page.goto("/tools/compress");
   await expect(page).toHaveURL(/\/compress-pdf$/);

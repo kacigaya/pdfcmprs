@@ -10,7 +10,7 @@
 </p>
 
 <p align="center">
-  <a href="https://nextjs.org"><img alt="Next.js 16.3.0" src="https://shieldcn.dev/badge/Next.js-16.3.0-171717.svg?variant=secondary&amp;logo=nextdotjs"></a>
+  <a href="https://nextjs.org"><img alt="Next.js 16.3.8" src="https://shieldcn.dev/badge/Next.js-16.3.8-171717.svg?variant=secondary&amp;logo=nextdotjs"></a>
   <a href="https://bun.sh"><img alt="Bun 1.3.11" src="https://shieldcn.dev/badge/Bun-1.3.11-fbf0df.svg?variant=secondary&amp;logo=bun&amp;logoColor=171717"></a>
   <a href="https://tailwindcss.com"><img alt="Tailwind CSS 4.3.2" src="https://shieldcn.dev/badge/Tailwind_CSS-4.3.2-06b6d4.svg?variant=secondary&amp;logo=tailwindcss"></a>
   <a href="https://github.com/kacigaya/pdfcmprs/blob/main/LICENSE"><img alt="AGPL-3.0 License" src="https://shieldcn.dev/github/license/kacigaya/pdfcmprs.svg?variant=secondary"></a>
@@ -121,6 +121,8 @@ Open [http://localhost:3000](http://localhost:3000) to view the app.
 ```bash
 bun run check     # typecheck, unit tests, production build
 bun run test      # unit tests only
+bunx playwright install chromium --only-shell # first browser-test run
+bun run test:e2e  # all tool routes, processing families, and site controls
 bun run build:static # export a fully static build to out/
 ```
 
@@ -129,6 +131,15 @@ their fastest path. On static hosts that cannot set headers, the service worker
 adds them itself and reloads the page when it takes control. The
 installable PWA caches same-origin routes and engine assets after first use, so
 tools remain available offline.
+
+The document CSP blocks string evaluation. LibreOffice's worker assets have a
+separate CSP that allows it because their generated bindings require it. This
+exception applies only to `/libreoffice-wasm/*` on the production server.
+
+PDF editor redactions flatten the edited document into images, removing masked
+content from the download. This also removes selectable text, forms, and vector
+content. Signature inspection reports byte-range structure; it does not verify
+cryptographic signatures or certificate trust.
 
 ### GitHub Pages
 

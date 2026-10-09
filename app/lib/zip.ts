@@ -67,12 +67,26 @@ class ByteWriter {
  * overflows the call stack.
  */
 export function createStoredZip(entries: ZipEntry[]): Blob {
+  if (entries.length > 0xffff) throw new Error("Too many files for a ZIP archive.");
   const encoder = new TextEncoder();
-  const prepared = entries.map((entry) => ({
-    name: encoder.encode(entry.filename),
-    bytes: entry.bytes,
-    crc: crc32(entry.bytes),
-  }));
+  const usedNames = new Set<string>();
+  const prepared = entries.map((entry) => {
+    // Keep document package paths, but reject paths that can escape extraction.
+    const path = entry.filename.replace(/\\/g, "/");
+    if (!path || path.startsWith("/") || /^[a-z]:/i.test(path) || path.includes("\0") || path.split("/").some((part) => part === ".." || part === ".")) {
+      throw new Error(`Unsafe ZIP filename: ${entry.filename}`);
+    }
+    const dot = path.lastIndexOf(".");
+    const extensionAt = dot > path.lastIndexOf("/") + 1 ? dot : path.length;
+    let name = path;
+    for (let suffix = 2; usedNames.has(name); suffix += 1) {
+      name = `${path.slice(0, extensionAt)} (${suffix})${path.slice(extensionAt)}`;
+    }
+    usedNames.add(name);
+    const encoded = encoder.encode(name);
+    if (encoded.length > 0xffff) throw new Error("ZIP filename is too long.");
+    return { name: encoded, bytes: entry.bytes, crc: crc32(entry.bytes) };
+  });
 
   const localSize = prepared.reduce(
     (sum, entry) => sum + LOCAL_HEADER_SIZE + entry.name.length + entry.bytes.length,
@@ -82,6 +96,9 @@ export function createStoredZip(entries: ZipEntry[]): Blob {
     (sum, entry) => sum + CENTRAL_HEADER_SIZE + entry.name.length,
     0,
   );
+  if (localSize + centralSize + END_RECORD_SIZE > 0xffffffff) {
+    throw new Error("This archive exceeds the 4 GB ZIP limit.");
+  }
 
   const writer = new ByteWriter(
     new Uint8Array(localSize + centralSize + END_RECORD_SIZE),
@@ -92,7 +109,7 @@ export function createStoredZip(entries: ZipEntry[]): Blob {
     offsets.push(writer.position);
     writer.u32(0x04034b50);
     writer.u16(20); // version needed
-    writer.u16(0); // flags
+    writer.u16(0x0800); // UTF-8 filenames
     writer.u16(0); // method: store
     writer.u16(0); // mod time
     writer.u16(0); // mod date
@@ -110,7 +127,7 @@ export function createStoredZip(entries: ZipEntry[]): Blob {
     writer.u32(0x02014b50);
     writer.u16(20); // version made by
     writer.u16(20); // version needed
-    writer.u16(0); // flags
+    writer.u16(0x0800); // UTF-8 filenames
     writer.u16(0); // method: store
     writer.u16(0); // mod time
     writer.u16(0); // mod date

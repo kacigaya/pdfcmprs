@@ -224,7 +224,7 @@ async function choose(page: Page, name: string, label: string) {
 }
 
 test.describe("real processing", () => {
-  test.describe.configure({ mode: "serial", timeout: 1_200_000 });
+  test.describe.configure({ timeout: 1_200_000 });
 
   test("core document, page, edit, and structure tools", async ({ page }, testInfo) => {
     const base = await makePdf();
@@ -407,12 +407,8 @@ test.describe("real processing", () => {
       vsd: await remoteUpload("document.vsd", "application/vnd.visio", `${raw}/draw/libvisio/pass/fdo57117-1.vsd`),
     };
     const requested = process.env.E2E_DOC_FORMAT;
-    if (process.arch === "arm64" && !requested) {
-      testInfo.annotations.push({ type: "issue", description: "LibreOffice WASM stalls in ARM Chromium; run an office format explicitly on x64." });
-    } else {
-      for (const [format, file] of Object.entries({ ...office, ...publishing }).filter(([format]) => !requested || format === requested)) {
-        await runTool(page, testInfo, `${format}-to-pdf`, file, { timeout: 300_000 });
-      }
+    for (const [format, file] of Object.entries({ ...office, ...publishing }).filter(([format]) => !requested || format === requested)) {
+      await runTool(page, testInfo, `${format}-to-pdf`, file, { timeout: 300_000 });
     }
 
     const images = await imageUploads();

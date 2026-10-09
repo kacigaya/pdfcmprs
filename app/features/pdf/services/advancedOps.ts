@@ -6,7 +6,7 @@ import { loadMupdf, runGhostscript } from "../../../lib/wasm/loadEngine";
 import { createStoredZip } from "../../../lib/zip";
 import type { ProgressReporter } from "../types";
 import { rasterizePdf, type RasterQuality } from "./rasterOps";
-import { loadPdf, savePdf } from "./pdfCore";
+import { ensurePageContents, loadPdf, savePdf } from "./pdfCore";
 import { readPositionedText } from "./textExport";
 
 type OfficeConverter = import("@matbee/libreoffice-converter/browser").WorkerBrowserConverter;
@@ -174,22 +174,38 @@ export function deskewPdf(file: File, quality: RasterQuality, report?: ProgressR
 }
 
 export async function rotateCustom(file: File, angle: number) {
+  if (!Number.isFinite(angle)) throw new Error("Use a finite rotation angle.");
   const source = await loadPdf(file);
+  ensurePageContents(source);
   const out = await PDFDocument.create();
-  const radians = (angle * Math.PI) / 180;
   for (const sourcePage of source.getPages()) {
-    const embedded = await out.embedPage(sourcePage);
-    const w = sourcePage.getWidth();
-    const h = sourcePage.getHeight();
-    const width = Math.abs(w * Math.cos(radians)) + Math.abs(h * Math.sin(radians));
-    const height = Math.abs(w * Math.sin(radians)) + Math.abs(h * Math.cos(radians));
+    const crop = sourcePage.getCropBox();
+    const media = sourcePage.getMediaBox();
+    const left = Math.max(crop.x, media.x);
+    const bottom = Math.max(crop.y, media.y);
+    const right = Math.min(crop.x + crop.width, media.x + media.width);
+    const top = Math.min(crop.y + crop.height, media.y + media.height);
+    const w = right - left;
+    const h = top - bottom;
+    if (w <= 0 || h <= 0) throw new Error("The page has an empty visible area.");
+    const embedded = await out.embedPage(sourcePage, { left, bottom, right, top });
+    const rotation = angle - sourcePage.getRotation().angle;
+    const radians = (rotation * Math.PI) / 180;
+    const cosine = Math.cos(radians);
+    const sine = Math.sin(radians);
+    const xs = [0, w * cosine, -h * sine, w * cosine - h * sine];
+    const ys = [0, w * sine, h * cosine, w * sine + h * cosine];
+    const minX = Math.min(...xs);
+    const minY = Math.min(...ys);
+    const width = Math.max(...xs) - minX;
+    const height = Math.max(...ys) - minY;
     const page = out.addPage([width, height]);
     page.drawPage(embedded, {
-      x: width / 2 - w / 2,
-      y: height / 2 - h / 2,
+      x: -minX,
+      y: -minY,
       width: w,
       height: h,
-      rotate: degrees(angle),
+      rotate: degrees(rotation),
       xSkew: degrees(0),
       ySkew: degrees(0),
     });
@@ -327,10 +343,12 @@ export async function inspectSignatures(file: File) {
   const ranges = [...raw.matchAll(/\/ByteRange\s*\[\s*(\d+)\s+(\d+)\s+(\d+)\s+(\d+)\s*\]/g)];
   const signatures = ranges.map((match, index) => {
     const values = match.slice(1).map(Number);
-    const coverage = values[0] === 0 && values[2] + values[3] <= bytes.length;
-    return { signature: index + 1, byteRange: values, structurallyValid: coverage, coversBytes: values[1] + values[3], fileBytes: bytes.length };
+    const coverage = values.every(Number.isSafeInteger) && values[0] === 0 &&
+      values[1] > 0 && values[2] > values[1] && values[3] > 0 &&
+      values[2] + values[3] <= bytes.length;
+    return { signature: index + 1, byteRange: values, structurallyValid: coverage, coversCurrentFile: coverage && values[2] + values[3] === bytes.length, coversBytes: values[1] + values[3], fileBytes: bytes.length };
   });
-  const report = { filename: file.name, signatureCount: signatures.length, signatures };
+  const report = { filename: file.name, signatureCount: signatures.length, cryptographicallyVerified: false, signatures };
   const text = JSON.stringify(report, null, 2);
   return { blob: new Blob([text], { type: "application/json" }), filename: file.name.replace(/\.pdf$/i, "-signature-report.json"), text, count: signatures.length };
 }

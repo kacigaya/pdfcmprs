@@ -852,7 +852,7 @@ export const TOOLS: ReadonlyArray<ToolDefinition> = [
 
   { slug: "sign-pdf", title: "Sign PDF", category: "secure", summary: "Place a visible signature block on a PDF page.", keywords: ["sign", "signature", "visible"], engine: "pdf-lib", load: advancedPanel("VisibleSignaturePanel") },
   { slug: "digital-sign-pdf", title: "Digitally Sign PDF", category: "secure", summary: "Apply a cryptographic X.509 signature using a PKCS#12 certificate.", keywords: ["digital", "signature", "p12", "pfx", "certificate"], engine: "pdf-lib", load: advancedPanel("DigitalSignaturePanel") },
-  { slug: "validate-signatures", title: "Validate PDF Signatures", category: "secure", summary: "Inspect signature dictionaries and verify byte-range integrity.", keywords: ["validate", "signature", "certificate", "integrity"], engine: "native", load: advancedPanel("ValidateSignaturePanel") },
+  { slug: "validate-signatures", title: "Inspect PDF Signatures", category: "secure", summary: "Inspect signature byte ranges without verifying cryptographic signatures or certificate trust.", keywords: ["validate", "signature", "certificate", "integrity"], engine: "native", load: advancedPanel("ValidateSignaturePanel") },
   { slug: "timestamp-pdf", title: "Timestamp PDF", category: "secure", summary: "Apply an RFC 3161 timestamp from a trusted authority.", keywords: ["timestamp", "tsa", "rfc3161", "trusted"], engine: "pdf-lib", load: advancedPanel("TimestampPanel") },
 
   { slug: "pdf-to-pdfa", title: "PDF to PDF/A", category: "secure", summary: "Convert to PDF/A-1b, PDF/A-2b, or PDF/A-3b for archiving.", keywords: ["pdfa", "archive", "compliance"], engine: "ghostscript", load: advancedPanel("PdfAPanel") },

@@ -31,6 +31,7 @@ export default function ExtractTextPanel({ run }: ToolPanelProps) {
   return (
     <section data-testid="extract-panel">
       <FileUploadZone
+        disabled={run.isRunning}
         previews
         files={slot.files}
         label="Drop your PDF here"

@@ -103,6 +103,7 @@ export async function runCliTool(
     inputs: Record<string, Uint8Array>;
     output: string;
     locateFile: (path: string) => string;
+    successCodes?: readonly number[];
   },
 ): Promise<Uint8Array> {
   const instance = await factory({
@@ -145,17 +146,19 @@ export async function runCliTool(
   }
 
   const produced = fileExists(instance.FS, options.output);
-  if (!produced) {
+  const result = produced ? instance.FS.readFile(options.output) : null;
+  if (!result?.length || !(options.successCodes ?? [0]).includes(code)) {
     const detail = captured
       .map((line) => line.replace(/^[^:]*\.(mjs|js):\s*/, "").trim())
       .filter(Boolean)
       .join(" · ");
     if (detail) throw new Error(detail);
     if (thrown instanceof Error) throw new Error(thrown.message);
-    throw new Error(`Engine exited with code ${code} and produced no output.`);
+    throw new Error(result?.length
+      ? `Engine exited with code ${code}.`
+      : `Engine exited with code ${code} and produced no output.`);
   }
 
-  const result = instance.FS.readFile(options.output);
   // Copy out of the WASM heap before the instance is dropped.
   return new Uint8Array(result);
 }
@@ -177,6 +180,7 @@ export async function runQpdf(
     inputs,
     output,
     locateFile: () => assetUrl("/wasm/qpdf/qpdf.wasm"),
+    successCodes: [0, 3], // qpdf returns 3 for a completed rewrite with warnings.
   });
 }
 

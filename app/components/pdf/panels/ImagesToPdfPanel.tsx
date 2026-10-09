@@ -30,6 +30,7 @@ export default function ImagesToPdfPanel({ run }: ToolPanelProps) {
   return (
     <section data-testid="images-to-pdf-panel">
       <FileUploadZone
+        disabled={run.isRunning}
         multiple
         files={list.files}
         label="Drop your images here"

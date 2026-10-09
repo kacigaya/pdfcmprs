@@ -46,6 +46,14 @@ const nextConfig: NextConfig = {
           { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
           { key: "Permissions-Policy", value: "camera=(), microphone=(), geolocation=(), payment=(), usb=()" },
         ],
+      }, {
+        source: "/libreoffice-wasm/:path*",
+        headers: [{
+          key: "Content-Security-Policy",
+          // LibreOffice's embind glue generates functions inside its workers.
+          // Keep this exception on engine assets; document scripts stay strict.
+          value: "default-src 'none'; script-src 'self' 'unsafe-eval' 'wasm-unsafe-eval'; connect-src 'self'; worker-src 'self' blob:",
+        }],
       }];
     },
   }),

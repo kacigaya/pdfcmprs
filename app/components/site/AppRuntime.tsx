@@ -30,12 +30,14 @@ export function AppRuntime() {
   }, []);
   useEffect(() => {
     const handler = (event: KeyboardEvent) => {
-      if (!ready || !settings.shortcuts || event.metaKey || event.ctrlKey || event.altKey) return;
-      if (event.key === "/" && !/input|textarea|select/i.test((event.target as HTMLElement).tagName)) {
+      if (!ready || !settings.shortcuts || event.defaultPrevented || event.metaKey || event.ctrlKey || event.altKey) return;
+      if (event.key === "/" && !(event.target as HTMLElement)?.closest("input, textarea, select, [contenteditable]")) {
         event.preventDefault();
         document.querySelector<HTMLInputElement>("#tool-search")?.focus();
       }
-      if (event.key === "Escape") (document.activeElement as HTMLElement)?.blur?.();
+      if (event.key === "Escape" && document.activeElement?.id === "tool-search") {
+        (document.activeElement as HTMLElement).blur();
+      }
     };
     window.addEventListener("keydown", handler);
     return () => window.removeEventListener("keydown", handler);

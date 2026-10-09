@@ -32,16 +32,18 @@ export const EncryptPanel = createToolPanel({
   input: SINGLE_PDF,
   fields: [
     {
-      kind: "text",
+      kind: "password",
       name: "userPassword",
       label: "User password (to open)",
+      autoComplete: "new-password",
       default: "",
       placeholder: "Leave empty for no open password…",
     },
     {
-      kind: "text",
+      kind: "password",
       name: "ownerPassword",
       label: "Owner password (to change)",
+      autoComplete: "new-password",
       default: "",
       placeholder: "Defaults to the user password…",
     },
@@ -74,7 +76,7 @@ export const EncryptPanel = createToolPanel({
     return {
       blob: out.blob,
       filename: out.filename,
-      description: `Encrypted with AES-${values.bits} · ${formatFileSize(out.blob.size)}.`,
+      description: `Encrypted with ${values.bits === "40" ? "RC4-40" : `AES-${values.bits}`} · ${formatFileSize(out.blob.size)}.`,
       message: "Encryption complete.",
     };
   },
@@ -84,7 +86,7 @@ export const DecryptPanel = createToolPanel({
   input: ENCRYPTED_PDF,
   fields: [
     {
-      kind: "text",
+      kind: "password",
       name: "password",
       label: "Password",
       default: "",
@@ -109,16 +111,18 @@ export const PermissionsPanel = createToolPanel({
   input: SINGLE_PDF,
   fields: [
     {
-      kind: "text",
+      kind: "password",
       name: "ownerPassword",
       label: "Owner password (required)",
+      autoComplete: "new-password",
       default: "",
       placeholder: "Needed to enforce restrictions…",
     },
     {
-      kind: "text",
+      kind: "password",
       name: "userPassword",
       label: "User password (optional)",
+      autoComplete: "new-password",
       default: "",
       placeholder: "Leave empty so anyone can open it…",
     },

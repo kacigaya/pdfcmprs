@@ -51,7 +51,7 @@ const QUALITY = {
 };
 
 export const DocumentToPdfPanel = createToolPanel({
-  input: { kind: "single", batch: true, label: "Drop your document here", filter: (files) => Array.from(files) },
+  input: { kind: "single", batch: true, label: "Drop your document here", accept: ".doc,.docx,.xls,.xlsx,.ppt,.pptx,.odt,.ods,.odp,.odg,.rtf,.pub,.wpd,.wps,.vsd,.pages,.epub,.mobi,.fb2,.cbz,.xps,.oxps", chooseLabel: "Select Documents", filter: (files) => Array.from(files) },
   actionLabel: "Convert to PDF",
   runningLabel: "Converting…",
   execute: async ({ files }) => ({ ...(await documentToPdf(files[0])), description: "Converted locally in your browser.", message: "Document converted to PDF." }),
@@ -168,7 +168,7 @@ export const WorkflowPanel = createToolPanel({
 });
 
 export const AddAttachmentsPanel = createToolPanel({
-  input: { kind: "multiple", label: "Drop a PDF first, then attachment files", minFiles: 2, filter: (files) => Array.from(files) },
+  input: { kind: "multiple", label: "Drop a PDF first, then attachment files", accept: "", chooseLabel: "Select Files", minFiles: 2, filter: (files) => Array.from(files) },
   actionLabel: "Attach Files",
   runningLabel: "Attaching…",
   validate: ({ files }) => /\.pdf$/i.test(files[0].name) ? null : "The first file must be a PDF.",
@@ -235,7 +235,7 @@ export const DigitalSignaturePanel = createToolPanel({
   },
 });
 
-export const ValidateSignaturePanel = createToolPanel({ input: PDF, actionLabel: "Validate Signatures", runningLabel: "Inspecting…", execute: async ({ files }) => { const out = await inspectSignatures(files[0]); return { ...out, description: `${out.count} signature dictionaries found and checked for byte-range integrity.`, message: "Signature inspection complete." }; } });
+export const ValidateSignaturePanel = createToolPanel({ input: PDF, actionLabel: "Inspect Signatures", runningLabel: "Inspecting…", execute: async ({ files }) => { const out = await inspectSignatures(files[0]); return { ...out, description: `${out.count} signature byte ranges inspected. Cryptographic signatures and certificate trust were not verified.`, message: "Signature inspection complete." }; } });
 
 export const TimestampPanel = createToolPanel({
   input: PDF,

@@ -20,7 +20,7 @@ const KEY = "pdfcmprs-settings-v1";
 export function normalizeSettings(value: unknown): AppSettings {
   const input = value && typeof value === "object" ? value as Partial<AppSettings> : {};
   return {
-    language: typeof input.language === "string" && input.language in LANGUAGES ? input.language as Language : DEFAULT_SETTINGS.language,
+    language: typeof input.language === "string" && Object.hasOwn(LANGUAGES, input.language) ? input.language as Language : DEFAULT_SETTINGS.language,
     compact: typeof input.compact === "boolean" ? input.compact : DEFAULT_SETTINGS.compact,
     shortcuts: typeof input.shortcuts === "boolean" ? input.shortcuts : DEFAULT_SETTINGS.shortcuts,
   };
@@ -44,7 +44,14 @@ export function useSettings() {
     const update = () => { setSettings(readSettings()); setReady(true); };
     update();
     window.addEventListener("pdfcmprs-settings", update);
-    return () => window.removeEventListener("pdfcmprs-settings", update);
+    const sync = (event: StorageEvent) => {
+      if (event.key === KEY || event.key === null) update();
+    };
+    window.addEventListener("storage", sync);
+    return () => {
+      window.removeEventListener("pdfcmprs-settings", update);
+      window.removeEventListener("storage", sync);
+    };
   }, []);
   return [settings, (next: AppSettings) => { writeSettings(next); setSettings(next); }, ready] as const;
 }
