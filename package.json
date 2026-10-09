@@ -43,7 +43,7 @@
     "tailwindcss": "^4.3.3",
     "tesseract.js": "7.0.0",
     "utif2": "4.1.0",
-    "wasm-vips": "0.0.18",
+    "wasm-vips": "0.0.19",
     "zgapdfsigner": "2.7.6"
   },
   "devDependencies": {

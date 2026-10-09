@@ -33,7 +33,7 @@
         "tailwindcss": "^4.3.3",
         "tesseract.js": "7.0.0",
         "utif2": "4.1.0",
-        "wasm-vips": "0.0.18",
+        "wasm-vips": "0.0.19",
         "zgapdfsigner": "2.7.6",
       },
       "devDependencies": {
@@ -513,7 +513,7 @@
 
     "wasm-feature-detect": ["wasm-feature-detect@1.8.0", "", {}, "sha512-zksaLKM2fVlnB5jQQDqKXXwYHLQUVH9es+5TOOHwGOVJOCeRBCiPjwSg+3tN2AdTCzjgli4jijCH290kXb/zWQ=="],
 
-    "wasm-vips": ["wasm-vips@0.0.18", "", {}, "sha512-AJyCvxZj/3qceKNnh+YyEobu/IaJFoPN7x7SxyyHmYBS3kASMqJqxQEuN0ZHKQDWsCJ8armfx4Tq3uKrNc+nMA=="],
+    "wasm-vips": ["wasm-vips@0.0.19", "", {}, "sha512-KeejYs8oNqPUd2C/XPRhQtRabydqOSkUyCdWhFf2ucL8rVKqHvtp5ZYuYLyeDG/4y45tvROST3mQWla+1uotSA=="],
 
     "webidl-conversions": ["webidl-conversions@3.0.1", "", {}, "sha512-2JAn3z8AR6rjK8Sm8orRC0h/bcl/DqL7tRPdGZ4I1CjdF+EaMLmYxBHyXuKL849eucPFhvBoxMsflfOb8kxaeQ=="],
 
