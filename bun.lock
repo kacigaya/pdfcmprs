@@ -33,7 +33,7 @@
         "tesseract.js": "7.0.0",
         "utif2": "4.1.0",
         "wasm-vips": "0.0.18",
-        "zgapdfsigner": "2.7.6",
+        "zgapdfsigner": "2.8.0",
       },
       "devDependencies": {
         "@happy-dom/global-registrator": "20.14.5",
@@ -524,7 +524,7 @@
 
     "ws": ["ws@8.21.1", "", { "peerDependencies": { "bufferutil": "^4.0.1", "utf-8-validate": ">=5.0.2" }, "optionalPeers": ["bufferutil", "utf-8-validate"] }, "sha512-+0NTnW77fFN/DjQi6k/Sq/Yvk4Sgajw7urW8V+asjXnRgDs9gyGkdb7EzgfhA4goXsRIZKE28fzIXBHEzhuiWw=="],
 
-    "zgapdfsigner": ["zgapdfsigner@2.7.6", "", { "dependencies": { "follow-redirects": "^1.16.0", "node-forge": "^1.4.0", "pdf-fontkit": "^1.8.9", "pdf-lib": "^1.17.1" } }, "sha512-v6wNud/x/qMNPZb6vkrpiXdKdnrdMMG+Q/zq8OA9Aqqsf7DOYmuhs7ZPutAytjwm7kq+71STeEiZYPZRQ0xw3g=="],
+    "zgapdfsigner": ["zgapdfsigner@2.8.0", "", { "dependencies": { "follow-redirects": "^1.16.0", "node-forge": "^1.4.0", "pdf-fontkit": "^1.8.9", "pdf-lib": "^1.17.1" } }, "sha512-16bLzVBQrFcgHtjp3QKB0dMjQSDY7KS0DGV2W6RFdqbdoRd7o1kfzTJu3MB9h5EWjrlo+QluC/NMU8TD/9Tcww=="],
 
     "zlibjs": ["zlibjs@0.3.1", "", {}, "sha512-+J9RrgTKOmlxFSDHo0pI1xM6BLVUv+o0ZT9ANtCxGkjIVCCUdx9alUF8Gm+dGLKbkkkidWIHFDZHDMpfITt4+w=="],
 
