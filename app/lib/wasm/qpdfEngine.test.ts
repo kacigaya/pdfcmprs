@@ -75,13 +75,15 @@ function asText(bytes: Uint8Array): string {
 describe("qpdf engine", () => {
   for (const bits of ["128", "256"] as const) {
     test(`encrypts and decrypts ${bits}-bit output using the advertised algorithm`, async () => {
-      const encrypted = await runQpdf(encryptionArgs("open-me", "owner", bits), await samplePdf());
+      const userPassword = crypto.randomUUID();
+      const ownerPassword = crypto.randomUUID();
+      const encrypted = await runQpdf(encryptionArgs(userPassword, ownerPassword, bits), await samplePdf());
       expect(encrypted?.length).toBeGreaterThan(0);
       if (!encrypted) throw new Error("Encryption produced no output.");
       const raw = asText(encrypted);
       if (bits === "128") expect(raw).toContain("/CFM /AESV2");
       if (bits === "256") expect(raw).toContain("/CFM /AESV3");
-      const decrypted = await runQpdf(["--decrypt", "--password=open-me"], encrypted);
+      const decrypted = await runQpdf(["--decrypt", `--password=${userPassword}`], encrypted);
       if (!decrypted) throw new Error("Decryption produced no output.");
       expect((await PDFDocument.load(decrypted)).getPageCount()).toBe(1);
     });
