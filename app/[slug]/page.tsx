@@ -57,7 +57,7 @@ export default async function ToolPage({ params }: ToolPageProps) {
           <ArrowLeft className="size-3.5" aria-hidden="true" />
           All Tools <span aria-hidden="true">/</span> {category?.label}
         </Link>
-        <ToolShell slug={tool.slug} />
+        <ToolShell key={tool.slug} slug={tool.slug} />
       </main>
       <SiteFooter />
     </div>

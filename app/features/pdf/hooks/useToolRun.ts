@@ -42,6 +42,7 @@ export function useToolRun(): ToolRun {
   }, []);
 
   const fail = useCallback((message: string) => {
+    setResult(null);
     setStatus({ tone: "error", message });
     setProgress(0);
   }, []);

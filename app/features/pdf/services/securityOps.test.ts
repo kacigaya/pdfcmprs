@@ -138,3 +138,27 @@ describe("sanitizePdf", () => {
     });
   });
 });
+
+test("sanitize removes chained actions, form actions, and page attachment payloads", async () => {
+  const doc = await PDFDocument.create();
+  const page = doc.addPage([200, 200]);
+  const context = doc.context;
+  const js = context.register(context.obj({ S: "JavaScript", JS: PDFString.of("CHAINED_PAYLOAD") }));
+  const safeAction = context.register(context.obj({ S: "GoTo", D: [page.ref, "Fit"], Next: js }));
+  const embedded = context.register(context.stream("ATTACHMENT_PAYLOAD"));
+  const spec = context.register(context.obj({ Type: "Filespec", F: PDFString.of("secret.txt"), EF: { F: embedded } }));
+  page.node.set(PDFName.of("Annots"), context.obj([
+    { Type: "Annot", Subtype: "Link", Rect: [0, 0, 10, 10], A: safeAction },
+    { Type: "Annot", Subtype: "FileAttachment", Rect: [0, 0, 10, 10], FS: spec },
+  ]));
+  const form = doc.getForm().createTextField("name");
+  form.addToPage(page, { x: 20, y: 50, width: 100, height: 20 });
+  form.acroField.dict.set(PDFName.of("AA"), context.obj({ K: context.obj({ S: "JavaScript", JS: PDFString.of("FORM_PAYLOAD") }) }));
+  const output = await sanitizePdf(new File([await doc.save() as BlobPart], "active.pdf"));
+  const clean = await reload(output.blob);
+  const raw = new TextDecoder().decode(await clean.save({ useObjectStreams: false }));
+  expect(raw).not.toContain("CHAINED_PAYLOAD");
+  expect(raw).not.toContain("ATTACHMENT_PAYLOAD");
+  expect(raw).not.toContain("FORM_PAYLOAD");
+  expect(clean.getForm().getFields()).toHaveLength(1);
+});

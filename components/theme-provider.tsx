@@ -1,8 +1,10 @@
 "use client";
 
 import { useEffect, type ReactNode } from "react";
+import { useSettings } from "@/app/lib/settings";
 
 export function ThemeProvider({ children }: { children: ReactNode }) {
+  const [settings, , ready] = useSettings();
   useEffect(() => {
     const root = document.documentElement;
     const media = matchMedia("(prefers-color-scheme: dark)");
@@ -17,6 +19,8 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
     const onKeyDown = (event: KeyboardEvent) => {
       const target = event.target as HTMLElement | null;
       if (
+        !ready || !settings.shortcuts || event.defaultPrevented ||
+        event.metaKey || event.ctrlKey || event.altKey ||
         event.key.toLowerCase() !== "d" ||
         target?.closest("input, textarea, select, [contenteditable]")
       )
@@ -29,7 +33,7 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
       removeEventListener("keydown", onKeyDown);
       media.removeEventListener("change", apply);
     };
-  }, []);
+  }, [ready, settings.shortcuts]);
 
   return children;
 }

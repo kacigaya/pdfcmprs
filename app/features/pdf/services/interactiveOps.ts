@@ -26,12 +26,22 @@ function parseColor(value = "#000000") {
 }
 
 export async function editPdf(file: File, operations: EditorOperation[]) {
-  if (!operations.length) throw new Error("Add at least one editor operation.");
-  let working = file;
-  if (operations.some((operation) => operation.type === "redact")) {
-    const rasterized = await rasterizeDocument(file, "high");
-    working = new File([rasterized.blob], rasterized.filename, { type: "application/pdf" });
+  if (!Array.isArray(operations) || !operations.length) throw new Error("Add at least one editor operation.");
+  for (const operation of operations) {
+    if (!operation || !["text", "rectangle", "redact"].includes(operation.type) ||
+      !Number.isInteger(operation.page) || operation.page < 1 ||
+      !Number.isFinite(operation.x) || !Number.isFinite(operation.y) ||
+      (operation.width !== undefined && (!Number.isFinite(operation.width) || operation.width <= 0)) ||
+      (operation.height !== undefined && (!Number.isFinite(operation.height) || operation.height <= 0)) ||
+      (operation.size !== undefined && (!Number.isFinite(operation.size) || operation.size <= 0))) {
+      throw new Error("Each editor operation needs a supported type, a positive page number, finite coordinates, and positive dimensions.");
+    }
   }
+  const hasRedactions = operations.some((operation) => operation.type === "redact");
+  // Flatten annotations first so their appearances cannot render over a mask.
+  const working = hasRedactions
+    ? new File([(await rasterizeDocument(file, "high")).blob], file.name, { type: "application/pdf" })
+    : file;
   const doc = await loadPdf(working);
   const font = await doc.embedFont(StandardFonts.Helvetica);
   for (const operation of operations) {
@@ -43,7 +53,16 @@ export async function editPdf(file: File, operations: EditorOperation[]) {
       page.drawRectangle({ x: operation.x, y: operation.y, width: operation.width || 100, height: operation.height || 30, color: operation.type === "redact" ? rgb(0, 0, 0) : parseColor(operation.color), borderWidth: operation.type === "rectangle" ? 1 : 0 });
     }
   }
-  return savePdf(doc, file.name, "-edited");
+  const edited = await savePdf(doc, file.name, "-edited");
+  if (hasRedactions) {
+    // Bake the masks into pixels so removing an overlay cannot reveal content.
+    const flattened = await rasterizeDocument(
+      new File([edited.blob], edited.filename, { type: "application/pdf" }),
+      "high",
+    );
+    return { ...flattened, filename: edited.filename };
+  }
+  return edited;
 }
 
 export interface FormFieldSpec {
@@ -127,9 +146,14 @@ export async function comparePdfs(left: File, right: File, report?: ProgressRepo
 }
 
 export async function runWorkflow(file: File, steps: Array<{ tool: string; value?: string }>, report?: ProgressReporter) {
+  if (!Array.isArray(steps) || !steps.length) throw new Error("Add at least one workflow step.");
   let current = file;
   for (let index = 0; index < steps.length; index += 1) {
     const step = steps[index];
+    if (!step || (step.tool !== "compress" && step.tool !== "rasterize")) throw new Error(`Unsupported workflow step ${index + 1}.`);
+    if (step.tool === "compress" && step.value !== undefined && !["lossless", "light", "balanced", "aggressive"].includes(step.value)) {
+      throw new Error(`Unsupported compression level: ${step.value}`);
+    }
     let result: { blob: Blob; filename: string };
     if (step.tool === "compress") result = await compressPdf(current, (step.value || "balanced") as CompressionLevel);
     else if (step.tool === "rasterize") result = await rasterizeDocument(current, "high");

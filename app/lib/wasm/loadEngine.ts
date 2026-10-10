@@ -146,21 +146,18 @@ export async function runCliTool(
     console.error = original.error;
   }
 
-  // Both engines create the output file before they fail (qpdf leaves it
-  // empty, Ghostscript leaves a truncated PDF), so its presence alone does not
-  // mean success. The exit code decides.
-  const succeeded = (options.successCodes ?? [0]).includes(code);
-  const result = succeeded && fileExists(instance.FS, options.output)
-    ? instance.FS.readFile(options.output)
-    : null;
-  if (!result || result.length === 0) {
+  const produced = fileExists(instance.FS, options.output);
+  const result = produced ? instance.FS.readFile(options.output) : null;
+  if (!result?.length || !(options.successCodes ?? [0]).includes(code)) {
     const detail = captured
       .map((line) => line.replace(/^[^:]*\.(mjs|js):\s*/, "").trim())
       .filter(Boolean)
       .join(" · ");
     if (detail) throw new Error(detail);
     if (thrown instanceof Error) throw new Error(thrown.message);
-    throw new Error(`Engine exited with code ${code} and produced no output.`);
+    throw new Error(result?.length
+      ? `Engine exited with code ${code}.`
+      : `Engine exited with code ${code} and produced no output.`);
   }
 
   // Copy out of the WASM heap before the instance is dropped.

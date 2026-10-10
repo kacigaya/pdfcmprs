@@ -39,6 +39,7 @@ export default function SplitPanel({ run }: ToolPanelProps) {
   return (
     <section data-testid="split-panel">
       <FileUploadZone
+        disabled={run.isRunning}
         previews
         files={slot.files}
         label="Drop your PDF here"

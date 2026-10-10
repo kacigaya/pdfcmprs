@@ -20,7 +20,6 @@ export type EngineId =
   | "mupdf"
   | "ghostscript"
   | "cpdf"
-  | "libreoffice"
   | "tesseract"
   | "vips"
   | "pdfkit"
@@ -34,7 +33,6 @@ export const ENGINE_IDS: ReadonlyArray<EngineId> = [
   "mupdf",
   "ghostscript",
   "cpdf",
-  "libreoffice",
   "tesseract",
   "vips",
   "pdfkit",
@@ -183,19 +181,6 @@ const IMAGE_ALIASES: ReadonlyArray<ToolDefinition> = [
 }));
 
 const DOCUMENT_CONVERSIONS: ReadonlyArray<ToolDefinition> = [
-  ["word-to-pdf", "Word to PDF", "doc docx word"],
-  ["excel-to-pdf", "Excel to PDF", "xls xlsx excel spreadsheet"],
-  ["powerpoint-to-pdf", "PowerPoint to PDF", "ppt pptx slides"],
-  ["odt-to-pdf", "ODT to PDF", "odt writer"],
-  ["ods-to-pdf", "ODS to PDF", "ods calc"],
-  ["odp-to-pdf", "ODP to PDF", "odp impress"],
-  ["odg-to-pdf", "ODG to PDF", "odg draw"],
-  ["rtf-to-pdf", "RTF to PDF", "rtf rich text"],
-  ["pages-to-pdf", "Pages to PDF", "pages apple"],
-  ["wpd-to-pdf", "WordPerfect to PDF", "wpd wordperfect"],
-  ["wps-to-pdf", "WPS to PDF", "wps writer"],
-  ["pub-to-pdf", "Publisher to PDF", "pub publisher"],
-  ["vsd-to-pdf", "Visio to PDF", "vsd visio diagram"],
   ["xps-to-pdf", "XPS to PDF", "xps oxps"],
   ["epub-to-pdf", "EPUB to PDF", "epub ebook"],
   ["mobi-to-pdf", "MOBI to PDF", "mobi kindle ebook"],
@@ -207,7 +192,7 @@ const DOCUMENT_CONVERSIONS: ReadonlyArray<ToolDefinition> = [
   category: "to-pdf",
   summary: `Convert ${title.replace(" to PDF", "")} files to PDF locally in your browser.`,
   keywords: [...words.split(" "), "convert", "pdf"],
-  engine: /^(xps|epub|mobi|fb2|cbz)-/.test(slug) ? "mupdf" : "libreoffice",
+  engine: "mupdf",
   preset: { sourceFormat: slug.replace(/-to-pdf$/, "") },
   load: advancedPanel("DocumentToPdfPanel"),
 }));
@@ -852,7 +837,7 @@ export const TOOLS: ReadonlyArray<ToolDefinition> = [
 
   { slug: "sign-pdf", title: "Sign PDF", category: "secure", summary: "Place a visible signature block on a PDF page.", keywords: ["sign", "signature", "visible"], engine: "pdf-lib", load: advancedPanel("VisibleSignaturePanel") },
   { slug: "digital-sign-pdf", title: "Digitally Sign PDF", category: "secure", summary: "Apply a cryptographic X.509 signature using a PKCS#12 certificate.", keywords: ["digital", "signature", "p12", "pfx", "certificate"], engine: "pdf-lib", load: advancedPanel("DigitalSignaturePanel") },
-  { slug: "validate-signatures", title: "Validate PDF Signatures", category: "secure", summary: "Inspect signature dictionaries and verify byte-range integrity.", keywords: ["validate", "signature", "certificate", "integrity"], engine: "native", load: advancedPanel("ValidateSignaturePanel") },
+  { slug: "validate-signatures", title: "Inspect PDF Signatures", category: "secure", summary: "Inspect signature byte ranges without verifying cryptographic signatures or certificate trust.", keywords: ["validate", "signature", "certificate", "integrity"], engine: "native", load: advancedPanel("ValidateSignaturePanel") },
   { slug: "timestamp-pdf", title: "Timestamp PDF", category: "secure", summary: "Apply an RFC 3161 timestamp from a trusted authority.", keywords: ["timestamp", "tsa", "rfc3161", "trusted"], engine: "pdf-lib", load: advancedPanel("TimestampPanel") },
 
   { slug: "pdf-to-pdfa", title: "PDF to PDF/A", category: "secure", summary: "Convert to PDF/A-1b, PDF/A-2b, or PDF/A-3b for archiving.", keywords: ["pdfa", "archive", "compliance"], engine: "ghostscript", load: advancedPanel("PdfAPanel") },

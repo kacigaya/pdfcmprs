@@ -150,6 +150,7 @@ export const AddBlankPagePanel = createToolPanel({
       default: 1,
       min: 1,
       visibleWhen: (values) => values.position === "after",
+      step: 1,
     },
     {
       kind: "number",
@@ -158,6 +159,7 @@ export const AddBlankPagePanel = createToolPanel({
       default: 1,
       min: 1,
       max: 50,
+      step: 1,
     },
     {
       kind: "select",
@@ -259,8 +261,8 @@ export const CombineToSinglePagePanel = createToolPanel({
 export const DividePagesPanel = createToolPanel({
   input: SINGLE_PDF,
   fields: [
-    { kind: "number", name: "columns", label: "Columns", default: 2, min: 1, max: 10 },
-    { kind: "number", name: "rows", label: "Rows", default: 1, min: 1, max: 10 },
+    { kind: "number", name: "columns", label: "Columns", default: 2, min: 1, max: 10, step: 1 },
+    { kind: "number", name: "rows", label: "Rows", default: 1, min: 1, max: 10, step: 1 },
   ],
   actionLabel: "Divide Pages",
   runningLabel: "Dividing…",
@@ -283,8 +285,8 @@ export const DividePagesPanel = createToolPanel({
 export const NUpPanel = createToolPanel({
   input: SINGLE_PDF,
   fields: [
-    { kind: "number", name: "columns", label: "Columns", default: 2, min: 1, max: 8 },
-    { kind: "number", name: "rows", label: "Rows", default: 2, min: 1, max: 8 },
+    { kind: "number", name: "columns", label: "Columns", default: 2, min: 1, max: 8, step: 1 },
+    { kind: "number", name: "rows", label: "Rows", default: 2, min: 1, max: 8, step: 1 },
     { kind: "number", name: "margin", label: "Sheet margin (pt)", default: 18, min: 0 },
     { kind: "number", name: "spacing", label: "Gap between pages (pt)", default: 8, min: 0 },
     { kind: "checkbox", name: "landscape", label: "Landscape sheets", default: false },
@@ -337,8 +339,8 @@ export const BookletPanel = createToolPanel({
 export const PosterizePanel = createToolPanel({
   input: SINGLE_PDF,
   fields: [
-    { kind: "number", name: "columns", label: "Sheets across", default: 2, min: 1, max: 10 },
-    { kind: "number", name: "rows", label: "Sheets down", default: 2, min: 1, max: 10 },
+    { kind: "number", name: "columns", label: "Sheets across", default: 2, min: 1, max: 10, step: 1 },
+    { kind: "number", name: "rows", label: "Sheets down", default: 2, min: 1, max: 10, step: 1 },
     {
       kind: "number",
       name: "overlap",

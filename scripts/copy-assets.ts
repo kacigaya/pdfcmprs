@@ -35,11 +35,6 @@ const ASSETS: [string, string][] = [
 
   ["@techstark/opencv-js/dist/opencv.js", "wasm/opencv/opencv.js"],
 
-  ["@matbee/libreoffice-converter/wasm/soffice.js", "libreoffice-wasm/soffice.js"],
-  ["@matbee/libreoffice-converter/wasm/soffice.wasm", "libreoffice-wasm/soffice.wasm"],
-  ["@matbee/libreoffice-converter/wasm/soffice.data", "libreoffice-wasm/soffice.data"],
-  ["@matbee/libreoffice-converter/wasm/soffice.worker.js", "libreoffice-wasm/soffice.worker.js"],
-  ["@matbee/libreoffice-converter/dist/browser.worker.global.js", "libreoffice-wasm/browser.worker.global.js"],
 
   ["tesseract.js/dist/worker.min.js", "tesseract/worker.min.js"],
   ["tesseract.js-core/tesseract-core-lstm.wasm.js", "tesseract/core/tesseract-core-lstm.wasm.js"],

@@ -1,4 +1,4 @@
-import { PDFDict, PDFName, PDFArray } from "pdf-lib";
+import { PDFDict, PDFName, PDFArray, PDFStream, type PDFObject } from "pdf-lib";
 import { bytesToPdfBlob } from "../../../lib/blob";
 import { withPdfExtension } from "../../../lib/files";
 import { loadMupdf, runQpdf } from "../../../lib/wasm/loadEngine";
@@ -33,6 +33,17 @@ async function qpdf(
 /** AES key length. qpdf refuses RC4 (40-bit and plain 128-bit) as weak crypto. */
 export type EncryptionBits = "128" | "256";
 
+export function encryptionArgs(userPassword: string, ownerPassword: string, bits: EncryptionBits): string[] {
+  return [
+    "--encrypt",
+    `--user-password=${userPassword}`,
+    `--owner-password=${ownerPassword || userPassword}`,
+    `--bits=${bits}`,
+    ...(bits === "128" ? ["--use-aes=y"] : []),
+    "--",
+  ];
+}
+
 export async function encryptPdf(
   file: File,
   userPassword: string,
@@ -44,15 +55,7 @@ export async function encryptPdf(
   }
   return qpdf(
     file,
-    [
-      "--encrypt",
-      `--user-password=${userPassword}`,
-      `--owner-password=${ownerPassword || userPassword}`,
-      `--bits=${bits}`,
-      // qpdf's 128-bit mode defaults to RC4; AES must be requested explicitly.
-      ...(bits === "128" ? ["--use-aes=y"] : []),
-      "--",
-    ],
+    encryptionArgs(userPassword, ownerPassword, bits),
     "-encrypted",
     (error) =>
       /already encrypted|invalid password/i.test(error.message)
@@ -221,31 +224,59 @@ export async function sanitizePdf(
     }
   }
 
-  for (const page of doc.getPages()) {
-    const node = page.node;
-    if (node.has(PDFName.of("AA"))) {
-      node.delete(PDFName.of("AA"));
-      report.openActions += 1;
+  // Actions also live in form fields and /Next chains, not just annotations.
+  const visited = new Set<PDFObject>();
+  const pending: PDFObject[] = [catalog, ...doc.context.enumerateIndirectObjects().map(([, object]) => object)];
+  while (pending.length) {
+    const object = doc.context.lookup(pending.pop());
+    if (!object || visited.has(object)) continue;
+    visited.add(object);
+    if (object instanceof PDFArray) {
+      pending.push(...object.asArray());
+      continue;
     }
-    const annots = node.lookupMaybe(PDFName.of("Annots"), PDFArray);
-    if (!annots) continue;
-    for (let i = annots.size() - 1; i >= 0; i -= 1) {
-      const annot = annots.lookup(i, PDFDict);
-      if (!annot) continue;
-      const action = annot.lookupMaybe(PDFName.of("A"), PDFDict);
-      const additional = annot.lookupMaybe(PDFName.of("AA"), PDFDict);
-      const subtype = action?.get(PDFName.of("S"));
-      const isJs = subtype === PDFName.of("JavaScript");
-      const isLaunch = subtype === PDFName.of("Launch");
-      const isSubmit = subtype === PDFName.of("SubmitForm");
-      if (isJs) report.javascript += 1;
-      if (isLaunch || isSubmit) report.launchActions += 1;
-      if (isJs || isLaunch || isSubmit) annot.delete(PDFName.of("A"));
-      if (additional) {
-        annot.delete(PDFName.of("AA"));
-        report.javascript += 1;
+    const dict = object instanceof PDFStream ? object.dict : object;
+    if (!(dict instanceof PDFDict)) continue;
+
+    const subtype = doc.context.lookup(dict.get(PDFName.of("S")));
+    if (subtype === PDFName.of("JavaScript") || subtype === PDFName.of("Launch") || subtype === PDFName.of("SubmitForm")) {
+      if (subtype === PDFName.of("JavaScript")) report.javascript += 1;
+      else report.launchActions += 1;
+      for (const key of dict.keys()) dict.delete(key);
+      continue;
+    }
+    for (const key of ["OpenAction", "AA"]) {
+      if (dict.has(PDFName.of(key))) {
+        dict.delete(PDFName.of(key));
+        report.openActions += 1;
       }
     }
+    if (dict.has(PDFName.of("EF"))) {
+      dict.delete(PDFName.of("EF"));
+      report.embeddedFiles += 1;
+    }
+    dict.delete(PDFName.of("AF"));
+    const annots = dict.lookupMaybe(PDFName.of("Annots"), PDFArray);
+    if (annots) {
+      for (let index = annots.size() - 1; index >= 0; index -= 1) {
+        const annot = doc.context.lookup(annots.get(index));
+        if (annot instanceof PDFDict && annot.get(PDFName.of("Subtype")) === PDFName.of("FileAttachment")) {
+          annots.remove(index);
+          report.embeddedFiles += 1;
+        }
+      }
+    }
+    const action = doc.context.lookup(dict.get(PDFName.of("A")));
+    if (action instanceof PDFDict && (action.keys().length === 0 || ["JavaScript", "Launch", "SubmitForm"].some((name) => action.get(PDFName.of("S")) === PDFName.of(name)))) {
+      if (action.keys().length) {
+        if (action.get(PDFName.of("S")) === PDFName.of("JavaScript")) report.javascript += 1;
+        else report.launchActions += 1;
+        for (const key of action.keys()) action.delete(key);
+        visited.add(action);
+      }
+      dict.delete(PDFName.of("A"));
+    }
+    pending.push(...dict.values());
   }
 
   // Unlinking alone leaves the payload recoverable in the output bytes.

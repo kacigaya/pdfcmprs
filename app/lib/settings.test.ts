@@ -5,4 +5,6 @@ test("normalizeSettings accepts only supported setting values", () => {
   expect(normalizeSettings({ language: "ja", compact: true, shortcuts: false })).toEqual({ language: "ja", compact: true, shortcuts: false });
   expect(normalizeSettings({ language: "xx", compact: "yes", shortcuts: null })).toEqual(DEFAULT_SETTINGS);
   expect(normalizeSettings(null)).toEqual(DEFAULT_SETTINGS);
+  expect(normalizeSettings({ language: "toString" })).toEqual(DEFAULT_SETTINGS);
+  expect(normalizeSettings({ language: "__proto__" })).toEqual(DEFAULT_SETTINGS);
 });

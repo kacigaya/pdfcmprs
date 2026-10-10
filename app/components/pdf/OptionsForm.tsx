@@ -131,6 +131,21 @@ interface OptionsFormProps {
   className?: string;
 }
 
+export function validateOptionValues(fields: ReadonlyArray<OptionField>, values: OptionValues): string | null {
+  for (const field of fields) {
+    if (field.kind !== "number" || (field.visibleWhen && !field.visibleWhen(values))) continue;
+    const value = Number(values[field.name]);
+    if (!Number.isFinite(value)) return `${field.label} must be a finite number.`;
+    if (field.min !== undefined && value < field.min) return `${field.label} must be at least ${field.min}.`;
+    if (field.max !== undefined && value > field.max) return `${field.label} must be at most ${field.max}.`;
+    if (field.step !== undefined) {
+      const steps = (value - (field.min ?? 0)) / field.step;
+      if (Math.abs(steps - Math.round(steps)) > 1e-7) return `${field.label} must use increments of ${field.step}.`;
+    }
+  }
+  return null;
+}
+
 export function OptionsForm({
   fields,
   values,
@@ -215,7 +230,7 @@ export function OptionsForm({
                     disabled={disabled}
                     min={field.min}
                     max={field.max}
-                    step={field.step}
+                    step={field.step ?? "any"}
                     className="font-mono tabular-nums"
                     value={String(values[field.name])}
                     onChange={(event) => {

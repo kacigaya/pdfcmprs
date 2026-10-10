@@ -1,6 +1,6 @@
 # Publishes the static export to GitHub Pages. Uses the Actions artifact path
-# rather than a gh-pages branch because soffice.wasm (141 MB) exceeds GitHub's
-# per-file git limit. Enable Pages with source "GitHub Actions" in repo settings.
+# rather than storing generated engine assets on a gh-pages branch.
+# Enable Pages with source "GitHub Actions" in repo settings.
 name: Deploy to GitHub Pages
 
 on:

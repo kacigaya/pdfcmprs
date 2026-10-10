@@ -29,6 +29,7 @@ export default function MergePanel({ run }: ToolPanelProps) {
   return (
     <section data-testid="merge-panel">
       <FileUploadZone
+        disabled={run.isRunning}
         multiple
         previews
         files={list.files}

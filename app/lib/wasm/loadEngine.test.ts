@@ -61,3 +61,11 @@ describe("runCliTool", () => {
     expect(await run(3, PDF, [0, 3])).toEqual(PDF);
   });
 });
+
+
+test("copies output out of the engine heap", async () => {
+  const heap = new Uint8Array([1, 2]);
+  const result = await run(0, heap);
+  heap.fill(0);
+  expect([...result]).toEqual([1, 2]);
+});

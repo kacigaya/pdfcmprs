@@ -247,7 +247,7 @@ export const DigitalSignaturePanel = createToolPanel({
   },
 });
 
-export const ValidateSignaturePanel = createToolPanel({ input: PDF, actionLabel: "Validate Signatures", runningLabel: "Inspecting…", execute: async ({ files }) => { const out = await inspectSignatures(files[0]); return { ...out, description: `${out.count} signature dictionaries found and checked for byte-range integrity.`, message: "Signature inspection complete." }; } });
+export const ValidateSignaturePanel = createToolPanel({ input: PDF, actionLabel: "Inspect Signatures", runningLabel: "Inspecting…", execute: async ({ files }) => { const out = await inspectSignatures(files[0]); return { ...out, description: `${out.count} signature byte ranges inspected. Cryptographic signatures and certificate trust were not verified.`, message: "Signature inspection complete." }; } });
 
 export const TimestampPanel = createToolPanel({
   input: PDF,

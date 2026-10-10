@@ -157,4 +157,15 @@ describe("useToolRun", () => {
     expect(result.current.progress).toBe(0);
     expect(result.current.result).toBeNull();
   });
+
+  test("validation failure clears an earlier successful download", async () => {
+    const { result } = renderHook(() => useToolRun());
+    await act(async () => {
+      await result.current.run(async () => outcome());
+    });
+    act(() => result.current.fail("Invalid options."));
+    expect(result.current.result).toBeNull();
+    expect(result.current.status).toEqual({ tone: "error", message: "Invalid options." });
+    expect(result.current.progress).toBe(0);
+  });
 });

@@ -117,7 +117,7 @@ declare module "coherentpdf" {
   export function removeAttachedFiles(pdf: Pdf): void;
   export function startGetAttachments(pdf: Pdf): void;
   export function numberGetAttachments(): number;
-  export function getAttachmentName(index: number): string;
+  export function getAttachmentName(index: number): string | { toUtf16(): string };
   export function getAttachmentPage(index: number): number;
   export function getAttachmentData(index: number): Uint8Array;
   export function endGetAttachments(): void;

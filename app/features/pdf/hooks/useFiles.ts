@@ -78,7 +78,8 @@ export function useFileList(onChange?: () => void): FileListBinding {
       next.splice(target, 0, item);
       return next;
     });
-  }, []);
+    onChange?.();
+  }, [onChange]);
 
   return { files, onFiles, onRemove, onClear, onMove };
 }

@@ -25,11 +25,22 @@ export async function loadPdfDocument(file: File): Promise<PDFDocumentProxy> {
   const pdfjs = await getPdfJs();
   const buffer = await file.arrayBuffer();
   const task = pdfjs.getDocument({ data: new Uint8Array(buffer) });
+  let cancelled = false;
   task.onPassword = (updatePassword: (password: string) => void) => {
     const password = window.prompt(`Enter the password for ${file.name}:`);
     if (password !== null) updatePassword(password);
+    else {
+      cancelled = true;
+      void task.destroy();
+    }
   };
-  return task.promise;
+  try {
+    return await task.promise;
+  } catch (error) {
+    await task.destroy();
+    if (cancelled) throw new Error("Password entry was cancelled.");
+    throw error;
+  }
 }
 
 export async function renderPageToDataUrl(

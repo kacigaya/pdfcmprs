@@ -1,5 +1,6 @@
 import { describe, expect, test } from "bun:test";
 import { PDFDocument } from "pdf-lib";
+import { encryptionArgs } from "../../features/pdf/services/securityOps";
 
 /**
  * Engine-level smoke test for qpdf.
@@ -72,6 +73,21 @@ function asText(bytes: Uint8Array): string {
 }
 
 describe("qpdf engine", () => {
+  for (const bits of ["128", "256"] as const) {
+    test(`encrypts and decrypts ${bits}-bit output using the advertised algorithm`, async () => {
+      const userPassword = crypto.randomUUID();
+      const ownerPassword = crypto.randomUUID();
+      const encrypted = await runQpdf(encryptionArgs(userPassword, ownerPassword, bits), await samplePdf());
+      expect(encrypted?.length).toBeGreaterThan(0);
+      if (!encrypted) throw new Error("Encryption produced no output.");
+      const raw = asText(encrypted);
+      if (bits === "128") expect(raw).toContain("/CFM /AESV2");
+      if (bits === "256") expect(raw).toContain("/CFM /AESV3");
+      const decrypted = await runQpdf(["--decrypt", `--password=${userPassword}`], encrypted);
+      if (!decrypted) throw new Error("Decryption produced no output.");
+      expect((await PDFDocument.load(decrypted)).getPageCount()).toBe(1);
+    });
+  }
   test("encrypts a PDF", async () => {
     const encrypted = await runQpdf(
       [

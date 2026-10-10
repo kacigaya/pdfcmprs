@@ -9,15 +9,8 @@ import { rasterizePdf, type RasterQuality } from "./rasterOps";
 import { ensurePageContents, loadPdf, savePdf } from "./pdfCore";
 import { escapeXml, readPositionedText } from "./textExport";
 
-type OfficeConverter = import("@matbee/libreoffice-converter/browser").WorkerBrowserConverter;
-let officeConverterPromise: Promise<OfficeConverter> | null = null;
 type FullMupdf = import("@bentopdf/pymupdf-wasm").PyMuPDF;
 let fullMupdfPromise: Promise<FullMupdf> | null = null;
-
-function stopOfficeConverter(converter: OfficeConverter) {
-  (converter as unknown as { worker: Worker | null }).worker?.terminate();
-  officeConverterPromise = null;
-}
 
 async function getFullMupdf() {
   if (!fullMupdfPromise) {
@@ -32,32 +25,6 @@ async function getFullMupdf() {
     });
   }
   return fullMupdfPromise;
-}
-
-async function getOfficeConverter() {
-  if (officeConverterPromise) return officeConverterPromise;
-  const { WorkerBrowserConverter } = await import("@matbee/libreoffice-converter/browser");
-  const converter = new WorkerBrowserConverter({
-    sofficeJs: assetUrl("/libreoffice-wasm/soffice.js"),
-    sofficeWasm: assetUrl("/libreoffice-wasm/soffice.wasm"),
-    sofficeData: assetUrl("/libreoffice-wasm/soffice.data"),
-    sofficeWorkerJs: assetUrl("/libreoffice-wasm/soffice.worker.js"),
-    browserWorkerJs: assetUrl("/libreoffice-wasm/browser.worker.global.js"),
-  });
-  officeConverterPromise = new Promise<OfficeConverter>((resolve, reject) => {
-    const timeout = window.setTimeout(
-      () => reject(new Error("LibreOffice took too long to initialize. Reload the page and try again.")),
-      90_000,
-    );
-    converter.initialize().then(
-      () => { window.clearTimeout(timeout); resolve(converter); },
-      (error) => { window.clearTimeout(timeout); reject(error); },
-    );
-  }).catch((error) => {
-    stopOfficeConverter(converter);
-    throw error;
-  });
-  return officeConverterPromise;
 }
 
 type GhostscriptMode = "pdfa1" | "pdfa2" | "pdfa3" | "outlines";
@@ -206,21 +173,30 @@ export function rotatedPlacement(w: number, h: number, angle: number) {
 }
 
 export async function rotateCustom(file: File, angle: number) {
+  if (!Number.isFinite(angle)) throw new Error("Use a finite rotation angle.");
   const source = await loadPdf(file);
   ensurePageContents(source);
   const out = await PDFDocument.create();
   for (const sourcePage of source.getPages()) {
-    const embedded = await out.embedPage(sourcePage);
-    const w = embedded.width;
-    const h = embedded.height;
-    const { width, height, x, y } = rotatedPlacement(w, h, angle);
+    const crop = sourcePage.getCropBox();
+    const media = sourcePage.getMediaBox();
+    const left = Math.max(crop.x, media.x);
+    const bottom = Math.max(crop.y, media.y);
+    const right = Math.min(crop.x + crop.width, media.x + media.width);
+    const top = Math.min(crop.y + crop.height, media.y + media.height);
+    const w = right - left;
+    const h = top - bottom;
+    if (w <= 0 || h <= 0) throw new Error("The page has an empty visible area.");
+    const embedded = await out.embedPage(sourcePage, { left, bottom, right, top });
+    const rotation = angle - sourcePage.getRotation().angle;
+    const { width, height, x, y } = rotatedPlacement(w, h, rotation);
     const page = out.addPage([width, height]);
     page.drawPage(embedded, {
       x,
       y,
       width: w,
       height: h,
-      rotate: degrees(angle),
+      rotate: degrees(rotation),
       xSkew: degrees(0),
       ySkew: degrees(0),
     });
@@ -267,33 +243,13 @@ export async function extractImages(file: File, report?: ProgressReporter) {
   return { blob: createStoredZip(entries), filename: `${file.name.replace(/\.pdf$/i, "")}-images.zip`, count: entries.length };
 }
 
-/** Converted by LibreOffice. */
-const OFFICE_EXTENSIONS = ["doc", "docx", "xls", "xlsx", "ppt", "pptx", "odt", "ods", "odp", "odg", "rtf", "pub", "wpd", "wps", "vsd", "pages"];
-/** Converted by PyMuPDF. */
-const EBOOK_EXTENSIONS = ["xps", "oxps", "epub", "mobi", "fb2", "cbz"];
-export const DOCUMENT_EXTENSIONS: ReadonlyArray<string> = [...OFFICE_EXTENSIONS, ...EBOOK_EXTENSIONS];
+export const DOCUMENT_EXTENSIONS: ReadonlyArray<string> = ["xps", "oxps", "epub", "mobi", "fb2", "cbz"];
 
 export async function documentToPdf(file: File) {
   const extension = file.name.split(".").pop()?.toLowerCase() || "document";
-  if (OFFICE_EXTENSIONS.includes(extension)) {
-    const converter = await getOfficeConverter();
-    const input = new Uint8Array(await file.arrayBuffer());
-    const result = await new Promise<Awaited<ReturnType<OfficeConverter["convert"]>>>((resolve, reject) => {
-      const timeout = window.setTimeout(() => {
-        stopOfficeConverter(converter);
-        reject(new Error("LibreOffice took too long to convert this document. Reload the page and try a smaller file."));
-      }, 120_000);
-      converter.convert(input, {
-        outputFormat: "pdf",
-        inputFormat: extension as "doc",
-      }, file.name).then(
-        (value) => { window.clearTimeout(timeout); resolve(value); },
-        (error) => { window.clearTimeout(timeout); reject(error); },
-      );
-    });
-    return { blob: bytesToPdfBlob(new Uint8Array(result.data)), filename: `${file.name.replace(/\.[^.]+$/, "")}.pdf` };
+  if (!DOCUMENT_EXTENSIONS.includes(extension)) {
+    throw new Error("This document format is not supported. Export it as PDF first.");
   }
-
   const engine = await getFullMupdf();
   return {
     blob: await engine.convertToPdf(file, { filetype: extension }),
@@ -371,10 +327,12 @@ export async function inspectSignatures(file: File) {
   const ranges = [...raw.matchAll(/\/ByteRange\s*\[\s*(\d+)\s+(\d+)\s+(\d+)\s+(\d+)\s*\]/g)];
   const signatures = ranges.map((match, index) => {
     const values = match.slice(1).map(Number);
-    const coverage = values[0] === 0 && values[2] + values[3] <= bytes.length;
-    return { signature: index + 1, byteRange: values, structurallyValid: coverage, coversBytes: values[1] + values[3], fileBytes: bytes.length };
+    const coverage = values.every(Number.isSafeInteger) && values[0] === 0 &&
+      values[1] > 0 && values[2] > values[1] && values[3] > 0 &&
+      values[2] + values[3] <= bytes.length;
+    return { signature: index + 1, byteRange: values, structurallyValid: coverage, coversCurrentFile: coverage && values[2] + values[3] === bytes.length, coversBytes: values[1] + values[3], fileBytes: bytes.length };
   });
-  const report = { filename: file.name, signatureCount: signatures.length, signatures };
+  const report = { filename: file.name, signatureCount: signatures.length, cryptographicallyVerified: false, signatures };
   const text = JSON.stringify(report, null, 2);
   return { blob: new Blob([text], { type: "application/json" }), filename: file.name.replace(/\.pdf$/i, "-signature-report.json"), text, count: signatures.length };
 }

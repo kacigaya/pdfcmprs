@@ -49,7 +49,7 @@ test("category filters, theme control, and related tools preserve context", asyn
   await expect(
     page.getByRole("heading", { name: "Related tools" }),
   ).toBeVisible();
-  await page.getByRole("link", { name: /All Secure & Optimize tools/ }).click();
+  await page.getByRole("link", { name: /All Secure & Optimize Tools/ }).click();
   await expect(page).toHaveURL(/category=secure/);
 });
 
@@ -121,16 +121,32 @@ test("headers, legacy redirects, PWA assets, and not-found page work", async ({
   expect(home.headers()["cross-origin-opener-policy"]).toBe("same-origin");
   expect(home.headers()["cross-origin-embedder-policy"]).toBe("require-corp");
   expect(home.headers()["x-content-type-options"]).toBe("nosniff");
+  expect(home.headers()["content-security-policy"]).not.toContain("'unsafe-eval'");
+
 
   await page.goto("/tools/compress");
   await expect(page).toHaveURL(/\/compress-pdf$/);
   const manifest = await request.get("/manifest.webmanifest");
-  expect((await manifest.json()).start_url).toBe("/");
+  expect(new URL((await manifest.json()).start_url, manifest.url()).pathname).toBe("/");
   expect((await request.get("/sw.js")).ok()).toBe(true);
   expect((await request.get("/icon.svg")).ok()).toBe(true);
 
   const missing = await page.goto("/definitely-not-a-tool");
   expect(missing?.status()).toBe(404);
+});
+
+test("unavailable converters are absent from the catalog and picker", async ({ page, request }) => {
+  const removed = ["word", "excel", "powerpoint", "odt", "ods", "odp", "odg", "rtf", "pages", "wpd", "wps", "pub", "vsd"];
+  await page.goto("/");
+  for (const format of removed) {
+    await expect(page.locator(`[data-testid="tool-card-${format}-to-pdf"]`)).toHaveCount(0);
+    expect((await request.get(`/${format}-to-pdf`)).status()).toBe(404);
+  }
+  await page.goto("/epub-to-pdf");
+  const accepted = (await page.locator('input[type="file"]').getAttribute("accept"))?.split(",");
+  for (const extension of ["doc", "docx", "xls", "xlsx", "ppt", "pptx", "odt", "ods", "odp", "odg", "rtf", "pages", "wpd", "wps", "pub", "vsd"]) {
+    expect(accepted).not.toContain(`.${extension}`);
+  }
 });
 
 for (const tool of TOOLS) {

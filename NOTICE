@@ -44,12 +44,6 @@ CoherentPDF (coherentpdf)
   Used for: booklet imposition, N-up, posterize, attachments, bookmarks,
   page labels, overlays, and optional-content layers.
 
-LibreOffice WASM (@matbee/libreoffice-converter)
-  Copyright (c) Matbee and The Document Foundation contributors
-  License: MPL-2.0 (LibreOffice components also include MPL-2.0/LGPL-3.0-or-later)
-  https://github.com/matbeedotcom/libreoffice-document-converter
-  Used for: Office, OpenDocument, Publisher, Visio, and legacy document conversion.
-
 wasm-vips
   Copyright (c) Kleis Auke Wolthuizen
   License: MIT (bundling libvips and its dependencies, which include
