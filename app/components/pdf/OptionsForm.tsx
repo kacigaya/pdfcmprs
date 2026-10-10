@@ -75,8 +75,9 @@ export type OptionField =
       label: string;
       kind: "password";
       default: string;
-      autoComplete?: "current-password" | "new-password";
       placeholder?: string;
+      /** "new-password" keeps browsers from autofilling a saved password. */
+      autoComplete?: "current-password" | "new-password";
       hint?: string;
       visibleWhen?: (values: OptionValues) => boolean;
     }

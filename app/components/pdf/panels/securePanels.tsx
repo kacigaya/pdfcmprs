@@ -34,16 +34,16 @@ export const EncryptPanel = createToolPanel({
     {
       kind: "password",
       name: "userPassword",
-      label: "User password (to open)",
       autoComplete: "new-password",
+      label: "User password (to open)",
       default: "",
       placeholder: "Leave empty for no open password…",
     },
     {
       kind: "password",
       name: "ownerPassword",
-      label: "Owner password (to change)",
       autoComplete: "new-password",
+      label: "Owner password (to change)",
       default: "",
       placeholder: "Defaults to the user password…",
     },
@@ -54,8 +54,7 @@ export const EncryptPanel = createToolPanel({
       default: "256",
       options: [
         { label: "AES-256 (recommended)", value: "256" },
-        { label: "AES-128", value: "128" },
-        { label: "RC4-40 (legacy readers)", value: "40" },
+        { label: "AES-128 (older readers)", value: "128" },
       ],
     },
   ],
@@ -76,7 +75,7 @@ export const EncryptPanel = createToolPanel({
     return {
       blob: out.blob,
       filename: out.filename,
-      description: `Encrypted with ${values.bits === "40" ? "RC4-40" : `AES-${values.bits}`} · ${formatFileSize(out.blob.size)}.`,
+      description: `Encrypted with AES-${values.bits} · ${formatFileSize(out.blob.size)}.`,
       message: "Encryption complete.",
     };
   },
@@ -113,16 +112,16 @@ export const PermissionsPanel = createToolPanel({
     {
       kind: "password",
       name: "ownerPassword",
-      label: "Owner password (required)",
       autoComplete: "new-password",
+      label: "Owner password (required)",
       default: "",
       placeholder: "Needed to enforce restrictions…",
     },
     {
       kind: "password",
       name: "userPassword",
-      label: "User password (optional)",
       autoComplete: "new-password",
+      label: "User password (optional)",
       default: "",
       placeholder: "Leave empty so anyone can open it…",
     },

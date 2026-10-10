@@ -382,39 +382,12 @@ test.describe("real processing", () => {
     ]) }, timeout: 240_000 });
   });
 
-  test("office, publishing, and ebook converters", async ({ page }, testInfo) => {
-    const core = "https://raw.githubusercontent.com/LibreOffice/core/master";
-    const office = {
-      word: await zipUpload("document.docx", "application/vnd.openxmlformats-officedocument.wordprocessingml.document", [
-        { filename: "[Content_Types].xml", text: `<?xml version="1.0"?><Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"><Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default Extension="xml" ContentType="application/xml"/><Override PartName="/word/document.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.document.main+xml"/></Types>` },
-        { filename: "_rels/.rels", text: `<?xml version="1.0"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="word/document.xml"/></Relationships>` },
-        { filename: "word/document.xml", text: `<?xml version="1.0"?><w:document xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main"><w:body><w:p><w:r><w:t>Browser office conversion test</w:t></w:r></w:p><w:sectPr><w:pgSz w:w="12240" w:h="15840"/></w:sectPr></w:body></w:document>` },
-      ]),
-      excel: await remoteUpload("sheet.xlsx", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", `${core}/sc/qa/unit/data/xlsx/check-boolean.xlsx`),
-      powerpoint: await remoteUpload("slides.pptx", "application/vnd.openxmlformats-officedocument.presentationml.presentation", `${core}/sd/qa/unit/data/pptx/hidden_group_shape.pptx`),
-      odt: await remoteUpload("document.odt", "application/vnd.oasis.opendocument.text", `${core}/sw/qa/core/data/odt/pass/tdf112123.odt`),
-      ods: await remoteUpload("sheet.ods", "application/vnd.oasis.opendocument.spreadsheet", `${core}/sc/qa/unit/data/ods/tdf76310.ods`),
-      odp: await remoteUpload("slides.odp", "application/vnd.oasis.opendocument.presentation", `${core}/sd/qa/unit/data/odp/tdf163343.odp`),
-      odg: await remoteUpload("drawing.odg", "application/vnd.oasis.opendocument.graphics", `${core}/sd/qa/unit/tiledrendering/data/dummy.odg`),
-      rtf: await remoteUpload("document.rtf", "application/rtf", `${core}/sw/qa/extras/rtfexport/data/hello.rtf`),
-    };
-    const raw = "https://raw.githubusercontent.com/LibreOffice/core/master/writerperfect/qa/unit/data";
-    const publishing = {
-      pages: await remoteUpload("document.pages", "application/x-iwork-pages-sffpages", `${raw}/writer/libetonyek/pass/Pages_4.pages`),
-      wpd: await remoteUpload("document.wpd", "application/vnd.wordperfect", `${raw}/writer/libwpd/pass/WP6.wpd`),
-      wps: await remoteUpload("document.wps", "application/vnd.ms-works", `${raw}/writer/libwps/pass/Works_6.0.wps`),
-      pub: await remoteUpload("document.pub", "application/x-mspublisher", `${raw}/draw/libmspub/pass/fdo59355-1.pub`),
-      vsd: await remoteUpload("document.vsd", "application/vnd.visio", `${raw}/draw/libvisio/pass/fdo57117-1.vsd`),
-    };
-    const requested = process.env.E2E_DOC_FORMAT;
-    for (const [format, file] of Object.entries({ ...office, ...publishing }).filter(([format]) => !requested || format === requested)) {
-      await runTool(page, testInfo, `${format}-to-pdf`, file, { timeout: 300_000 });
-    }
-
+  test("ebook converters", async ({ page }, testInfo) => {
     const images = await imageUploads();
     const ebooks = await makeEbookUploads(images.png);
-    for (const [format, file] of Object.entries(ebooks).filter(([format]) => !requested || format === requested)) {
-      await runTool(page, testInfo, `${format}-to-pdf`, file, { timeout: 300_000 });
+    for (const [format, file] of Object.entries(ebooks)) {
+      const output = await runTool(page, testInfo, `${format}-to-pdf`, file, { timeout: 300_000 });
+      expect((await PDFDocument.load(output!.buffer)).getPageCount()).toBeGreaterThan(0);
     }
   });
 });

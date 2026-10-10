@@ -86,8 +86,8 @@ test("invalid numeric options are rejected before generating a PDF", async ({ pa
 });
 
 test("document and attachment pickers accept their advertised inputs", async ({ page }) => {
-  await page.goto("/word-to-pdf");
-  await expect(page.locator('input[type="file"]')).toHaveAttribute("accept", /\.docx/);
+  await page.goto("/epub-to-pdf");
+  await expect(page.locator('input[type="file"]')).toHaveAttribute("accept", /\.epub/);
   await expect(page.getByRole("button", { name: /Select Documents/ })).toBeVisible();
   await page.goto("/add-attachments");
   await expect(page.locator('input[type="file"]')).toHaveAttribute("accept", "");

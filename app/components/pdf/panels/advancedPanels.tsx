@@ -5,6 +5,7 @@ import {
   changeTextColor,
   deskewPdf,
   digitalSign,
+  DOCUMENT_EXTENSIONS,
   documentToPdf,
   extractImages,
   ghostscriptPdf,
@@ -50,8 +51,18 @@ const QUALITY = {
   ],
 };
 
+const DOCUMENT_ACCEPT = DOCUMENT_EXTENSIONS.map((extension) => `.${extension}`).join(",");
+const DOCUMENT_PATTERN = new RegExp(`\\.(${DOCUMENT_EXTENSIONS.join("|")})$`, "i");
+
 export const DocumentToPdfPanel = createToolPanel({
-  input: { kind: "single", batch: true, label: "Drop your document here", accept: ".doc,.docx,.xls,.xlsx,.ppt,.pptx,.odt,.ods,.odp,.odg,.rtf,.pub,.wpd,.wps,.vsd,.pages,.epub,.mobi,.fb2,.cbz,.xps,.oxps", chooseLabel: "Select Documents", filter: (files) => Array.from(files) },
+  input: {
+    kind: "single",
+    batch: true,
+    label: "Drop your document here",
+    accept: DOCUMENT_ACCEPT,
+    chooseLabel: "Select Documents",
+    filter: (files) => Array.from(files).filter((file) => DOCUMENT_PATTERN.test(file.name)),
+  },
   actionLabel: "Convert to PDF",
   runningLabel: "Converting…",
   execute: async ({ files }) => ({ ...(await documentToPdf(files[0])), description: "Converted locally in your browser.", message: "Document converted to PDF." }),
@@ -167,8 +178,9 @@ export const WorkflowPanel = createToolPanel({
   execute: async ({ files, values, report }) => { const out = await runWorkflow(files[0], JSON.parse(String(values.steps)), report); return { ...out, description: `${out.steps} steps completed.`, message: "Workflow complete." }; },
 });
 
+// An empty accept lets the picker offer any file type as an attachment.
 export const AddAttachmentsPanel = createToolPanel({
-  input: { kind: "multiple", label: "Drop a PDF first, then attachment files", accept: "", chooseLabel: "Select Files", minFiles: 2, filter: (files) => Array.from(files) },
+  input: { kind: "multiple", label: "Drop a PDF first, then attachment files", minFiles: 2, accept: "", chooseLabel: "Select Files", filter: (files) => Array.from(files) },
   actionLabel: "Attach Files",
   runningLabel: "Attaching…",
   validate: ({ files }) => /\.pdf$/i.test(files[0].name) ? null : "The first file must be a PDF.",

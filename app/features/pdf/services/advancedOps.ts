@@ -7,17 +7,10 @@ import { createStoredZip } from "../../../lib/zip";
 import type { ProgressReporter } from "../types";
 import { rasterizePdf, type RasterQuality } from "./rasterOps";
 import { ensurePageContents, loadPdf, savePdf } from "./pdfCore";
-import { readPositionedText } from "./textExport";
+import { escapeXml, readPositionedText } from "./textExport";
 
-type OfficeConverter = import("@matbee/libreoffice-converter/browser").WorkerBrowserConverter;
-let officeConverterPromise: Promise<OfficeConverter> | null = null;
 type FullMupdf = import("@bentopdf/pymupdf-wasm").PyMuPDF;
 let fullMupdfPromise: Promise<FullMupdf> | null = null;
-
-function stopOfficeConverter(converter: OfficeConverter) {
-  (converter as unknown as { worker: Worker | null }).worker?.terminate();
-  officeConverterPromise = null;
-}
 
 async function getFullMupdf() {
   if (!fullMupdfPromise) {
@@ -34,52 +27,16 @@ async function getFullMupdf() {
   return fullMupdfPromise;
 }
 
-async function getOfficeConverter() {
-  if (officeConverterPromise) return officeConverterPromise;
-  const { WorkerBrowserConverter } = await import("@matbee/libreoffice-converter/browser");
-  const converter = new WorkerBrowserConverter({
-    sofficeJs: assetUrl("/libreoffice-wasm/soffice.js"),
-    sofficeWasm: assetUrl("/libreoffice-wasm/soffice.wasm"),
-    sofficeData: assetUrl("/libreoffice-wasm/soffice.data"),
-    sofficeWorkerJs: assetUrl("/libreoffice-wasm/soffice.worker.js"),
-    browserWorkerJs: assetUrl("/libreoffice-wasm/browser.worker.global.js"),
-  });
-  officeConverterPromise = new Promise<OfficeConverter>((resolve, reject) => {
-    const timeout = window.setTimeout(
-      () => reject(new Error("LibreOffice took too long to initialize. Reload the page and try again.")),
-      90_000,
-    );
-    converter.initialize().then(
-      () => { window.clearTimeout(timeout); resolve(converter); },
-      (error) => { window.clearTimeout(timeout); reject(error); },
-    );
-  }).catch((error) => {
-    stopOfficeConverter(converter);
-    throw error;
-  });
-  return officeConverterPromise;
-}
+type GhostscriptMode = "pdfa1" | "pdfa2" | "pdfa3" | "outlines";
 
-export async function ghostscriptPdf(
-  file: File,
-  mode: "pdfa1" | "pdfa2" | "pdfa3" | "outlines",
-) {
-  const args = ["-q", "-dNOPAUSE", "-dBATCH", "-dNOSAFER", "-sDEVICE=pdfwrite"];
-  const inputs: Record<string, Uint8Array> = { "in.pdf": new Uint8Array(await file.arrayBuffer()) };
+/** Ghostscript arguments for PDF/A and outline conversion; PDF/A also reads pdfa.ps. */
+export function ghostscriptPdfArgs(mode: GhostscriptMode): string[] {
+  // -dSAFER is safe here: the ICC profile is inlined into pdfa.ps rather than
+  // read from disk, and files named on the command line stay readable.
+  const args = ["-q", "-dNOPAUSE", "-dBATCH", "-dSAFER", "-sDEVICE=pdfwrite"];
   if (mode === "outlines") {
     args.push("-dNoOutputFonts", "-dCompatibilityLevel=1.7");
   } else {
-    const icc = new Uint8Array(await (await fetch(assetUrl("/wasm/ghostscript/srgb.icc"))).arrayBuffer());
-    const hex = Array.from(icc, (byte) => byte.toString(16).padStart(2, "0")).join("");
-    const subtype = mode === "pdfa1" ? "/GTS_PDFA1" : "/GTS_PDFA";
-    inputs["pdfa.ps"] = new TextEncoder().encode(`%!
-[/_objdef {icc_PDFA} /type /stream /OBJ pdfmark
-[{icc_PDFA} << /N 3 >> /PUT pdfmark
-[{icc_PDFA} <${hex}> /PUT pdfmark
-[/_objdef {OutputIntent_PDFA} /type /dict /OBJ pdfmark
-[{OutputIntent_PDFA} << /Type /OutputIntent /S ${subtype} /DestOutputProfile {icc_PDFA} /OutputConditionIdentifier (sRGB IEC61966-2.1) /Info (sRGB IEC61966-2.1) /RegistryName (http://www.color.org) >> /PUT pdfmark
-[{Catalog} << /OutputIntents [ {OutputIntent_PDFA} ] >> /PUT pdfmark
-`);
     args.push(
       `-dPDFA=${mode.slice(-1)}`,
       "-dPDFACompatibilityPolicy=1",
@@ -92,7 +49,30 @@ export async function ghostscriptPdf(
     );
   }
   args.push("-dAutoRotatePages=/None", "-sOutputFile=out.pdf", ...(mode === "outlines" ? [] : ["pdfa.ps"]), "in.pdf");
-  const bytes = await runGhostscript(args, inputs, "out.pdf");
+  return args;
+}
+
+/** PostScript prologue that attaches the sRGB OutputIntent PDF/A requires. */
+export function pdfaDefinition(mode: Exclude<GhostscriptMode, "outlines">, icc: Uint8Array): string {
+  const hex = Array.from(icc, (byte) => byte.toString(16).padStart(2, "0")).join("");
+  const subtype = mode === "pdfa1" ? "/GTS_PDFA1" : "/GTS_PDFA";
+  return `%!
+[/_objdef {icc_PDFA} /type /stream /OBJ pdfmark
+[{icc_PDFA} << /N 3 >> /PUT pdfmark
+[{icc_PDFA} <${hex}> /PUT pdfmark
+[/_objdef {OutputIntent_PDFA} /type /dict /OBJ pdfmark
+[{OutputIntent_PDFA} << /Type /OutputIntent /S ${subtype} /DestOutputProfile {icc_PDFA} /OutputConditionIdentifier (sRGB IEC61966-2.1) /Info (sRGB IEC61966-2.1) /RegistryName (http://www.color.org) >> /PUT pdfmark
+[{Catalog} << /OutputIntents [ {OutputIntent_PDFA} ] >> /PUT pdfmark
+`;
+}
+
+export async function ghostscriptPdf(file: File, mode: GhostscriptMode) {
+  const inputs: Record<string, Uint8Array> = { "in.pdf": new Uint8Array(await file.arrayBuffer()) };
+  if (mode !== "outlines") {
+    const icc = new Uint8Array(await (await fetch(assetUrl("/wasm/ghostscript/srgb.icc"))).arrayBuffer());
+    inputs["pdfa.ps"] = new TextEncoder().encode(pdfaDefinition(mode, icc));
+  }
+  const bytes = await runGhostscript(ghostscriptPdfArgs(mode), inputs, "out.pdf");
   return {
     blob: bytesToPdfBlob(bytes),
     filename: withPdfExtension(file.name, mode === "outlines" ? "-outlined" : `-${mode}`),
@@ -173,6 +153,25 @@ export function deskewPdf(file: File, quality: RasterQuality, report?: ProgressR
   );
 }
 
+/**
+ * Where to place a w x h page so that, rotated by `angle` degrees about the
+ * placement origin (how pdf-lib's drawPage rotates), it sits centred on a
+ * sheet sized to its rotated bounding box.
+ */
+export function rotatedPlacement(w: number, h: number, angle: number) {
+  const radians = (angle * Math.PI) / 180;
+  const cos = Math.cos(radians);
+  const sin = Math.sin(radians);
+  const width = Math.abs(w * cos) + Math.abs(h * sin);
+  const height = Math.abs(w * sin) + Math.abs(h * cos);
+  return {
+    width,
+    height,
+    x: width / 2 - (w / 2) * cos + (h / 2) * sin,
+    y: height / 2 - (w / 2) * sin - (h / 2) * cos,
+  };
+}
+
 export async function rotateCustom(file: File, angle: number) {
   if (!Number.isFinite(angle)) throw new Error("Use a finite rotation angle.");
   const source = await loadPdf(file);
@@ -190,19 +189,11 @@ export async function rotateCustom(file: File, angle: number) {
     if (w <= 0 || h <= 0) throw new Error("The page has an empty visible area.");
     const embedded = await out.embedPage(sourcePage, { left, bottom, right, top });
     const rotation = angle - sourcePage.getRotation().angle;
-    const radians = (rotation * Math.PI) / 180;
-    const cosine = Math.cos(radians);
-    const sine = Math.sin(radians);
-    const xs = [0, w * cosine, -h * sine, w * cosine - h * sine];
-    const ys = [0, w * sine, h * cosine, w * sine + h * cosine];
-    const minX = Math.min(...xs);
-    const minY = Math.min(...ys);
-    const width = Math.max(...xs) - minX;
-    const height = Math.max(...ys) - minY;
+    const { width, height, x, y } = rotatedPlacement(w, h, rotation);
     const page = out.addPage([width, height]);
     page.drawPage(embedded, {
-      x: -minX,
-      y: -minY,
+      x,
+      y,
       width: w,
       height: h,
       rotate: degrees(rotation),
@@ -223,14 +214,26 @@ export async function extractImages(file: File, report?: ProgressReporter) {
       const device = new mupdf.Device({
         fillImage(image) {
           imageIndex += 1;
-          entries.push({
-            filename: `page-${pageIndex + 1}-image-${imageIndex}.png`,
-            bytes: new Uint8Array(image.toPixmap().asPNG()),
-          });
+          // asPNG converts CMYK and other colour spaces to RGB itself.
+          const pixmap = image.toPixmap();
+          try {
+            entries.push({
+              filename: `page-${pageIndex + 1}-image-${imageIndex}.png`,
+              bytes: new Uint8Array(pixmap.asPNG()),
+            });
+          } finally {
+            pixmap.destroy();
+          }
         },
       });
-      doc.loadPage(pageIndex).run(device, [1, 0, 0, 1, 0, 0]);
-      device.close();
+      const page = doc.loadPage(pageIndex);
+      try {
+        page.run(device, [1, 0, 0, 1, 0, 0]);
+        device.close();
+      } finally {
+        device.destroy();
+        page.destroy();
+      }
       report?.(((pageIndex + 1) / doc.countPages()) * 95);
     }
   } finally {
@@ -240,37 +243,18 @@ export async function extractImages(file: File, report?: ProgressReporter) {
   return { blob: createStoredZip(entries), filename: `${file.name.replace(/\.pdf$/i, "")}-images.zip`, count: entries.length };
 }
 
+export const DOCUMENT_EXTENSIONS: ReadonlyArray<string> = ["xps", "oxps", "epub", "mobi", "fb2", "cbz"];
+
 export async function documentToPdf(file: File) {
   const extension = file.name.split(".").pop()?.toLowerCase() || "document";
-  const office = new Set(["doc", "docx", "xls", "xlsx", "ppt", "pptx", "odt", "ods", "odp", "odg", "rtf", "pub", "wpd", "wps", "vsd", "pages"]);
-  if (office.has(extension)) {
-    const converter = await getOfficeConverter();
-    const input = new Uint8Array(await file.arrayBuffer());
-    const result = await new Promise<Awaited<ReturnType<OfficeConverter["convert"]>>>((resolve, reject) => {
-      const timeout = window.setTimeout(() => {
-        stopOfficeConverter(converter);
-        reject(new Error("LibreOffice took too long to convert this document. Reload the page and try a smaller file."));
-      }, 120_000);
-      converter.convert(input, {
-        outputFormat: "pdf",
-        inputFormat: extension as "doc",
-      }, file.name).then(
-        (value) => { window.clearTimeout(timeout); resolve(value); },
-        (error) => { window.clearTimeout(timeout); reject(error); },
-      );
-    });
-    return { blob: bytesToPdfBlob(new Uint8Array(result.data)), filename: `${file.name.replace(/\.[^.]+$/, "")}.pdf` };
+  if (!DOCUMENT_EXTENSIONS.includes(extension)) {
+    throw new Error("This document format is not supported. Export it as PDF first.");
   }
-
   const engine = await getFullMupdf();
   return {
     blob: await engine.convertToPdf(file, { filetype: extension }),
     filename: `${file.name.replace(/\.[^.]+$/, "")}.pdf`,
   };
-}
-
-function escapeXml(value: string) {
-  return value.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 }
 
 export async function pdfToMarkdown(file: File, report?: ProgressReporter) {

@@ -48,12 +48,12 @@ routes, the catalog, the metadata, and the sitemap.
 | Tool | What it does |
 | --- | --- |
 | Compress PDF | Rewrite with object streams, leaving images and layout untouched |
-| Encrypt PDF | Password-protect with AES-256, AES-128, or legacy RC4-40 |
+| Encrypt PDF | Password-protect with AES-256 or AES-128 |
 | Decrypt PDF | Remove a known password |
 | Change Permissions | Control printing, copying, editing, screen-reader access |
 | Repair PDF | Rebuild a damaged cross-reference table |
 | Linearize PDF | Reorder for fast web view |
-| Remove Restrictions | Lift limits from a PDF that is not password-encrypted |
+| Remove Restrictions | Lift limits from a PDF that opens without a password |
 | Sanitize PDF | Strip JavaScript, auto-run actions, launch actions, attachments |
 
 ### Convert
@@ -64,10 +64,10 @@ routes, the catalog, the metadata, and the sitemap.
 | PDF to Image | Render pages as PNG or JPG (ZIP for multi-page) |
 | PDF to Text | Extract selectable text to a `.txt` file |
 
-The catalog now includes more than 110 routes, including PDF/A conversion,
+The catalog includes 104 routes, including PDF/A conversion,
 font outlining, rasterization and deskewing, attachment/bookmark/layer editing,
 forms, visual and certificate signing, timestamping, visual comparison,
-workflows, Office/OpenDocument/ebook conversion, DOCX/Markdown/AI exports, and
+workflows, ebook conversion, DOCX/Markdown/AI exports, and
 format-specific image converters. The registry is the authoritative live list.
 
 ## Tech stack
@@ -89,7 +89,6 @@ that needs one actually runs:
 | CoherentPDF | Booklet, N-up, posterize, Bates numbering |
 | Tesseract.js | OCR |
 | wasm-vips | HEIC, PSD, TIFF, BMP |
-| LibreOffice WASM | Word, Excel, PowerPoint, OpenDocument and legacy office files |
 | `zgapdfsigner` | PKCS#12 signatures and RFC 3161 timestamps |
 
 Engine binaries are copied out of `node_modules` into `public/wasm/` by
@@ -132,9 +131,9 @@ adds them itself and reloads the page when it takes control. The
 installable PWA caches same-origin routes and engine assets after first use, so
 tools remain available offline.
 
-The document CSP blocks string evaluation. LibreOffice's worker assets have a
-separate CSP that allows it because their generated bindings require it. This
-exception applies only to `/libreoffice-wasm/*` on the production server.
+Office imports are unavailable because the browser engine can stall during
+startup. Export Office files as PDF before using the toolkit. XPS, EPUB, MOBI,
+FB2, and CBZ imports remain available.
 
 PDF editor redactions flatten the edited document into images, removing masked
 content from the download. This also removes selectable text, forms, and vector

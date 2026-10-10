@@ -73,7 +73,7 @@ function asText(bytes: Uint8Array): string {
 }
 
 describe("qpdf engine", () => {
-  for (const bits of ["40", "128", "256"] as const) {
+  for (const bits of ["128", "256"] as const) {
     test(`encrypts and decrypts ${bits}-bit output using the advertised algorithm`, async () => {
       const encrypted = await runQpdf(encryptionArgs("open-me", "owner", bits), await samplePdf());
       expect(encrypted?.length).toBeGreaterThan(0);
@@ -125,6 +125,36 @@ describe("qpdf engine", () => {
     );
     const result = await runQpdf(["--decrypt", "--password=wrong"], encrypted!);
     expect(result).toBeNull();
+  });
+
+  test("128-bit encryption needs --use-aes=y; plain 128-bit RC4 is refused", async () => {
+    const source = await samplePdf();
+    const aes = await runQpdf(
+      ["--encrypt", "--user-password=u", "--owner-password=o", "--bits=128", "--use-aes=y", "--"],
+      source,
+    );
+    expect(asText(aes!)).toContain("/AESV2");
+
+    // qpdf still leaves an empty out.pdf here, which is why runCliTool must
+    // check the exit code instead of trusting the file's presence.
+    const rc4 = await runQpdf(
+      ["--encrypt", "--user-password=u", "--owner-password=o", "--bits=128", "--"],
+      source,
+    );
+    expect(rc4?.length ?? 0).toBe(0);
+  });
+
+  test("--decrypt lifts permission limits from an owner-password-only file", async () => {
+    const restricted = await runQpdf(
+      ["--encrypt", "--user-password=", "--owner-password=owner", "--bits=256", "--print=none", "--modify=none", "--"],
+      await samplePdf(),
+    );
+    // --remove-restrictions alone keeps the encryption dictionary.
+    const kept = await runQpdf(["--remove-restrictions"], restricted!);
+    expect(asText(kept!)).toContain("/Encrypt");
+
+    const lifted = await runQpdf(["--decrypt", "--remove-restrictions"], restricted!);
+    expect(asText(lifted!)).not.toContain("/Encrypt");
   });
 
   test("linearizes a PDF", async () => {

@@ -30,11 +30,11 @@ async function qpdf(
   };
 }
 
-export type EncryptionBits = "40" | "128" | "256";
+/** AES key length. qpdf refuses RC4 (40-bit and plain 128-bit) as weak crypto. */
+export type EncryptionBits = "128" | "256";
 
 export function encryptionArgs(userPassword: string, ownerPassword: string, bits: EncryptionBits): string[] {
   return [
-    ...(bits === "40" ? ["--allow-weak-crypto"] : []),
     "--encrypt",
     `--user-password=${userPassword}`,
     `--owner-password=${ownerPassword || userPassword}`,
@@ -164,13 +164,17 @@ export async function linearizePdf(file: File): Promise<PdfSaveResult> {
 export async function removeRestrictions(
   file: File,
 ): Promise<PdfSaveResult> {
+  // Permission limits live in the encryption dictionary, and qpdf keeps the
+  // input's encryption unless told to decrypt. An owner-only file opens with
+  // the empty user password, so --decrypt lifts them; --remove-restrictions
+  // additionally clears the limits a digital signature can impose.
   return qpdf(
     file,
-    ["--remove-restrictions"],
+    ["--decrypt", "--remove-restrictions"],
     "-unrestricted",
     () =>
       new Error(
-        "Could not remove restrictions because this PDF is encrypted. Use Decrypt PDF with its password instead.",
+        "Could not remove restrictions because this PDF needs a password to open. Use Decrypt PDF with its password instead.",
       ),
   );
 }

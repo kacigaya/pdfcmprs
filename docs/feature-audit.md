@@ -1,17 +1,18 @@
-# Feature audit — 2026-10-09
+# Feature audit, 2026-10-10
 
-The audit covers the 117 registered tools, shared upload/run/download paths,
+The audit started with 117 registered tools and retained 104 after removing 13
+unavailable or unstable converters. It covers shared upload/run/download paths,
 catalog navigation, settings, theme controls, metadata, security headers, and
 offline behavior. Browser processing uses representative fixtures and alternate
 options; route checks cover every registered tool. This establishes working
 processing paths, rather than fidelity for every document a tool can accept.
 
-| Tool category | Routes audited |
+| Tool category | Retained routes |
 | --- | ---: |
 | Secure & Optimize | 21 |
 | Organize | 19 |
 | Convert from PDF | 20 |
-| Convert to PDF | 33 |
+| Convert to PDF | 20 |
 | Edit | 22 |
 | Automate | 2 |
 
@@ -21,8 +22,8 @@ processing paths, rather than fidelity for every document a tool can accept.
 | --- | --- | --- |
 | PDF editor redaction | Black overlays left the underlying image pixels recoverable. Annotations could also paint over a mask. | Flatten annotations before editing, then rasterize the masked result. Regression checks inspect embedded image pixels and extracted text. |
 | Sanitization | Scripts in form fields and action chains, and page attachment payloads, survived catalog-only cleanup. | Traverse PDF dictionaries and arrays, unlink active content and attachments, then remove unreachable objects. Preserve ordinary forms. |
-| Office conversion | The document CSP also applied to LibreOffice workers, blocking their generated function bindings. | Allow string evaluation only on the engine asset responses. Refresh the service-worker cache to remove assets with old headers. Keep the main document CSP restricted and remove the ARM browser-test bypass. |
-| Encryption and engine failures | 40-bit and 128-bit commands failed or selected the wrong cipher. Empty or partial output could still be offered for download. | Explicitly enable legacy RC4 for 40-bit and AES for 128-bit. Accept only successful exits with nonempty output, including qpdf's documented warning exit. |
+| Document conversion | Five legacy formats failed; eight Office formats worked after initialization but stalled in fresh sessions. | Remove all 13 affected catalog entries, accepted extensions, the Office dependency, and its asset-copy path. Former routes return 404. Keep five verified ebook/document converters and reject unsupported formats before loading an engine. |
+| Encryption and engine failures | 128-bit encryption selected RC4, and empty or partial engine output could be offered for download. | Preserve AES-only encryption and request AES explicitly for 128-bit output. Accept only successful exits with nonempty output, including qpdf's documented warning exit. |
 | Attachment extraction | coherentpdf returned a wrapped string instead of a JavaScript filename. | Decode wrapped filenames with `toUtf16`; test Unicode names and attachment payloads through ZIP extraction. |
 | ZIP downloads | Duplicate names overwrote files during extraction; Unicode names lacked the UTF-8 flag. | Disambiguate names, flag UTF-8, reject unsafe extraction paths, and enforce classic ZIP limits. Preserve Office package directory paths. |
 | Custom rotation | Content moved outside the output page; blank, cropped, and already rotated pages behaved incorrectly. | Normalize visible bounds, include existing rotation, and translate all transformed corners into the output page. |
@@ -34,13 +35,29 @@ processing paths, rather than fidelity for every document a tool can accept.
 
 ## Validation
 
-Final validation results are recorded before the PR is opened.
+- `bun run check`: TypeScript, 231 unit tests across 24 files, and the production
+  build passed.
+- `bun run test:e2e` against the production server: 121 Chromium tests passed
+  without skips, covering all 104 routes, processing families, and regressions.
+- `bun install --frozen-lockfile`: passed with the final dependency graph.
+- A 390px browser session verified no horizontal overflow, service-worker cache
+  migration from v3 to v4, cross-origin isolation, and compression after an
+  offline reload. No browser errors occurred.
+- A static export with `/pdfcmprs` as the base path passed. Settings uses the
+  prefixed canonical URL; retired routes and Office engine assets are absent.
+- Local and external diff review found no unresolved critical, high, or medium
+  defects.
 
 ## Dependency scan and limitations
 
-The full public lockfile scan queried OSV for 244 exact package versions. Updates
+The full public lockfile scan queried OSV for 240 exact package versions. Updates
 addressed reported vulnerabilities in Next.js, sharp, baseline-browser-mapping,
 and source-map-js without adding production dependencies.
+
+Office conversion is removed because fresh-session startup was unreliable in
+ARM Chromium, despite successful conversions with a loaded engine. Reintroduce
+it when initialization and first imports pass independently from fresh sessions.
+XPS, EPUB, MOBI, FB2, and CBZ produce valid PDFs in the retained browser engine.
 
 `node-forge@1.4.0`, used by the signing dependency, remains affected by
 [GHSA-86w9-cpqp-85rv](https://osv.dev/vulnerability/GHSA-86w9-cpqp-85rv).

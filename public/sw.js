@@ -76,10 +76,9 @@ function staleWhileRevalidate(event) {
 }
 
 /**
- * Static hosts such as GitHub Pages cannot send COOP/COEP, and LibreOffice's
- * pthread build refuses to start without SharedArrayBuffer. Re-issue responses
- * with the headers so the page is cross-origin isolated on every load this
- * worker controls. Redirects and errors (status 0) cannot be rebuilt.
+ * Static hosts such as GitHub Pages cannot send COOP/COEP. Re-issue responses
+ * with these headers to preserve cross-origin isolation for browser engines.
+ * Redirects and errors (status 0) cannot be rebuilt.
  */
 function isolate(response) {
   if ([0, 204, 205, 304].includes(response.status)) {

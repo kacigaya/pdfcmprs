@@ -20,7 +20,6 @@ export type EngineId =
   | "mupdf"
   | "ghostscript"
   | "cpdf"
-  | "libreoffice"
   | "tesseract"
   | "vips"
   | "pdfkit"
@@ -34,7 +33,6 @@ export const ENGINE_IDS: ReadonlyArray<EngineId> = [
   "mupdf",
   "ghostscript",
   "cpdf",
-  "libreoffice",
   "tesseract",
   "vips",
   "pdfkit",
@@ -183,19 +181,6 @@ const IMAGE_ALIASES: ReadonlyArray<ToolDefinition> = [
 }));
 
 const DOCUMENT_CONVERSIONS: ReadonlyArray<ToolDefinition> = [
-  ["word-to-pdf", "Word to PDF", "doc docx word"],
-  ["excel-to-pdf", "Excel to PDF", "xls xlsx excel spreadsheet"],
-  ["powerpoint-to-pdf", "PowerPoint to PDF", "ppt pptx slides"],
-  ["odt-to-pdf", "ODT to PDF", "odt writer"],
-  ["ods-to-pdf", "ODS to PDF", "ods calc"],
-  ["odp-to-pdf", "ODP to PDF", "odp impress"],
-  ["odg-to-pdf", "ODG to PDF", "odg draw"],
-  ["rtf-to-pdf", "RTF to PDF", "rtf rich text"],
-  ["pages-to-pdf", "Pages to PDF", "pages apple"],
-  ["wpd-to-pdf", "WordPerfect to PDF", "wpd wordperfect"],
-  ["wps-to-pdf", "WPS to PDF", "wps writer"],
-  ["pub-to-pdf", "Publisher to PDF", "pub publisher"],
-  ["vsd-to-pdf", "Visio to PDF", "vsd visio diagram"],
   ["xps-to-pdf", "XPS to PDF", "xps oxps"],
   ["epub-to-pdf", "EPUB to PDF", "epub ebook"],
   ["mobi-to-pdf", "MOBI to PDF", "mobi kindle ebook"],
@@ -207,7 +192,7 @@ const DOCUMENT_CONVERSIONS: ReadonlyArray<ToolDefinition> = [
   category: "to-pdf",
   summary: `Convert ${title.replace(" to PDF", "")} files to PDF locally in your browser.`,
   keywords: [...words.split(" "), "convert", "pdf"],
-  engine: /^(xps|epub|mobi|fb2|cbz)-/.test(slug) ? "mupdf" : "libreoffice",
+  engine: "mupdf",
   preset: { sourceFormat: slug.replace(/-to-pdf$/, "") },
   load: advancedPanel("DocumentToPdfPanel"),
 }));
@@ -623,7 +608,7 @@ export const TOOLS: ReadonlyArray<ToolDefinition> = [
     title: "Encrypt PDF",
     category: "secure",
     summary:
-      "Lock a PDF with a password using AES-256, AES-128, or legacy RC4-40.",
+      "Lock a PDF with a password using AES-256 or AES-128.",
     keywords: ["encrypt", "password", "protect", "lock", "secure", "aes"],
     engine: "qpdf",
     load: securePanel("EncryptPanel"),
@@ -672,7 +657,7 @@ export const TOOLS: ReadonlyArray<ToolDefinition> = [
     title: "Remove Restrictions",
     category: "secure",
     summary:
-      "Lift printing, copying, and editing limits from a PDF that is not password-encrypted.",
+      "Lift printing, copying, and editing limits from a PDF that opens without a password.",
     keywords: ["restrictions", "unlock", "permissions", "remove", "owner"],
     engine: "qpdf",
     load: securePanel("RemoveRestrictionsPanel"),
@@ -701,7 +686,7 @@ export const TOOLS: ReadonlyArray<ToolDefinition> = [
     title: "Remove Metadata",
     category: "secure",
     summary:
-      "Clear the document info dictionary and the XMP packet that readers prefer.",
+      "Remove the document info dictionary and the XMP packet that readers prefer.",
     keywords: ["metadata", "strip", "privacy", "anonymize", "xmp", "clean"],
     engine: "pdf-lib",
     load: editPanel("RemoveMetadataPanel"),

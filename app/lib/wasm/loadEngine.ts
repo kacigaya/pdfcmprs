@@ -103,7 +103,8 @@ export async function runCliTool(
     inputs: Record<string, Uint8Array>;
     output: string;
     locateFile: (path: string) => string;
-    successCodes?: readonly number[];
+    /** Exit codes that mean the output is usable. qpdf uses 3 for warnings. */
+    successCodes?: ReadonlyArray<number>;
   },
 ): Promise<Uint8Array> {
   const instance = await factory({
@@ -180,7 +181,7 @@ export async function runQpdf(
     inputs,
     output,
     locateFile: () => assetUrl("/wasm/qpdf/qpdf.wasm"),
-    successCodes: [0, 3], // qpdf returns 3 for a completed rewrite with warnings.
+    successCodes: [0, 3],
   });
 }
 

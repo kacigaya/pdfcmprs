@@ -1,26 +1,71 @@
-import { expect, test } from "bun:test";
+import { describe, expect, test } from "bun:test";
 import { runCliTool, type EmscriptenFactory } from "./loadEngine";
 
-function factory(code: number, output: Uint8Array): EmscriptenFactory {
-  return async () => ({
-    callMain: () => code,
-    FS: {
-      writeFile() {}, readFile: () => output, unlink() {}, mkdir() {},
-      readdir: () => [], stat: () => ({}),
-    },
+/** Stand-in Emscripten module: main exits with `code` after writing `output`. */
+function fakeEngine(code: number, output: Uint8Array | null): EmscriptenFactory {
+  return async () => {
+    const files = new Map<string, Uint8Array>();
+    return {
+      callMain() {
+        if (output) files.set("out.pdf", output);
+        return code;
+      },
+      FS: {
+        writeFile: (path, data) => void files.set(path, data),
+        readFile: (path) => {
+          const data = files.get(path);
+          if (!data) throw new Error("ENOENT");
+          return data;
+        },
+        unlink: (path) => void files.delete(path),
+        mkdir: () => undefined,
+        readdir: () => [...files.keys()],
+        stat: (path) => {
+          if (!files.has(path)) throw new Error("ENOENT");
+          return {};
+        },
+      },
+    };
+  };
+}
+
+function run(code: number, output: Uint8Array | null, successCodes?: number[]) {
+  return runCliTool(fakeEngine(code, output), {
+    args: [],
+    inputs: { "in.pdf": new Uint8Array([1]) },
+    output: "out.pdf",
+    locateFile: () => "",
+    successCodes,
   });
 }
-const options = { args: [], inputs: {}, output: "out.pdf", locateFile: (path: string) => path };
 
-test("CLI tools reject empty output left by a failed engine", async () => {
-  await expect(runCliTool(factory(2, new Uint8Array()), options)).rejects.toThrow("code 2");
+const PDF = new TextEncoder().encode("%PDF-1.7");
+
+describe("runCliTool", () => {
+  test("returns the output on a zero exit code", async () => {
+    expect(await run(0, PDF)).toEqual(PDF);
+  });
+
+  test("rejects a failed run even when the engine left an output file", async () => {
+    // qpdf creates out.pdf before refusing weak crypto and exits with 2.
+    await expect(run(2, new Uint8Array())).rejects.toThrow("code 2");
+    await expect(run(1, PDF)).rejects.toThrow("code 1");
+  });
+
+  test("rejects an empty output on a zero exit code", async () => {
+    await expect(run(0, new Uint8Array())).rejects.toThrow();
+  });
+
+  test("accepts extra success codes such as qpdf's warning exit", async () => {
+    await expect(run(3, PDF)).rejects.toThrow("code 3");
+    expect(await run(3, PDF, [0, 3])).toEqual(PDF);
+  });
 });
-test("CLI tools reject partial output on a failing exit", async () => {
-  await expect(runCliTool(factory(1, new Uint8Array([1, 2])), options)).rejects.toThrow("code 1");
-});
-test("CLI tools allow qpdf warnings with nonempty output and copy the heap", async () => {
+
+
+test("copies output out of the engine heap", async () => {
   const heap = new Uint8Array([1, 2]);
-  const result = await runCliTool(factory(3, heap), { ...options, successCodes: [0, 3] });
+  const result = await run(0, heap);
   heap.fill(0);
   expect([...result]).toEqual([1, 2]);
 });

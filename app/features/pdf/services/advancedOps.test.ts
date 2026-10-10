@@ -1,8 +1,53 @@
-import { expect, test } from "bun:test";
+import { describe, expect, test } from "bun:test";
+import { ghostscriptPdfArgs, rotatedPlacement } from "./advancedOps";
 import { PDFDocument, degrees, rgb, PDFDict, PDFArray, PDFName, PDFNumber } from "pdf-lib";
 import * as mupdf from "mupdf";
-import { rotateCustom, inspectSignatures } from "./advancedOps";
+import { rotateCustom, inspectSignatures, documentToPdf, DOCUMENT_EXTENSIONS } from "./advancedOps";
 import { addPageLabels } from "./structureOps";
+
+/** Where pdf-lib's drawPage puts point (u, v) after rotating about (x, y). */
+function place(u: number, v: number, x: number, y: number, angle: number) {
+  const radians = (angle * Math.PI) / 180;
+  return [
+    x + u * Math.cos(radians) - v * Math.sin(radians),
+    y + u * Math.sin(radians) + v * Math.cos(radians),
+  ];
+}
+
+describe("rotatedPlacement", () => {
+  test.each([5, 30, 90, -45, 180, 270])(
+    "keeps every corner on the sheet at %p degrees",
+    (angle) => {
+      const [w, h] = [612, 792];
+      const { width, height, x, y } = rotatedPlacement(w, h, angle);
+      for (const [u, v] of [[0, 0], [w, 0], [0, h], [w, h]]) {
+        const [px, py] = place(u, v, x, y, angle);
+        expect(px).toBeGreaterThanOrEqual(-1e-6);
+        expect(py).toBeGreaterThanOrEqual(-1e-6);
+        expect(px).toBeLessThanOrEqual(width + 1e-6);
+        expect(py).toBeLessThanOrEqual(height + 1e-6);
+      }
+      const [cx, cy] = place(w / 2, h / 2, x, y, angle);
+      expect(cx).toBeCloseTo(width / 2);
+      expect(cy).toBeCloseTo(height / 2);
+    },
+  );
+});
+
+describe("ghostscriptPdfArgs", () => {
+  test("runs Ghostscript in SAFER mode for every conversion", () => {
+    for (const mode of ["pdfa1", "pdfa2", "pdfa3", "outlines"] as const) {
+      const args = ghostscriptPdfArgs(mode);
+      expect(args).toContain("-dSAFER");
+      expect(args).not.toContain("-dNOSAFER");
+    }
+  });
+
+  test("feeds the PDF/A definition before the input only for PDF/A", () => {
+    expect(ghostscriptPdfArgs("pdfa2").slice(-2)).toEqual(["pdfa.ps", "in.pdf"]);
+    expect(ghostscriptPdfArgs("outlines")).not.toContain("pdfa.ps");
+  });
+});
 
 for (const angle of [90, -90, 180]) {
   test(`custom rotation ${angle} keeps the whole page visible`, async () => {
@@ -70,4 +115,11 @@ test("signature inspection rejects overlapping ranges and never claims cryptogra
   const report = JSON.parse(result.text);
   expect(report.cryptographicallyVerified).toBe(false);
   expect(report.signatures[0].structurallyValid).toBe(false);
+});
+
+test("document conversion rejects unavailable formats before loading an engine", async () => {
+  for (const extension of ["doc", "docx", "xls", "xlsx", "ppt", "pptx", "odt", "ods", "odp", "odg", "rtf", "pages", "wpd", "wps", "pub", "vsd", "unknown"]) {
+    expect(DOCUMENT_EXTENSIONS).not.toContain(extension);
+    await expect(documentToPdf(new File(["unsupported"], `document.${extension}`))).rejects.toThrow("This document format is not supported.");
+  }
 });

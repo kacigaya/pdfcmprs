@@ -8,6 +8,16 @@ This block is written and re-added by `next dev` — verify at `node_modules/nex
 
 <!-- END:nextjs-agent-rules -->
 
+## Development and validation
+
+- Package manager: Bun `1.3.11` in `package.json` and CI. Runtime: Node.js `24.x`.
+- `bun run dev` copies local engine assets and starts Next.js on port `3000`.
+- `bun run check` runs TypeScript, unit tests, and the production build.
+- `bun run test:e2e` runs Chromium on `127.0.0.1:3100`; Playwright starts a dev server when that port is free.
+- Install the browser with `bunx playwright install chromium --only-shell`.
+- `bun run build:static` writes `out/`. Project-site exports use `NEXT_PUBLIC_BASE_PATH` and `NEXT_PUBLIC_SITE_URL`.
+- Generated engine assets come from `scripts/copy-assets.ts` and are ignored by Git.
+
 ## Privacy pages and deployment facts
 
 - Public VPS URL: `https://pdfcmprs.duckdns.org`. Netlify URLs in older files are stale.

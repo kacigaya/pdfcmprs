@@ -15,6 +15,8 @@ import { cn } from "@/lib/utils";
 import { filterPdfFiles, formatFileSize } from "../../lib/files";
 import { PdfThumbnail } from "./PdfThumbnail";
 
+const PDF_ACCEPT = "application/pdf,.pdf";
+
 interface FileUploadZoneProps {
   files: ReadonlyArray<File>;
   multiple?: boolean;
@@ -36,7 +38,7 @@ export function FileUploadZone({
   multiple = false,
   label,
   hint,
-  accept = "application/pdf,.pdf",
+  accept = PDF_ACCEPT,
   chooseLabel,
   filterFiles = filterPdfFiles,
   onFiles,
@@ -50,7 +52,12 @@ export function FileUploadZone({
   const [dragging, setDragging] = useState(false);
   const isImageZone = accept.includes("image");
   const EmptyIcon = isImageZone ? ImageIcon : FileText;
-  const acceptedLabel = isImageZone ? "images" : accept === "application/pdf,.pdf" ? "PDF files" : accept || "all file types";
+  const isPdfZone = accept === PDF_ACCEPT;
+  const acceptedLabel = isImageZone
+    ? "images"
+    : isPdfZone
+      ? "PDF files"
+      : "the supported file types";
 
   const handleSelect = useCallback(
     (list: FileList | null) => {
@@ -228,7 +235,8 @@ export function FileUploadZone({
               className="-ms-1 opacity-60"
               aria-hidden="true"
             />
-            {chooseLabel ?? `Select PDF${multiple ? "s" : ""}`}
+            {chooseLabel ??
+              `Select ${isPdfZone ? "PDF" : "File"}${multiple ? "s" : ""}`}
           </span>
         </button>
       )}
