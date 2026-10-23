@@ -11,7 +11,7 @@
         "@neslinesli93/qpdf-wasm": "0.3.0",
         "@tailwindcss/postcss": "^4.3.3",
         "@techstark/opencv-js": "5.0.0-release.1",
-        "ag-psd": "31.0.2",
+        "ag-psd": "31.0.3",
         "class-variance-authority": "^0.7.1",
         "clsx": "^2.1.1",
         "coherentpdf": "2.5.5",
@@ -314,7 +314,7 @@
 
     "@types/ws": ["@types/ws@8.18.1", "", { "dependencies": { "@types/node": "*" } }, "sha512-ThVF6DCVhA8kUGy+aazFQ4kXQ7E1Ty7A3ypFOe0IcJV8O/M511G99AW24irKrW56Wt44yG9+ij8FaqoBGkuBXg=="],
 
-    "ag-psd": ["ag-psd@31.0.2", "", { "dependencies": { "base64-js": "1.5.1", "pako": "2.1.0" } }, "sha512-5s5PvqbomPIIJ9YjL6robz55rT4RYPiQkww4brisyZEb5jzlHB1EKh47IJg7gIFj0RUrD0cMgdntM907qaZjXA=="],
+    "ag-psd": ["ag-psd@31.0.3", "", { "dependencies": { "base64-js": "1.5.1", "pako": "2.1.0" } }, "sha512-THDYK+WK1F5GOH4G0l4wkQRc0Cyq5tnxIwBezACKwa6idKygphnGgMISr4lmW6n0Q89ceoqpdPZQF3Y7TL1pgg=="],
 
     "ansi-regex": ["ansi-regex@5.0.1", "", {}, "sha512-quJQXlTSUGL2LH9SUXo8VwsY4soanhgo6LNSm84E1LBcE8s3O0wpdiRzyR9z/ZZJMlMWv37qOOb9pdJlMUEKFQ=="],
 

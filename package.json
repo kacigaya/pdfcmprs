@@ -21,7 +21,7 @@
     "@neslinesli93/qpdf-wasm": "0.3.0",
     "@tailwindcss/postcss": "^4.3.3",
     "@techstark/opencv-js": "5.0.0-release.1",
-    "ag-psd": "31.0.2",
+    "ag-psd": "31.0.3",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "coherentpdf": "2.5.5",
