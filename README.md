@@ -183,7 +183,7 @@ public/wasm/             # Engine binaries (generated, git-ignored)
 
 ## License
 
-[AGPL-3.0-or-later](LICENSE).
+Copyright (c) 2026 Gaya KACI. [AGPL-3.0-or-later](LICENSE).
 
 The project was previously MIT. It moved to the AGPL because it bundles
 Ghostscript, MuPDF, and CoherentPDF, which are AGPL-3.0; distributing them as
