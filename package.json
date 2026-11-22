@@ -35,7 +35,7 @@
     "pdf-lib": "1.17.1",
     "pdfjs-dist": "6.4.299",
     "pdfkit": "0.19.1",
-    "pixelmatch": "7.2.0",
+    "pixelmatch": "8.0.0",
     "react": "19.2.0",
     "react-dom": "19.2.0",
     "tailwind-merge": "^3.7.0",
